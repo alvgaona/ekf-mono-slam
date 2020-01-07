@@ -1,3 +1,16 @@
+# JetBrains CLion
+.idea/
+
+# VSCode
+.vscode/
+
+# CMake
+build/
+cmake-build-debug/
+
+# macOS
+.DS_Store
+
 # Prerequisites
 *.d
 
