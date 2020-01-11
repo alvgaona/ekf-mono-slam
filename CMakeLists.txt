@@ -6,19 +6,24 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 project(ekf_mono_slam)
 
 find_package(opencv 4.1 REQUIRED)
+find_package(eigen3 3.3.7 REQUIRED)
 
-include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(
+    include
+    ${OpenCV_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}
+)
 link_directories(${OpenCV_LIBRARY_DIRS})
 add_definitions(${OpenCV_DEFINITIONS})
 
 # Find all executables
-file(GLOB SOURCES src/*.cpp) #src/*.h
+file(GLOB SOURCES src/*.cpp)
 
 # Add GoogleTest library subdirectories
 add_subdirectory(thirdparty/googletest)
 
 # Add the testing executable
-add_executable(test test/utest_ekf_mono_slam.cpp) # TODO: Append .cpp files for testing
+add_executable(test test/utest_ekf_mono_slam.cpp test/utest_state.cpp src/state.cpp)
 
 target_link_libraries(test gtest_main)
 
