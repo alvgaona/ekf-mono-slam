@@ -20,4 +20,4 @@ class ImageFeatureMeasurement : public ImageFeature {
     cv::Mat descriptor_data_;
 };
 
-#endif //EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H
+#endif
