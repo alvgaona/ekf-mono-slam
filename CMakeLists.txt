@@ -23,7 +23,7 @@ file(GLOB SOURCES src/*.cpp)
 add_subdirectory(thirdparty/googletest)
 
 # Add the testing executable
-add_executable(test test/utest_ekf_mono_slam.cpp test/utest_state.cpp src/state.cpp)
+add_executable(test test/utest_state.cpp src/state.cpp)
 
 target_link_libraries(test gtest_main)
 
