@@ -1,5 +1,5 @@
 # EKF Mono SLAM
-> Capstone project for C++ Nanodegree at Udacity
+> EKF Mono SLAM written in modern C++
 
 TBD
 
