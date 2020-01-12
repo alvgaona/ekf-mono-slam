@@ -1,10 +1,11 @@
 #include "../include/ekf.h"
 #include "../include/file_sequence_image_provider.h"
 
-#include <iostream>
-#include <chrono>
-#include <opencv2/opencv.hpp>
+#include <ekf_math.h>
 #include <Eigen/Dense>
+#include <chrono>
+#include <iostream>
+#include <opencv2/opencv.hpp>
 
 int main(int argc, const char * argv[])
 {
@@ -16,6 +17,8 @@ int main(int argc, const char * argv[])
 
   cv::Mat image;
   image = image_provider.GetNextImage();
+
+  // TODO: Initialize EKF
 
   while(!image.empty()) {
    image = image_provider.GetNextImage();
