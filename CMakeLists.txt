@@ -8,25 +8,18 @@ project(ekf_mono_slam)
 find_package(opencv 4.1 REQUIRED)
 find_package(eigen3 3.3.7 REQUIRED)
 
-include_directories(
+file(GLOB SOURCES src/*.cpp)
+
+add_subdirectory(thirdparty/googletest)
+add_executable(test test/utest_state.cpp src/state.cpp)
+target_link_libraries(test gtest_main)
+
+add_executable(ekf_mono_slam ${SOURCES})
+target_link_directories(ekf_mono_slam PRIVATE ${OpenCV_LIBRARY_DIRS})
+target_compile_definitions(ekf_mono_slam PRIVATE ${OpenCV_DEFINITIONS})
+target_link_libraries(ekf_mono_slam PRIVATE ${OpenCV_LIBRARIES})
+target_include_directories(ekf_mono_slam PRIVATE
     include
     ${OpenCV_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
 )
-link_directories(${OpenCV_LIBRARY_DIRS})
-add_definitions(${OpenCV_DEFINITIONS})
-
-# Find all executables
-file(GLOB SOURCES src/*.cpp)
-
-# Add GoogleTest library subdirectories
-add_subdirectory(thirdparty/googletest)
-
-# Add the testing executable
-add_executable(test test/utest_state.cpp src/state.cpp)
-
-target_link_libraries(test gtest_main)
-
-# Add project executable
-add_executable(ekf_mono_slam ${SOURCES})
-target_link_libraries(ekf_mono_slam ${OpenCV_LIBRARIES})
