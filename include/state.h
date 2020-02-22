@@ -1,5 +1,5 @@
-#ifndef EKF_MONO_SLAM_STATE_H
-#define EKF_MONO_SLAM_STATE_H
+#ifndef EKF_MONO_SLAM_STATE_H_
+#define EKF_MONO_SLAM_STATE_H_
 
 #include <Eigen/Dense>
 #include <memory>
@@ -47,4 +47,4 @@ class State {
   int dimension_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_STATE_H_ */

@@ -1,5 +1,5 @@
-#ifndef IMAGE_FEATURE_H
-#define IMAGE_FEATURE_H
+#ifndef EKF_MONO_SLAM_IMAGE_FEATURE_H_
+#define EKF_MONO_SLAM_IMAGE_FEATURE_H_
 
 #include <vector>
 
@@ -17,4 +17,4 @@ class ImageFeature {
   int feature_index_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_IMAGE_FEATURE_H_ */

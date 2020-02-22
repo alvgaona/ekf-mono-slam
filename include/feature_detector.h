@@ -1,5 +1,5 @@
-#ifndef FEATURE_DETECTOR_H
-#define FEATURE_DETECTOR_H
+#ifndef EKF_MONO_SLAM_FEATURE_DETECTOR_H_
+#define EKF_MONO_SLAM_FEATURE_DETECTOR_H_
 
 #include <math.h>
 #include <opencv2/core/mat.hpp>
@@ -43,4 +43,4 @@ class FeatureDetector {
                                          int image_width);
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_FEATURE_DETECTOR_H_ */

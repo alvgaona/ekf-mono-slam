@@ -1,5 +1,5 @@
-#ifndef ZONE_H
-#define ZONE_H
+#ifndef EKF_MONO_SLAM_ZONE_H_
+#define EKF_MONO_SLAM_ZONE_H_
 
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
@@ -12,8 +12,8 @@ class Zone {
   std::vector<ImageFeatureMeasurement*>& GetCandidates() { return candidates_; }
   std::vector<ImageFeatureMeasurement*>& GetAdded() { return added_; }
   std::vector<ImageFeaturePrediction*>& GetPredictions() { return predictions_; }
-  int GetZoneWidth() { return zone_width_ };
-  int GetZoneHeight() { return zone_height_ };
+  int GetZoneWidth() { return zone_width_; };
+  int GetZoneHeight() { return zone_height_; };
 
   void SetCandidatesLeft(int candidates_left) { this->candidates_left_ = candidates_left; }
   void SetPredictionsFeaturesCount(int count) { this->predictions_features_count_ = count; }
@@ -33,4 +33,4 @@ class Zone {
   int zone_height_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_ZONE_H_ */

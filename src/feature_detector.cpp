@@ -58,6 +58,7 @@ void FeatureDetector::SearchFeaturesByZone(std::vector<Zone*>& zones,
   // TODO: Implement function.
 }
 
+// TODO: Complete implementation
 std::vector<Zone*> FeatureDetector::CreateZones(int zones_in_a_row, int zone_height, int zone_width) {
   int zones_count = pow(zones_in_a_row, 2);
   std::vector<Zone*> zones;
@@ -65,6 +66,8 @@ std::vector<Zone*> FeatureDetector::CreateZones(int zones_in_a_row, int zone_hei
   for (auto i = 0; i < zones_count; i++) {
     zones.emplace_back(new Zone(i, zone_width, zone_height));
   }
+
+  return std::vector<Zone*>();
 }
 
 void FeatureDetector::GroupFeaturesAndPredictionsByZone(std::vector<Zone*>& zones,
@@ -79,7 +82,9 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(std::vector<Zone*>& zone
   for (auto i = 0; i < keypoints_size; i++) {
     cv::KeyPoint& keypoint = keypoints.at(i);
     std::vector<double> coordinates{keypoint.pt.x, keypoint.pt.y};
-    ImageFeatureMeasurement* image_feature_measurement = new ImageFeatureMeasurement(coordinates, descriptors.rows(i));
+
+    // TODO: Prone to leak memory. ImageFeatureMeasurement is not being deallocated on the heap. Fix!
+    ImageFeatureMeasurement* image_feature_measurement = new ImageFeatureMeasurement(coordinates, descriptors.row(i));
 
     int zone_id = image_feature_measurement->ComputeZone(zone_width, zone_height, image_width, image_height);
 

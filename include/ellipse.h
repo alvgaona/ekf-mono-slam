@@ -1,5 +1,5 @@
-#ifndef ELLIPSE_H
-#define ELLIPSE_H
+#ifndef EKF_MONO_SLAM_ELLIPSE_H_
+#define EKF_MONO_SLAM_ELLIPSE_H_
 
 #include <opencv2/opencv.hpp>
 
@@ -16,4 +16,4 @@ private:
     double angle_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_ELLIPSE_H_ */

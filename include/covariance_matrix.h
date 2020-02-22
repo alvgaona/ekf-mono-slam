@@ -1,5 +1,5 @@
-#ifndef COVARIANCE_MATRIX_H
-#define COVARIANCE_MATRIX_H
+#ifndef EKF_MONO_SLAM_COVARIANCE_MATRIX_H_
+#define EKF_MONO_SLAM_COVARIANCE_MATRIX_H_
 
 #include "configuration_manager.h"
 #include "image_feature.h"
@@ -25,4 +25,4 @@ class CovarianceMatrix {
   cv::Mat_<double> matrix_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_COVARIANCE_MATRIX_H_ */

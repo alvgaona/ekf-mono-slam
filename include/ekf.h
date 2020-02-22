@@ -32,9 +32,9 @@ class Ekf {
   std::unique_ptr<CovarianceMatrix> covariance_matrix_;
   std::unique_ptr<State> state_;
   int step_;
-  double dt_;
+  double delta_t_;
 
   std::unique_ptr<FeatureDetector> feature_detector_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_EKF_H */

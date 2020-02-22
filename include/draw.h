@@ -1,5 +1,5 @@
-#ifndef DRAW_H
-#define DRAW_H
+#ifndef EKF_MONO_SLAM_DRAW_H_
+#define EKF_MONO_SLAM_DRAW_H_
 
 #include <opencv2/opencv.hpp>
 #include "ekf_math.h"
@@ -11,4 +11,4 @@ void UncertaintyEllipse2D(cv::Mat& image, ImageFeaturePrediction* prediction, in
                           bool fill);
 }
 
-#endif
+#endif /* EKF_MONO_SLAM_DRAW_H_ */

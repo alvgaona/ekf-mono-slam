@@ -16,7 +16,3 @@ Ellipse EkfMath::Matrix2x2To2DEllipse(cv::Mat& matrix) {
   Ellipse ellipse(axes, angle);
   return ellipse;
 }
-
-inline double EkfMath::Rad2deg(double rads) {
-  return rads * 180.0L / EkfMath::PI;
-}

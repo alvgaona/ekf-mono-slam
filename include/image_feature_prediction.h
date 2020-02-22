@@ -1,5 +1,5 @@
-#ifndef IMAGE_FEATURE_PREDICTION_H
-#define IMAGE_FEATURE_PREDICTION_H
+#ifndef EKF_MONO_SLAM_IMAGE_FEATURE_PREDICTION_H_
+#define EKF_MONO_SLAM_IMAGE_FEATURE_PREDICTION_H_
 
 #include "image_feature.h"
 #include "opencv2/opencv.hpp"
@@ -15,4 +15,4 @@ private:
     cv::Mat covariance_matrix_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_IMAGE_FEATURE_PREDICTION_H_ */

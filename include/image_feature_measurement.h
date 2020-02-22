@@ -1,5 +1,5 @@
-#ifndef IMAGE_FEATURE_MEASUREMENT_H
-#define IMAGE_FEATURE_MEASUREMENT_H
+#ifndef EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H_
+#define EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H_
 
 #include <opencv2/opencv.hpp>
 
@@ -8,7 +8,7 @@
 class ImageFeatureMeasurement : public ImageFeature {
  public:
     ImageFeatureMeasurement();
-    ImageFeatureMeasurement(std::vector<double>& coordinates, cv::Mat& descriptor_data);
+    ImageFeatureMeasurement(std::vector<double>& coordinates, cv::Mat descriptor_data);
     ~ImageFeatureMeasurement();
     ImageFeatureMeasurement(const ImageFeatureMeasurement& source) = delete;
     ImageFeatureMeasurement(ImageFeatureMeasurement&& source) noexcept = delete;
@@ -20,4 +20,4 @@ class ImageFeatureMeasurement : public ImageFeature {
     cv::Mat descriptor_data_;
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H_ */

@@ -1,5 +1,5 @@
-#ifndef MAP_FEATURE_TYPE_H
-#define MAP_FEATURE_TYPE_H
+#ifndef EKF_MONO_SLAM_MAP_FEATURE_TYPE_H_
+#define EKF_MONO_SLAM_MAP_FEATURE_TYPE_H_
 
 enum class MapFeatureType {
   kInvalid = 0,
@@ -7,4 +7,4 @@ enum class MapFeatureType {
   kDepth
 };
 
-#endif
+#endif /* EKF_MONO_SLAM_MAP_FEATURE_TYPE_H_ */
