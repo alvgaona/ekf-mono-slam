@@ -7,8 +7,7 @@
 #include "image_feature_prediction.h"
 
 namespace Draw {
-void UncertaintyEllipse2D(cv::Mat& image, ImageFeaturePrediction* prediction, int axes_max_size, cv::Scalar color,
-                          bool fill);
+void UncertaintyEllipse2D(cv::Mat& image, Ellipse& ellipse, int max_axes_size, cv::Scalar color, bool fill);
 }
 
 #endif /* EKF_MONO_SLAM_DRAW_H_ */

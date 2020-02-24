@@ -11,7 +11,7 @@ class State;
 class MapFeature {
  public:
   MapFeature();
-  ~MapFeature();
+  virtual ~MapFeature();
   MapFeature(MapFeature const& source);
   MapFeature(MapFeature&& source);
 
@@ -23,7 +23,7 @@ class MapFeature {
   void ComputeJacobian(State& state, std::vector<double>& image_feature_pos);
 
  private:
-  std::unique_ptr<Eigen::Vector3d> position_;
+  Eigen::Vector3d position_;
   MapFeatureType type_;
   int times_predicted_;
   int times_matched_;

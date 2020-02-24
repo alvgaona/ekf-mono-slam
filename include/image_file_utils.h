@@ -4,21 +4,21 @@
 #include <exception>
 #include <string>
 
-#include "image_file_type.h"
+#include "image_file_format.h"
 
 class ImageFileUtils {
  public:
   ImageFileUtils() = delete;
   virtual ~ImageFileUtils() = delete;
 
-  static std::string ToString(ImageFileType type) {
-    switch (type) {
-      case ImageFileType::kJpg:
+  static std::string ToString(ImageFileFormat format) {
+    switch (format) {
+      case ImageFileFormat::JPG:
         return "jpg";
-      case ImageFileType ::kPng:
+      case ImageFileFormat::PNG:
         return "png";
       default:
-        throw std::runtime_error("Image type is not supported.");
+        throw std::runtime_error("Format is not supported.");
     }
   }
 };

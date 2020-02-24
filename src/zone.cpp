@@ -1,17 +1,14 @@
 #include "zone.h"
 
-Zone::Zone(int id, int zone_width, int zone_height) {
-  this->id_ = std::move(id);
-  this->candidates_left_ = 0;
-  this->predictions_features_count_ = 0;
-  this->zone_width_ = std::move(zone_width);
-  this->zone_height_ = std::move(zone_height);
+Zone::Zone(int id, cv::Size dimensions) {
+  id_ = id;
+  candidates_left_ = 0;
+  predictions_features_count_ = 0;
+  dimensions_ = dimensions;
 }
 
-Zone::~Zone() {}
+void Zone::AddCandidate(std::shared_ptr<ImageFeatureMeasurement> candidate) { candidates_.emplace_back(candidate); }
 
-void Zone::AddCandidate(ImageFeatureMeasurement* candidate) { this->candidates_.emplace_back(candidate); }
+void Zone::AddFeature(std::shared_ptr<ImageFeatureMeasurement> feature) { added_.emplace_back(std::move(feature)); }
 
-void Zone::AddFeature(ImageFeatureMeasurement* feature) { this->added_.emplace_back(feature); }
-
-void Zone::AddPrediction(ImageFeaturePrediction* prediction) { this->predictions_.emplace_back(prediction); }
+void Zone::AddPrediction(ImageFeaturePrediction* prediction) { predictions_.emplace_back(prediction); }

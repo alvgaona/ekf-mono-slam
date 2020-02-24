@@ -1,32 +1,32 @@
-#include "../include/ekf.h"
+#include "ekf.h"
 
-Ekf::Ekf() : delta_t_(0), step_(0) {
+EKF::EKF() {
   this->covariance_matrix_ = std::make_unique<CovarianceMatrix>();
   this->state_ = std::make_unique<State>();
   this->delta_t_ = 1;
   this->step_ = 0;
 }
 
-Ekf::~Ekf() {}
+void EKF::Init(cv::Mat& image) {
+  spdlog::info("Initializing Extender Kalman Filter");
 
-void Ekf::Init(cv::Mat& image) {
-  std::cout << "Initializing Extender Kalman Filter" << std::endl;
+  feature_detector_ = std::make_unique<FeatureDetector>(
+      FeatureDetector::BuildDetector(DetectorType::AKAZE),
+      FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE),
+      cv::Size(image.rows, image.cols));
 
-  // TODO: Implement initialization logic.
+  feature_detector_->DetectFeatures(image);
 }
 
-// TODO: Implement
-void Ekf::Step(cv::Mat& image) {}
+void EKF::Step(cv::Mat& image) {}
 
-void Ekf::PredictState() {
-  state_->PredictState(delta_t_);
-}
+void EKF::PredictState() { state_->PredictState(delta_t_); }
 
 // TODO: Implement
-void Ekf::PredictCovarianceMatrix() {}
+void EKF::PredictCovarianceMatrix() {}
 
 // TODO: Implement
-void Ekf::PredictMeasurementState() {}
+void EKF::PredictMeasurementState() {}
 
 // TODO: Implement
-void Ekf::PredictMeasurementCovariance() {}
+void EKF::PredictMeasurementCovariance() {}

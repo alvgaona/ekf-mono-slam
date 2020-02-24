@@ -1,16 +1,18 @@
 #ifndef EKF_MONO_SLAM_COVARIANCE_MATRIX_H_
 #define EKF_MONO_SLAM_COVARIANCE_MATRIX_H_
 
+#include <Eigen/Dense>
+#include <iostream>
+#include <ostream>
+
 #include "configuration_manager.h"
 #include "image_feature.h"
 #include "state.h"
 
-#include <opencv2/opencv.hpp>
-
 class CovarianceMatrix {
  public:
   CovarianceMatrix();
-  ~CovarianceMatrix();
+  virtual ~CovarianceMatrix() = default;
   CovarianceMatrix(const CovarianceMatrix& source) = delete;
   CovarianceMatrix(CovarianceMatrix&& source) noexcept = delete;
 
@@ -20,9 +22,13 @@ class CovarianceMatrix {
   void AddImageFeaturesToMatrix(std::vector<std::unique_ptr<ImageFeature>>& image_features);
   void AddImageFeatureToMatrix(const ImageFeature* image_feature);
 
- private:
+  friend std::ostream& operator<<(std::ostream& os, const CovarianceMatrix& covariance_matrix) {
+    os << covariance_matrix.matrix_;
+    return os;
+  }
 
-  cv::Mat_<double> matrix_;
+ private:
+  Eigen::MatrixXd matrix_;
 };
 
 #endif /* EKF_MONO_SLAM_COVARIANCE_MATRIX_H_ */

@@ -1,48 +1,33 @@
-#include "../include/state.h"
-#include "../include/map_feature_type.h"
-#include "../include/map_feature.h"
-
-#include <Eigen/Dense>
-#include <memory>
+#include "state.h"
 
 State::State() {
-  this->position_ = std::make_unique<Eigen::Vector3d>(0, 0, 0);
-  this->velocity_ = std::make_unique<Eigen::Vector3d>(0, 0, 0);
-  this->angular_velocity_ = std::make_unique<Eigen::Vector3d>(0, 0, 0);
-  this->orientation_ = std::make_unique<Eigen::Quaterniond>(1, 0, 0, 0);
-  this->dimension_ = 13;
-
-  this->features_ = nullptr;
-  this->inverse_depth_features_ = nullptr;
-  this->depth_features_ = nullptr;
+  position_ = Eigen::Vector3d(0, 0, 0);
+  velocity_ = Eigen::Vector3d(0, 0, 0);
+  angular_velocity_ = Eigen::Vector3d(0, 0, 0);
+  orientation_ = Eigen::Quaterniond(1, 0, 0, 0);
+  rotation_matrix_ = Eigen::Matrix3d(orientation_.toRotationMatrix());
+  dimension_ = 13;
 }
 
-State::~State() {}
-
-void State::PredictState(const int dt) {
-  for (int i = 0; i < 3; i++) {
-    (*position_)[i] += (*velocity_)[i] * dt;
-  }
-
-  Eigen::Vector3d angles(0, 0, 0);
-
-  for (int i = 0; i < 3; i++) {
-    angles[i] = (*angular_velocity_)[i] * dt;
-  }
+void State::PredictState(const int delta_t) {
+  position_ += velocity_ * delta_t;
+  Eigen::Vector3d angles = angular_velocity_ * delta_t;
 
   // TODO: Predict orientation.
 }
 
-void State::RemoveFeature(const MapFeature* feature) {
-  std::vector<MapFeature*>::iterator it;
-  switch(feature->GetType()) {
-    case MapFeatureType::kDepth:
-       it = std::find(depth_features_->begin(), depth_features_->end(), feature);
+void State::RemoveFeature(const MapFeature *feature) {
+  std::vector<std::unique_ptr<MapFeature>>::iterator it;
+  switch (feature->GetType()) {
+    case MapFeatureType::DEPTH:
+      depth_features_.erase(std::remove_if(depth_features_.begin(), depth_features_.end(),
+                                           [&feature](std::unique_ptr<MapFeature>& f) { return f.get() == feature; }));
       break;
-    case MapFeatureType::kInverseDepth:
-      it = std::find(inverse_depth_features_->begin(), inverse_depth_features_->end(), feature);
-      inverse_depth_features_->erase(it);
-      return;
+    case MapFeatureType::INVERSE_DEPTH:
+      inverse_depth_features_.erase(
+          std::remove_if(inverse_depth_features_.begin(), inverse_depth_features_.end(),
+                         [&feature](std::unique_ptr<MapFeature>& f) { return f.get() == feature; }));
+      break;
     default:
       throw std::runtime_error("Feature to be removed is invalid");
   }

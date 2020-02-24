@@ -1,24 +1,26 @@
 #ifndef EKF_MONO_SLAM_EKF_H
 #define EKF_MONO_SLAM_EKF_H
 
+#include <spdlog/spdlog.h>
+
+#include <iostream>
+#include <memory>
+#include <string>
+
 #include "covariance_matrix.h"
 #include "feature_detector.h"
 #include "state.h"
 
-#include <memory>
-#include <string>
-#include <iostream>
-
-class Ekf {
+class EKF {
  public:
-  Ekf();
-  ~Ekf();
+  EKF();
+  virtual ~EKF() = default;
 
-  Ekf(Ekf const& source) = delete;
-  Ekf(Ekf&& source) = delete;
+  EKF(EKF const& source) = delete;
+  EKF(EKF&& source) = delete;
 
-  Ekf& operator=(Ekf const& source) = delete;
-  Ekf& operator=(Ekf&& source) noexcept = delete;
+  EKF& operator=(EKF const& source) = delete;
+  EKF& operator=(EKF&& source) noexcept = delete;
 
   void Init(cv::Mat& image);
   void Step(cv::Mat& image);

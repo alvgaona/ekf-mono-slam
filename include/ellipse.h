@@ -3,17 +3,23 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "ekf_math.h"
+
 class Ellipse {
  public:
-    Ellipse(cv::Size2f axes, double angle);
-    ~Ellipse();
+  Ellipse(cv::Point2f center, cv::Mat matrix);
+  virtual ~Ellipse() = default;
 
-    cv::Size2f GetAxes() { return axes_; }
-    double GetAngle() { return angle_; }
+  cv::Point2f GetCenter() { return center_; }
 
-private:
-    cv::Size2f axes_;
-    double angle_;
+  cv::Size2f Axes();
+  double Angle();
+
+ private:
+  cv::Point2f center_;
+  cv::Mat matrix_;
+  cv::Mat eigen_values_;
+  cv::Mat eigen_vectors_;
 };
 
 #endif /* EKF_MONO_SLAM_ELLIPSE_H_ */

@@ -1,19 +1,20 @@
 #ifndef EKF_MONO_SLAM_IMAGE_FEATURE_H_
 #define EKF_MONO_SLAM_IMAGE_FEATURE_H_
 
+#include <opencv2/core/types.hpp>
 #include <vector>
 
 class ImageFeature {
  public:
   ImageFeature();
-  ~ImageFeature();
+  virtual ~ImageFeature();
 
-  std::vector<double>& GetCoordinates() { return coordinates_; }
+  cv::Point2f GetCoordinates() { return coordinates_; }
 
   int ComputeZone(int zone_width, int zone_height, int image_width, int image_height);
 
  protected:
-  std::vector<double> coordinates_;
+  cv::Point2f coordinates_;
   int feature_index_;
 };
 

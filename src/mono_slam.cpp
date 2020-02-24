@@ -1,5 +1,7 @@
 #include "mono_slam.h"
 
+#include "ekf.h"
+
 void MonoSlam::run() {
   auto start = std::chrono::steady_clock::now();
 
@@ -7,7 +9,8 @@ void MonoSlam::run() {
 
   cv::Mat image = image_provider.GetNextImage();
 
-  // TODO: Initialize EKF
+  EKF ekf;
+  ekf.Init(image);
 
   while (!image.empty()) {
     image = image_provider.GetNextImage();

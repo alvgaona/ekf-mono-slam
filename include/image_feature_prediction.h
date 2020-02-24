@@ -7,7 +7,7 @@
 class ImageFeaturePrediction : public ImageFeature {
  public:
     ImageFeaturePrediction();
-    ~ImageFeaturePrediction();
+    virtual ~ImageFeaturePrediction();
 
     cv::Mat& GetCovarianceMatrix() { return covariance_matrix_; }
 
