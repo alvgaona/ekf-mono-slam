@@ -1,5 +1,5 @@
-#include "../include/state.h"
 #include "gtest/gtest.h"
+#include "state.h"
 
 //-------------------------------------//
 //   Beginning EkfStateTest Tests.     //
