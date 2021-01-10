@@ -43,9 +43,9 @@ class State {
 
   void PredictState(const int delta_t);
 
-  void AddImageFeatures(std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features);
-  void AddFeature(MapFeature* feature);
-  void RemoveFeature(const MapFeature* feature);
+  void Add(ImageFeatureMeasurement* image_feature_measurement);
+  void Add(MapFeature* feature);
+  void Remove(const MapFeature* feature);
 
  private:
   Eigen::Vector3d position_;
@@ -59,8 +59,6 @@ class State {
   std::vector<std::unique_ptr<MapFeature>> depth_features_;
 
   int dimension_;
-
-  void AddImageFeature(ImageFeatureMeasurement* image_feature_measurement);
 };
 
 #endif /* EKF_MONO_SLAM_STATE_H_ */
