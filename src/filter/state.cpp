@@ -46,19 +46,19 @@ void State::Add(ImageFeatureMeasurement* image_feature_measurement) {
   UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
   Eigen::Vector3d retro_point = undistorted_feature.RetroProject();
 
-  // TODO: Check if this orientation matrix is correct
+  // Orientation of the camera respect to the world axis
   retro_point = orientation_.toRotationMatrix() * retro_point;
 
   feature_state(0) = position_(0);
   feature_state(1) = position_(1);
   feature_state(2) = position_(2);
 
-  double fdx = retro_point.x();
-  double fdy = retro_point.y();
-  double fdz = retro_point.z();
+  double hx = retro_point.x();
+  double hy = retro_point.y();
+  double hz = retro_point.z();
 
-  feature_state(3) = atan2(fdx, fdz);
-  feature_state(4) = atan2(-fdy, sqrt(fdx * fdx + fdz * fdz));
+  feature_state(3) = atan2(hx, hz);
+  feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));
   feature_state(5) = ImageFeatureParameters::INIT_INV_DEPTH;
 
   // TODO: Check if we really need to store the position in the covariance matrix within the MapFeature object
