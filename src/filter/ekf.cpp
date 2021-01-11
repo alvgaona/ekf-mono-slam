@@ -18,8 +18,7 @@ void EKF::Init(cv::Mat& image) {
 
   feature_detector_->DetectFeatures(image, true);
 
-  state_->AddImageFeatures(feature_detector_->GetImageFeatures());
-//  covariance_matrix_->Add(feature_detector_->GetImageFeatures());
+  AddFeatures(feature_detector_->GetImageFeatures());
 }
 
 void EKF::Step(cv::Mat& image) {}
@@ -34,3 +33,12 @@ void EKF::PredictMeasurementState() {}
 
 // TODO: Implement
 void EKF::PredictMeasurementCovariance() {}
+
+void EKF::AddFeatures(std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) {
+  std::for_each(features.begin(), features.end(), [this](std::shared_ptr<ImageFeatureMeasurement> image_feature_measurement) {
+                  ImageFeatureMeasurement* image_feature = image_feature_measurement.get();
+                  this->state_->Add(image_feature);
+                  this->covariance_matrix_->Add(image_feature, this->state_.get());
+  });
+}
+

@@ -37,6 +37,8 @@ class EKF {
   double delta_t_;
 
   std::unique_ptr<FeatureDetector> feature_detector_;
+
+  void AddFeatures(std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features);
 };
 
 #endif /* EKF_MONO_SLAM_EKF_H */
