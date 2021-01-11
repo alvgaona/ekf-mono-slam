@@ -7,7 +7,7 @@ ImageFeatureMeasurement::ImageFeatureMeasurement(cv::Point2f coordinates, cv::Ma
 }
 
 UndistortedImageFeature ImageFeatureMeasurement::Undistort() {
-  Eigen::Vector2d point(CameraParameters::px, coordinates_.y);
+  Eigen::Vector2d point(coordinates_.x, coordinates_.y);
 
   Eigen::Vector2d principal_point(CameraParameters::cx, CameraParameters::cy);
 

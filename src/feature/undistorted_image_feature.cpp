@@ -5,8 +5,8 @@ UndistortedImageFeature::UndistortedImageFeature(Eigen::Vector2d coordinates) {
 }
 
 Eigen::Vector3d UndistortedImageFeature::RetroProject() {
-  double x = -(CameraParameters::cx - coordinates_.x()) / CameraParameters::fx;
-  double y = -(CameraParameters::cy - coordinates_.y()) / CameraParameters::fy;
+  double x = (coordinates_.x() - CameraParameters::cx) / CameraParameters::fx;
+  double y = (coordinates_.y() - CameraParameters::cy) / CameraParameters::fy;
   double z = 1.0L;
 
   return Eigen::Vector3d(x, y, z);
