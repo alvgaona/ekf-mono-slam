@@ -32,17 +32,13 @@ class State {
   }
 
   Eigen::Vector3d& GetPosition() { return position_; }
-
   Eigen::Quaterniond& GetOrientation() { return orientation_; }
-
   Eigen::Vector3d& GetVelocity() { return velocity_; }
-
   Eigen::Vector3d& GetAngularVelocity() { return angular_velocity_; }
-
+  Eigen::Matrix3d GetRotationMatrix() { return rotation_matrix_; }
   int GetDimension() { return dimension_; }
 
   void PredictState(const int delta_t);
-
   void Add(ImageFeatureMeasurement* image_feature_measurement);
   void Add(MapFeature* feature);
   void Remove(const MapFeature* feature);
