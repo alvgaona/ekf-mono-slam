@@ -33,7 +33,7 @@ target_include_directories(ekf_mono_slam PRIVATE
 add_executable(test ${TESTS_SOURCES} ${SOURCES_FOR_TESTS})
 target_link_directories(test PRIVATE ${OpenCV_LIBRARY_DIRS})
 target_compile_definitions(test PRIVATE ${OpenCV_DEFINITIONS})
-target_link_libraries(test PRIVATE gtest_main ${OpenCV_LIBRARIES} spdlog::spdlog)
+target_link_libraries(test PRIVATE gtest_main gmock_main ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(test PRIVATE
     include
     ${OpenCV_INCLUDE_DIRS}

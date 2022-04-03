@@ -9,13 +9,13 @@ State::State() {
   dimension_ = 13;
 }
 
-void State::PredictState(const int delta_t) {
+void State::PredictState(int delta_t) {
   position_ += velocity_ * delta_t;
-  Eigen::Vector3d angles = angular_velocity_ * delta_t;
+  const Eigen::Vector3d angles = angular_velocity_ * delta_t;
 
   // Compute the orientation and its rotation matrix from angles
   double angle = angles.norm();
-  Eigen::Vector3d axis = angles.normalized();
+  const Eigen::Vector3d axis = angles.normalized();
   Eigen::Quaterniond q;
   q = Eigen::AngleAxisd(angle, axis);
 
@@ -40,40 +40,34 @@ void State::Remove(const MapFeature* feature) {
   }
 }
 
-void State::Add(ImageFeatureMeasurement* image_feature_measurement) {
+void State::Add(const ImageFeatureMeasurement* image_feature_measurement) {
   Eigen::VectorXd feature_state(6);
 
   UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
-  Eigen::Vector3d retro_point = undistorted_feature.RetroProject();
+  Eigen::Vector3d back_projected_point = undistorted_feature.BackProject();
 
   // Orientation of the camera respect to the world axis
-  retro_point = orientation_.toRotationMatrix() * retro_point;
+  back_projected_point = orientation_.toRotationMatrix() * back_projected_point;
 
-  feature_state(0) = position_(0);
-  feature_state(1) = position_(1);
-  feature_state(2) = position_(2);
+  feature_state.segment(0, 3) = position_;
 
-  double hx = retro_point.x();
-  double hy = retro_point.y();
-  double hz = retro_point.z();
+  double hx = back_projected_point.x();
+  double hy = back_projected_point.y();
+  double hz = back_projected_point.z();
 
   feature_state(3) = atan2(hx, hz);
   feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));
   feature_state(5) = ImageFeatureParameters::INIT_INV_DEPTH;
 
   // TODO: Check if we really need to store the position in the covariance matrix within the MapFeature object
-  MapFeature* map_feature = new MapFeature(
-      feature_state,
-      6,
-      image_feature_measurement->GetDescriptorData(),
-      MapFeatureType::INVERSE_DEPTH
-  );
+  MapFeature* map_feature =
+      new MapFeature(feature_state, 6, image_feature_measurement->GetDescriptorData(), MapFeatureType::INVERSE_DEPTH);
 
   Add(map_feature);
 }
 
 void State::Add(MapFeature* feature) {
-  switch(feature->GetType()) {
+  switch (feature->GetType()) {
     case MapFeatureType::DEPTH:
       depth_features_.emplace_back(std::unique_ptr<MapFeature>(feature));
       break;

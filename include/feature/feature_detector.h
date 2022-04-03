@@ -10,12 +10,12 @@
 #include <random>
 
 #include "configuration/image_feature_parameters.h"
+#include "descriptor_extractor_type.h"
+#include "detector_type.h"
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
 #include "visual/visual.h"
 #include "zone.h"
-#include "descriptor_extractor_type.h"
-#include "detector_type.h"
 
 class FeatureDetector {
  public:

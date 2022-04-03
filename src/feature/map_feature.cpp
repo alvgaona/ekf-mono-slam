@@ -1,5 +1,10 @@
 #include "feature/map_feature.h"
+
 #include "filter/state.h"
+
+MapFeature::~MapFeature() {
+  std::cout << "Destructor" << std::endl;
+}
 
 MapFeature::MapFeature(Eigen::VectorXd position, int position_dimension, cv::Mat descriptor_data, MapFeatureType type) {
   this->position_ = position;

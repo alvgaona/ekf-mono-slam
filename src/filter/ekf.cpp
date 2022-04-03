@@ -1,4 +1,5 @@
 #include "filter/ekf.h"
+
 #include "feature/feature_detector.h"
 
 EKF::EKF() {
@@ -13,8 +14,7 @@ void EKF::Init(cv::Mat& image) {
 
   feature_detector_ = std::make_unique<FeatureDetector>(
       FeatureDetector::BuildDetector(DetectorType::AKAZE),
-      FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE), cv::Size(image.rows, image.cols)
-  );
+      FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE), cv::Size(image.rows, image.cols));
 
   feature_detector_->DetectFeatures(image, true);
 
@@ -35,10 +35,10 @@ void EKF::PredictMeasurementState() {}
 void EKF::PredictMeasurementCovariance() {}
 
 void EKF::AddFeatures(std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) {
-  std::for_each(features.begin(), features.end(), [this](std::shared_ptr<ImageFeatureMeasurement> image_feature_measurement) {
+  std::for_each(features.begin(), features.end(),
+                [this](std::shared_ptr<ImageFeatureMeasurement> image_feature_measurement) {
                   ImageFeatureMeasurement* image_feature = image_feature_measurement.get();
                   this->state_->Add(image_feature);
                   this->covariance_matrix_->Add(image_feature, this->state_.get());
-  });
+                });
 }
-

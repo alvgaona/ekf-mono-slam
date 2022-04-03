@@ -6,8 +6,9 @@
 #include <ostream>
 
 #include "configuration/kinematics_parameters.h"
-#include "feature/image_feature_measurement.h"
 #include "feature/image_feature.h"
+#include "feature/image_feature_measurement.h"
+#include "math/ekf_math.h"
 #include "state.h"
 
 class CovarianceMatrix {
@@ -26,8 +27,7 @@ class CovarianceMatrix {
     return os;
   }
 
-  void Add(std::vector<std::shared_ptr<ImageFeatureMeasurement>>& image_features);
-  void Add(const ImageFeature* image_feature);
+  void Add(const ImageFeatureMeasurement* const image_feature, State* const state);
 
  private:
   Eigen::MatrixXd matrix_;

@@ -15,10 +15,10 @@ class UndistortedImageFeature {
   UndistortedImageFeature& operator=(const UndistortedImageFeature& source) = delete;
   UndistortedImageFeature& operator=(UndistortedImageFeature&& source) = delete;
 
-  Eigen::Vector3d RetroProject();
+  Eigen::Vector3d BackProject() const;
 
  private:
   Eigen::Vector2d coordinates_;
 };
 
-#endif // EKF_MONO_SLAM_UNDISTORTED_IMAGE_FEATURE_H
+#endif  // EKF_MONO_SLAM_UNDISTORTED_IMAGE_FEATURE_H

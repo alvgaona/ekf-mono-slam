@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 #include "configuration/image_feature_parameters.h"
 #include "feature/image_feature_measurement.h"
@@ -31,15 +32,32 @@ class State {
     return os;
   }
 
-  Eigen::Vector3d& GetPosition() { return position_; }
-  Eigen::Quaterniond& GetOrientation() { return orientation_; }
-  Eigen::Vector3d& GetVelocity() { return velocity_; }
-  Eigen::Vector3d& GetAngularVelocity() { return angular_velocity_; }
-  Eigen::Matrix3d GetRotationMatrix() { return rotation_matrix_; }
-  int GetDimension() { return dimension_; }
+  const Eigen::Vector3d& GetPosition() const { return position_; }
 
-  void PredictState(const int delta_t);
-  void Add(ImageFeatureMeasurement* image_feature_measurement);
+  const Eigen::Quaterniond& GetOrientation() const { return orientation_; }
+
+  const Eigen::Vector3d& GetVelocity() const { return velocity_; }
+
+  const Eigen::Vector3d& GetAngularVelocity() const { return angular_velocity_; }
+
+  const Eigen::Matrix3d& GetRotationMatrix() const { return rotation_matrix_; }
+
+  int GetDimension() const { return dimension_; }
+
+  std::vector<MapFeature*> GetDepthFeatures() const {
+    std::vector<MapFeature*> features;
+    std::transform(depth_features_.begin(), depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
+    return features;
+  };
+
+  std::vector<MapFeature*> GetInverseDepthFeatures() const {
+    std::vector<MapFeature*> features;
+    std::transform(inverse_depth_features_.begin(), inverse_depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
+    return features;
+  };
+
+  void PredictState(int delta_t);
+  void Add(const ImageFeatureMeasurement* image_feature_measurement);
   void Add(MapFeature* feature);
   void Remove(const MapFeature* feature);
 

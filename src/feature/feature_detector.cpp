@@ -1,7 +1,4 @@
 #include "feature/feature_detector.h"
-#include "visual/visual.h"
-
-using namespace Visual;
 
 FeatureDetector::FeatureDetector(cv::Ptr<cv::FeatureDetector> detector,
                                  cv::Ptr<cv::DescriptorExtractor> descriptor_extractor, cv::Size img_size) {
@@ -12,9 +9,8 @@ FeatureDetector::FeatureDetector(cv::Ptr<cv::FeatureDetector> detector,
   zone_size_ = cv::Size(img_size.height / zones_in_row_, img_size.width / zones_in_row_);
 }
 
-void FeatureDetector::DetectFeatures(cv::Mat& image,
-                                              std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
-                                              bool visualize) {
+void FeatureDetector::DetectFeatures(cv::Mat& image, std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
+                                     bool visualize) {
   cv::Mat image_mask(cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255);
 
   BuildImageMask(image_mask, predictions);
@@ -25,7 +21,7 @@ void FeatureDetector::DetectFeatures(cv::Mat& image,
   spdlog::debug("Number of keypoints detected: {}", image_keypoints.size());
 
   if (visualize) {
-    VisualizeKeyPoints(image, image_keypoints);
+    Visual::VisualizeKeyPoints(image, image_keypoints);
   }
 
   cv::Mat descriptors;
@@ -40,17 +36,15 @@ void FeatureDetector::DetectFeatures(cv::Mat& image, bool visualize) {
 }
 
 void FeatureDetector::BuildImageMask(cv::Mat& image_mask,
-                                              std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions) {
+                                     std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions) {
   if (predictions.empty()) {
     return;
   }
 
   for (auto& prediction : predictions) {
     Ellipse ellipse(prediction->GetCoordinates(), prediction->GetCovarianceMatrix());
-    Visual::UncertaintyEllipse2D(image_mask,
-                               ellipse,
-                               2 * (image_mask.rows + image_mask.cols),
-                               cv::Scalar(0, 0, 0), true);
+    Visual::UncertaintyEllipse2D(image_mask, ellipse, 2 * (image_mask.rows + image_mask.cols), cv::Scalar(0, 0, 0),
+                                 true);
   }
 }
 
@@ -157,7 +151,8 @@ void FeatureDetector::ComputeImageFeatureMeasurements(cv::Mat& image_mask, cv::M
 
 void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::unique_ptr<Zone>>& zones, cv::Mat& image_mask) {
   cv::Mat1d measurementEllipseMatrix(2, 2);
-  measurementEllipseMatrix << ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE, 0.0, 0.0, ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE;
+  measurementEllipseMatrix << ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE, 0.0, 0.0,
+      ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE;
 
   int zones_left = zones.size();
 
@@ -193,7 +188,7 @@ void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::unique_ptr
 
         Ellipse ellipse(candidate_coordinates, measurementEllipseMatrix);
         Visual::UncertaintyEllipse2D(image_mask, ellipse, 2 * (image_mask.cols + image_mask.rows), cv::Scalar(0, 0, 0),
-                                   true);
+                                     true);
 
         features_needed--;
       }

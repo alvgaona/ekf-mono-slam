@@ -1,12 +1,12 @@
 #include "feature/image_feature_measurement.h"
 
-ImageFeatureMeasurement::ImageFeatureMeasurement(cv::Point2f coordinates, cv::Mat descriptor_data) {
+ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat descriptor_data) {
   this->coordinates_ = coordinates;
   this->descriptor_data_ = std::move(descriptor_data);
   this->feature_index_ = -1;
 }
 
-UndistortedImageFeature ImageFeatureMeasurement::Undistort() {
+UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {
   Eigen::Vector2d point(coordinates_.x, coordinates_.y);
 
   Eigen::Vector2d principal_point(CameraParameters::cx, CameraParameters::cy);
