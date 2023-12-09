@@ -1,7 +1,6 @@
 #ifndef EKF_MONO_SLAM_MAP_FEATURE_H
 #define EKF_MONO_SLAM_MAP_FEATURE_H
 
-#include <Eigen/Dense>
 #include <memory>
 #include <opencv2/opencv.hpp>
 
@@ -10,11 +9,11 @@
 
 class State;
 
-class MapFeature {
+class MapFeature final {
  public:
-  MapFeature(Eigen::VectorXd position, int position_dimension, cv::Mat descriptor_data, MapFeatureType type);
+  MapFeature(const Eigen::VectorXd& position, int position_dimension, const cv::Mat& descriptor_data, MapFeatureType type);
 
-  virtual ~MapFeature();
+  ~MapFeature();
 
   MapFeature(MapFeature const& source) = delete;
 

@@ -6,7 +6,7 @@ MapFeature::~MapFeature() {
   std::cout << "Destructor" << std::endl;
 }
 
-MapFeature::MapFeature(Eigen::VectorXd position, int position_dimension, cv::Mat descriptor_data, MapFeatureType type) {
+MapFeature::MapFeature(const Eigen::VectorXd& position, const int position_dimension, const cv::Mat& descriptor_data, const MapFeatureType type) {
   this->position_ = position;
   this->position_dimension_ = position_dimension;
   this->descriptor_data_ = descriptor_data;

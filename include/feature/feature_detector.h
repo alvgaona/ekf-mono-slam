@@ -17,11 +17,11 @@
 #include "visual/visual.h"
 #include "zone.h"
 
-class FeatureDetector {
+class FeatureDetector final {
  public:
   FeatureDetector(cv::Ptr<cv::FeatureDetector> detector, cv::Ptr<cv::DescriptorExtractor> descriptor_extractor,
                   cv::Size img_size);
-  virtual ~FeatureDetector() = default;
+  ~FeatureDetector() = default;
   FeatureDetector(const FeatureDetector& source) = delete;
   FeatureDetector(FeatureDetector&& source) noexcept = delete;
   FeatureDetector& operator=(const FeatureDetector& source) = delete;

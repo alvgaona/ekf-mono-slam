@@ -3,14 +3,12 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "math/ekf_math.h"
-
-class Ellipse {
+class Ellipse final {
  public:
-  Ellipse(cv::Point2f center, cv::Mat matrix);
+  Ellipse(cv::Point2f center, const cv::Mat& matrix);
   virtual ~Ellipse() = default;
 
-  cv::Point2f GetCenter() { return center_; }
+  [[nodiscard]] cv::Point2f GetCenter() const { return center_; }
 
   cv::Size2f Axes();
   double Angle();

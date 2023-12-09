@@ -1,4 +1,5 @@
 #include "filter/state.h"
+#include "configuration/image_feature_parameters.h"
 
 State::State() {
   position_ = Eigen::Vector3d(0, 0, 0);
@@ -9,12 +10,12 @@ State::State() {
   dimension_ = 13;
 }
 
-void State::PredictState(int delta_t) {
+void State::PredictState(const int delta_t) {
   position_ += velocity_ * delta_t;
   const Eigen::Vector3d angles = angular_velocity_ * delta_t;
 
   // Compute the orientation and its rotation matrix from angles
-  double angle = angles.norm();
+  const double angle = angles.norm();
   const Eigen::Vector3d axis = angles.normalized();
   Eigen::Quaterniond q;
   q = Eigen::AngleAxisd(angle, axis);
@@ -33,7 +34,7 @@ void State::Remove(const MapFeature* feature) {
     case MapFeatureType::INVERSE_DEPTH:
       inverse_depth_features_.erase(
           std::remove_if(inverse_depth_features_.begin(), inverse_depth_features_.end(),
-                         [&feature](std::unique_ptr<MapFeature>& f) { return f.get() == feature; }));
+                         [&feature](std::unique_ptr<MapFeature>& f) { return f.get() == feature; }), inverse_depth_features_.end());
       break;
     default:
       throw std::runtime_error("Feature to be removed is invalid");
@@ -43,7 +44,7 @@ void State::Remove(const MapFeature* feature) {
 void State::Add(const ImageFeatureMeasurement* image_feature_measurement) {
   Eigen::VectorXd feature_state(6);
 
-  UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
+  const UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
   Eigen::Vector3d back_projected_point = undistorted_feature.BackProject();
 
   // Orientation of the camera respect to the world axis
@@ -51,16 +52,16 @@ void State::Add(const ImageFeatureMeasurement* image_feature_measurement) {
 
   feature_state.segment(0, 3) = position_;
 
-  double hx = back_projected_point.x();
-  double hy = back_projected_point.y();
-  double hz = back_projected_point.z();
+  const double hx = back_projected_point.x();
+  const double hy = back_projected_point.y();
+  const double hz = back_projected_point.z();
 
   feature_state(3) = atan2(hx, hz);
   feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));
   feature_state(5) = ImageFeatureParameters::INIT_INV_DEPTH;
 
   // TODO: Check if we really need to store the position in the covariance matrix within the MapFeature object
-  MapFeature* map_feature =
+  const auto map_feature =
       new MapFeature(feature_state, 6, image_feature_measurement->GetDescriptorData(), MapFeatureType::INVERSE_DEPTH);
 
   Add(map_feature);

@@ -103,12 +103,12 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
     zone->SetPredictionsFeaturesCount(++predictions_features_count);
   }
 
-  std::sort(zones.begin(), zones.end(), [](std::unique_ptr<Zone>& a, std::unique_ptr<Zone>& b) {
+  std::ranges::sort(zones.begin(), zones.end(), [](const std::unique_ptr<Zone>& a, const std::unique_ptr<Zone>& b) {
     return a->GetPredictionsFeaturesCount() > b->GetPredictionsFeaturesCount();
   });
 }
 
-cv::Ptr<cv::FeatureDetector> FeatureDetector::BuildDetector(DetectorType type) {
+cv::Ptr<cv::FeatureDetector> FeatureDetector::BuildDetector(const DetectorType type) {
   switch (type) {
     case DetectorType::BRISK:
       return cv::BRISK::create(30, 3, 1.0);
@@ -121,7 +121,7 @@ cv::Ptr<cv::FeatureDetector> FeatureDetector::BuildDetector(DetectorType type) {
   }
 }
 
-cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType type) {
+cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(const DescriptorExtractorType type) {
   switch (type) {
     case DescriptorExtractorType::AKAZE:
       return cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
@@ -137,7 +137,7 @@ cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(Descr
 void FeatureDetector::ComputeImageFeatureMeasurements(cv::Mat& image_mask, cv::Mat& descriptors,
                                                       std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
                                                       std::vector<cv::KeyPoint>& image_keypoints) {
-  auto keypoints_size = image_keypoints.size();
+  const auto keypoints_size = image_keypoints.size();
 
   if (keypoints_size <= ImageFeatureParameters::FEATURES_PER_IMAGE) {
     for (int i = 0; i < keypoints_size; i++) {
@@ -154,7 +154,7 @@ void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::unique_ptr
   measurementEllipseMatrix << ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE, 0.0, 0.0,
       ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE;
 
-  int zones_left = zones.size();
+  auto zones_left = zones.size();
 
   // TODO: Change features_needed to be passed when calling DetectFeatures.
   int features_needed = ImageFeatureParameters::FEATURES_PER_IMAGE;

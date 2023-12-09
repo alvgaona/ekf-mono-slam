@@ -1,20 +1,17 @@
 #ifndef EKF_MONO_SLAM_EKF_H
 #define EKF_MONO_SLAM_EKF_H
 
-#include <spdlog/spdlog.h>
-
-#include <iostream>
 #include <memory>
-#include <string>
+#include <spdlog/spdlog.h>
 
 #include "covariance_matrix.h"
 #include "feature/feature_detector.h"
 #include "state.h"
 
-class EKF {
+class EKF final {
  public:
   EKF();
-  virtual ~EKF() = default;
+  ~EKF() = default;
 
   EKF(EKF const& source) = delete;
   EKF(EKF&& source) = delete;

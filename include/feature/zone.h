@@ -4,25 +4,25 @@
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
 
-class Zone {
+class Zone final {
  public:
   Zone(int id, cv::Size dimensions);
-  virtual ~Zone() = default;
+  ~Zone() = default;
 
   std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetCandidates() { return candidates_; }
   std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetAdded() { return added_; }
   std::vector<std::shared_ptr<ImageFeaturePrediction>> GetPredictions() { return predictions_; }
 
-  int GetId() { return id_; }
-  int GetCandidatesLeft() { return candidates_left_; }
-  cv::Size GetDimensions() { return dimensions_; }
-  int GetPredictionsFeaturesCount() { return predictions_features_count_; }
+  [[nodiscard]] int GetId() const { return id_; }
+  [[nodiscard]] int GetCandidatesLeft() const { return candidates_left_; }
+  [[nodiscard]] cv::Size GetDimensions() const { return dimensions_; }
+  [[nodiscard]] int GetPredictionsFeaturesCount() const { return predictions_features_count_; }
 
-  void SetCandidatesLeft(int candidates_left) { this->candidates_left_ = candidates_left; }
-  void SetPredictionsFeaturesCount(int count) { this->predictions_features_count_ = count; }
+  void SetCandidatesLeft(const int candidates_left) { this->candidates_left_ = candidates_left; }
+  void SetPredictionsFeaturesCount(const int count) { this->predictions_features_count_ = count; }
 
   void AddFeature(std::shared_ptr<ImageFeatureMeasurement> feature);
-  void AddCandidate(std::shared_ptr<ImageFeatureMeasurement> candidate);
+  void AddCandidate(const std::shared_ptr<ImageFeatureMeasurement>& candidate);
   void AddPrediction(ImageFeaturePrediction* prediction);
 
  private:

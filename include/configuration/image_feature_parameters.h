@@ -1,8 +1,6 @@
 #ifndef EKF_MONO_SLAM_CONFIGURATION_H_
 #define EKF_MONO_SLAM_CONFIGURATION_H_
 
-#include <opencv4/opencv2/opencv.hpp>
-
 struct ImageFeatureParameters {
   static constexpr double IMAGE_AREA_DIVIDE_TIMES = 2.0L;
   static constexpr double IMAGE_MASK_ELLIPSE_SIZE = 5.0L;

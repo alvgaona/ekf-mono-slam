@@ -1,6 +1,6 @@
 #include "math/ekf_math.h"
 
-const Eigen::MatrixXd EkfMath::computeJacobianDirectionalVector(const Eigen::Quaterniond& q, const Eigen::Vector3d& directionalVector) {
+Eigen::MatrixXd EkfMath::computeJacobianDirectionalVector(const Eigen::Quaterniond& q, const Eigen::Vector3d& directionalVector) {
   Eigen::MatrixXd jacobian(3, 4);
 
   Eigen::Matrix3d rotationMatrixJacobianQw;

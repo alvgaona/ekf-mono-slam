@@ -1,20 +1,17 @@
 #ifndef EKF_MONO_SLAM_STATE_H_
 #define EKF_MONO_SLAM_STATE_H_
 
-#include <spdlog/spdlog.h>
-
-#include <Eigen/Dense>
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <spdlog/spdlog.h>
 
-#include "configuration/image_feature_parameters.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/map_feature.h"
 
 class MapFeature;
 
-class State {
+class State final {
  public:
   State();
   virtual ~State() = default;
@@ -46,13 +43,13 @@ class State {
 
   std::vector<MapFeature*> GetDepthFeatures() const {
     std::vector<MapFeature*> features;
-    std::transform(depth_features_.begin(), depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
+    std::ranges::transform(depth_features_.begin(), depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
     return features;
   };
 
   std::vector<MapFeature*> GetInverseDepthFeatures() const {
     std::vector<MapFeature*> features;
-    std::transform(inverse_depth_features_.begin(), inverse_depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
+    std::ranges::transform(inverse_depth_features_.begin(), inverse_depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
     return features;
   };
 

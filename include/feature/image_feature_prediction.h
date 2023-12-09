@@ -4,10 +4,10 @@
 #include "image_feature.h"
 #include "opencv2/opencv.hpp"
 
-class ImageFeaturePrediction : public ImageFeature {
+class ImageFeaturePrediction final : public ImageFeature {
  public:
   ImageFeaturePrediction() = default;
-  virtual ~ImageFeaturePrediction() = default;
+  ~ImageFeaturePrediction() override = default;
 
   cv::Mat& GetCovarianceMatrix() { return covariance_matrix_; }
 

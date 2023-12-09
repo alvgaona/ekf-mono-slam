@@ -3,12 +3,10 @@
 
 #include <Eigen/Dense>
 
-#include "configuration/camera_parameters.h"
-
-class UndistortedImageFeature {
+class UndistortedImageFeature final {
  public:
-  UndistortedImageFeature(Eigen::Vector2d coordinates);
-  virtual ~UndistortedImageFeature() = default;
+  explicit UndistortedImageFeature(const Eigen::Vector2d& coordinates);
+  ~UndistortedImageFeature() = default;
   UndistortedImageFeature(const UndistortedImageFeature& source) = delete;
   UndistortedImageFeature(UndistortedImageFeature&& source) noexcept = delete;
 

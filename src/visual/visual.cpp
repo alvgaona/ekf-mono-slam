@@ -1,9 +1,10 @@
 #include "visual/visual.h"
+#include "math/ekf_math.h"
 
-void Visual::UncertaintyEllipse2D(cv::Mat& image, Ellipse& ellipse, int max_axes_size, cv::Scalar color, bool fill) {
-  cv::Size ellipse_axes = ellipse.Axes();
-  cv::Size axes(MIN(ellipse_axes.width, max_axes_size), MIN(ellipse_axes.height, max_axes_size));
-  double angle = EkfMath::Rad2Deg(ellipse.Angle());
+void Visual::UncertaintyEllipse2D(cv::Mat& image, Ellipse& ellipse, const int max_axes_size, const cv::Scalar& color, const bool fill) {
+  const cv::Size ellipse_axes = ellipse.Axes();
+  const cv::Size axes(MIN(ellipse_axes.width, max_axes_size), MIN(ellipse_axes.height, max_axes_size));
+  const double angle = EkfMath::Rad2Deg(ellipse.Angle());
 
   if (fill) {
     cv::ellipse(image, ellipse.GetCenter(), axes, angle, 0, 360, color, -1);
@@ -12,12 +13,12 @@ void Visual::UncertaintyEllipse2D(cv::Mat& image, Ellipse& ellipse, int max_axes
   }
 }
 
-void Visual::VisualizeKeyPoints(cv::Mat& image, std::__1::vector<cv::KeyPoint>& keypoints) {
+void Visual::VisualizeKeyPoints(const cv::Mat& image, const std::vector<cv::KeyPoint>& keypoints) {
   cv::Mat image_out = image.clone();
-  cv::drawKeypoints(image, keypoints, image_out, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-  std::string windowName = "Keypoints detected";
-  cv::namedWindow(windowName, 6);
-  imshow(windowName, image_out);
+  drawKeypoints(image, keypoints, image_out, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+  const std::string window_name = "Keypoints detected";
+  cv::namedWindow(window_name, 6);
+  imshow(window_name, image_out);
   cv::waitKey(0);
-  cv::destroyWindow(windowName);
+  cv::destroyWindow(window_name);
 }
