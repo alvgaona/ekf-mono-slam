@@ -12,6 +12,11 @@ build:
 	cmake .. && \
 	make
 
+.PHONY: setup
+setup:
+	curl https://pub-db0cd070a4f94dabb9b58161850d4868.r2.dev/AGZ_subset.zip -o ./test/resources/AGZ_subset.zip
+	unzip ./test/resources/AGZ_subset -d ./test/resources/
+
 .PHONY: test
 test:
 	mkdir -p build
@@ -30,3 +35,4 @@ debug:
 .PHONY: clean
 clean:
 	rm -rf build
+
