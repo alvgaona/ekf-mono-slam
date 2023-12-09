@@ -1,3 +1,6 @@
+test/**/AGZ_subset
+thirdparty/
+
 # JetBrains CLion
 .idea/
 
@@ -43,5 +46,3 @@ cmake-build-debug/
 *.exe
 *.out
 *.app
-
-test/**/AGZ_subset
