@@ -2,6 +2,7 @@
 #define EKF_MONO_SLAM_IMAGE_FILE_UTILS_H
 
 #include <string>
+
 #include "image_file_format.h"
 
 class ImageFileUtils final {

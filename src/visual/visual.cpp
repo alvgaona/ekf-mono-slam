@@ -1,7 +1,9 @@
 #include "visual/visual.h"
+
 #include "math/ekf_math.h"
 
-void Visual::UncertaintyEllipse2D(cv::Mat& image, Ellipse& ellipse, const int max_axes_size, const cv::Scalar& color, const bool fill) {
+void Visual::UncertaintyEllipse2D(const cv::Mat& image, Ellipse& ellipse, const int max_axes_size,
+                                  const cv::Scalar& color, const bool fill) {
   const cv::Size ellipse_axes = ellipse.Axes();
   const cv::Size axes(MIN(ellipse_axes.width, max_axes_size), MIN(ellipse_axes.height, max_axes_size));
   const double angle = EkfMath::Rad2Deg(ellipse.Angle());

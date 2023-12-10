@@ -2,6 +2,7 @@
 #define EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H_
 
 #include <opencv2/opencv.hpp>
+
 #include "image_feature.h"
 #include "undistorted_image_feature.h"
 

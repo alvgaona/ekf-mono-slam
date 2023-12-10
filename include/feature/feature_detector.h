@@ -1,26 +1,21 @@
 #ifndef EKF_MONO_SLAM_FEATURE_DETECTOR_H_
 #define EKF_MONO_SLAM_FEATURE_DETECTOR_H_
 
-#include <math.h>
 #include <spdlog/spdlog.h>
 
-#include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
-#include <random>
 
-#include "configuration/image_feature_parameters.h"
 #include "descriptor_extractor_type.h"
 #include "detector_type.h"
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
-#include "visual/visual.h"
 #include "zone.h"
 
 class FeatureDetector final {
  public:
-  FeatureDetector(cv::Ptr<cv::FeatureDetector> detector, cv::Ptr<cv::DescriptorExtractor> descriptor_extractor,
-                  cv::Size img_size);
+  FeatureDetector(const cv::Ptr<cv::FeatureDetector>& detector,
+                  const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor, cv::Size img_size);
   ~FeatureDetector() = default;
   FeatureDetector(const FeatureDetector& source) = delete;
   FeatureDetector(FeatureDetector&& source) noexcept = delete;
@@ -32,9 +27,9 @@ class FeatureDetector final {
 
   std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetImageFeatures() { return image_features_; }
 
-  void DetectFeatures(cv::Mat& image, bool visualize = false);
+  void DetectFeatures(const cv::Mat& image, bool visualize = false);
 
-  void DetectFeatures(cv::Mat& image, std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
+  void DetectFeatures(const cv::Mat& image, const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
                       bool visualize = false);
 
  private:
@@ -46,22 +41,24 @@ class FeatureDetector final {
   cv::Size zone_size_;
   int zones_in_row_;
 
-  void BuildImageMask(cv::Mat& image, std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions);
+  void BuildImageMask(const cv::Mat& image_mask,
+                      const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions);
 
-  void SearchFeaturesByZone(cv::Mat& image_mask, std::vector<cv::KeyPoint>& keypoints, cv::Mat& descriptors,
-                            std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions);
+  void SearchFeaturesByZone(const cv::Mat& image_mask, const std::vector<cv::KeyPoint>& keypoints,
+                            const cv::Mat& descriptors,
+                            const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions);
 
-  std::vector<std::unique_ptr<Zone>> CreateZones();
+  std::vector<std::shared_ptr<Zone>> CreateZones();
 
-  void GroupFeaturesAndPredictionsByZone(std::vector<std::unique_ptr<Zone>>& zones,
-                                         std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
-                                         std::vector<cv::KeyPoint>& keypoints, cv::Mat& descriptors);
+  void GroupFeaturesAndPredictionsByZone(std::vector<std::shared_ptr<Zone>>& zones,
+                                         const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+                                         const std::vector<cv::KeyPoint>& keypoints, const cv::Mat& descriptors) const;
 
-  void ComputeImageFeatureMeasurements(cv::Mat& image_mask, cv::Mat& descriptors,
-                                       std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
-                                       std::vector<cv::KeyPoint>& image_keypoints);
+  void ComputeImageFeatureMeasurements(const cv::Mat& image_mask, const cv::Mat& descriptors,
+                                       const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+                                       const std::vector<cv::KeyPoint>& image_keypoints);
 
-  void SelectImageMeasurementsFromZones(std::list<std::unique_ptr<Zone>>& zones, cv::Mat& image_mask);
+  void SelectImageMeasurementsFromZones(std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask);
 };
 
 #endif /* EKF_MONO_SLAM_FEATURE_DETECTOR_H_ */

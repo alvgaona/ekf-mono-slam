@@ -1,4 +1,5 @@
 #include "filter/state.h"
+
 #include "configuration/image_feature_parameters.h"
 
 State::State() {
@@ -24,24 +25,26 @@ void State::PredictState(const int delta_t) {
   rotation_matrix_ = q.toRotationMatrix();
 }
 
-void State::Remove(const MapFeature* feature) {
+void State::Remove(const std::shared_ptr<MapFeature>& feature) {
   std::vector<std::unique_ptr<MapFeature>>::iterator it;
   switch (feature->GetType()) {
     case MapFeatureType::DEPTH:
-      depth_features_.erase(std::remove_if(depth_features_.begin(), depth_features_.end(),
-                                           [&feature](std::unique_ptr<MapFeature>& f) { return f.get() == feature; }));
+      depth_features_.erase(
+          std::remove_if(depth_features_.begin(), depth_features_.end(),
+                         [&feature](const std::shared_ptr<MapFeature>& f) { return f.get() == feature.get(); }));
       break;
     case MapFeatureType::INVERSE_DEPTH:
       inverse_depth_features_.erase(
           std::remove_if(inverse_depth_features_.begin(), inverse_depth_features_.end(),
-                         [&feature](std::unique_ptr<MapFeature>& f) { return f.get() == feature; }), inverse_depth_features_.end());
+                         [&feature](const std::shared_ptr<MapFeature>& f) { return f.get() == feature.get(); }),
+          inverse_depth_features_.end());
       break;
     default:
       throw std::runtime_error("Feature to be removed is invalid");
   }
 }
 
-void State::Add(const ImageFeatureMeasurement* image_feature_measurement) {
+void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
   Eigen::VectorXd feature_state(6);
 
   const UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
@@ -61,19 +64,19 @@ void State::Add(const ImageFeatureMeasurement* image_feature_measurement) {
   feature_state(5) = ImageFeatureParameters::INIT_INV_DEPTH;
 
   // TODO: Check if we really need to store the position in the covariance matrix within the MapFeature object
-  const auto map_feature =
-      new MapFeature(feature_state, 6, image_feature_measurement->GetDescriptorData(), MapFeatureType::INVERSE_DEPTH);
+  auto map_feature = std::make_shared<MapFeature>(feature_state, 6, image_feature_measurement->GetDescriptorData(),
+                                                  MapFeatureType::INVERSE_DEPTH);
 
   Add(map_feature);
 }
 
-void State::Add(MapFeature* feature) {
+void State::Add(const std::shared_ptr<MapFeature>& feature) {
   switch (feature->GetType()) {
     case MapFeatureType::DEPTH:
-      depth_features_.emplace_back(std::unique_ptr<MapFeature>(feature));
+      depth_features_.emplace_back(feature);
       break;
     case MapFeatureType::INVERSE_DEPTH:
-      inverse_depth_features_.emplace_back(std::unique_ptr<MapFeature>(feature));
+      inverse_depth_features_.emplace_back(feature);
       break;
     case MapFeatureType::INVALID:
       spdlog::error("Feature is type INVALID");

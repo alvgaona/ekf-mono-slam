@@ -1,8 +1,9 @@
 #ifndef EKF_MONO_SLAM_EKF_H
 #define EKF_MONO_SLAM_EKF_H
 
-#include <memory>
 #include <spdlog/spdlog.h>
+
+#include <memory>
 
 #include "covariance_matrix.h"
 #include "feature/feature_detector.h"
@@ -19,8 +20,8 @@ class EKF final {
   EKF& operator=(EKF const& source) = delete;
   EKF& operator=(EKF&& source) noexcept = delete;
 
-  void Init(cv::Mat& image);
-  void Step(cv::Mat& image);
+  void Init(const cv::Mat& image);
+  void Step(const cv::Mat& image);
 
   void PredictState();
   void PredictCovarianceMatrix();

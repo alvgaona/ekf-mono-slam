@@ -2,7 +2,6 @@
 #define EKF_MONO_SLAM_IMAGE_FEATURE_PREDICTION_H_
 
 #include "image_feature.h"
-#include "opencv2/opencv.hpp"
 
 class ImageFeaturePrediction final : public ImageFeature {
  public:

@@ -9,7 +9,7 @@ EKF::EKF() {
   this->step_ = 0;
 }
 
-void EKF::Init(cv::Mat& image) {
+void EKF::Init(const cv::Mat& image) {
   spdlog::info("Initializing Extender Kalman Filter");
 
   feature_detector_ = std::make_unique<FeatureDetector>(
@@ -21,7 +21,7 @@ void EKF::Init(cv::Mat& image) {
   AddFeatures(feature_detector_->GetImageFeatures());
 }
 
-void EKF::Step(cv::Mat& image) {}
+void EKF::Step(const cv::Mat& image) {}
 
 void EKF::PredictState() { state_->PredictState(delta_t_); }
 
@@ -35,10 +35,9 @@ void EKF::PredictMeasurementState() {}
 void EKF::PredictMeasurementCovariance() {}
 
 void EKF::AddFeatures(std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) {
-  std::for_each(features.begin(), features.end(),
-                [this](std::shared_ptr<ImageFeatureMeasurement> image_feature_measurement) {
-                  ImageFeatureMeasurement* image_feature = image_feature_measurement.get();
-                  this->state_->Add(image_feature);
-                  this->covariance_matrix_->Add(image_feature, this->state_.get());
-                });
+  std::ranges::for_each(features.begin(), features.end(),
+                        [this](const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
+                          this->state_->Add(image_feature_measurement);
+                          this->covariance_matrix_->Add(image_feature_measurement, this->state_);
+                        });
 }

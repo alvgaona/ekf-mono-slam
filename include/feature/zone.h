@@ -23,7 +23,7 @@ class Zone final {
 
   void AddFeature(std::shared_ptr<ImageFeatureMeasurement> feature);
   void AddCandidate(const std::shared_ptr<ImageFeatureMeasurement>& candidate);
-  void AddPrediction(ImageFeaturePrediction* prediction);
+  void AddPrediction(std::shared_ptr<ImageFeaturePrediction> prediction);
 
  private:
   std::vector<std::shared_ptr<ImageFeatureMeasurement>> candidates_;

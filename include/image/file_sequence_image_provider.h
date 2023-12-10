@@ -1,7 +1,6 @@
 #ifndef EKF_MONO_SLAM_FILE_SEQUENCE_IMAGE_PROVIDER_H_
 #define EKF_MONO_SLAM_FILE_SEQUENCE_IMAGE_PROVIDER_H_
 
-
 #include <filesystem>
 #include <string>
 
@@ -13,9 +12,7 @@ class FileSequenceImageProvider final : public ImageProvider {
   explicit FileSequenceImageProvider(const std::string& directory, int start_index = 1, int end_index = 10);
   ~FileSequenceImageProvider() override = default;
 
-  [[nodiscard]] int GetImageCounter() const {
-    return this->image_counter_;
-  }
+  [[nodiscard]] int GetImageCounter() const { return this->image_counter_; }
 
   cv::Mat GetNextImage() override;
 

@@ -1,4 +1,5 @@
 #include "filter/covariance_matrix.h"
+
 #include "configuration/kinematics_parameters.h"
 
 using namespace EkfMath;
@@ -18,7 +19,8 @@ CovarianceMatrix::CovarianceMatrix() {
       0, 0, 0, 0, 0, 0, 0, KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD;
 }
 
-void CovarianceMatrix::Add(const ImageFeatureMeasurement* image_feature_measurement, const State* state) {
+void CovarianceMatrix::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
+                           const std::unique_ptr<State>& state) {
   const int n = state->GetDimension();
   const int new_covariance_matrix_dim = n + 6;
   Eigen::MatrixXd new_covariance_matrix(new_covariance_matrix_dim, new_covariance_matrix_dim);

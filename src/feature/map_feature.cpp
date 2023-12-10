@@ -2,15 +2,16 @@
 
 #include "filter/state.h"
 
-MapFeature::~MapFeature() {
-  std::cout << "Destructor" << std::endl;
-}
+MapFeature::~MapFeature() { std::cout << "Destructor" << std::endl; }
 
-MapFeature::MapFeature(const Eigen::VectorXd& position, const int position_dimension, const cv::Mat& descriptor_data, const MapFeatureType type) {
+MapFeature::MapFeature(const Eigen::VectorXd& position, const int position_dimension, const cv::Mat& descriptor_data,
+                       const MapFeatureType type) {
   this->position_ = position;
   this->position_dimension_ = position_dimension;
   this->descriptor_data_ = descriptor_data;
   this->type_ = type;
+  this->times_matched_ = 0;
+  this->times_predicted_ = 0;
 }
 
 // TODO: Implement

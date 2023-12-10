@@ -1,10 +1,11 @@
 #ifndef EKF_MONO_SLAM_STATE_H_
 #define EKF_MONO_SLAM_STATE_H_
 
+#include <spdlog/spdlog.h>
+
+#include <algorithm>
 #include <memory>
 #include <vector>
-#include <algorithm>
-#include <spdlog/spdlog.h>
 
 #include "feature/image_feature_measurement.h"
 #include "feature/map_feature.h"
@@ -14,7 +15,7 @@ class MapFeature;
 class State final {
  public:
   State();
-  virtual ~State() = default;
+  ~State() = default;
   State(const State& source) = delete;
   State(State&& source) = delete;
 
@@ -29,34 +30,36 @@ class State final {
     return os;
   }
 
-  const Eigen::Vector3d& GetPosition() const { return position_; }
+  [[nodiscard]] const Eigen::Vector3d& GetPosition() const { return position_; }
 
-  const Eigen::Quaterniond& GetOrientation() const { return orientation_; }
+  [[nodiscard]] const Eigen::Quaterniond& GetOrientation() const { return orientation_; }
 
-  const Eigen::Vector3d& GetVelocity() const { return velocity_; }
+  [[nodiscard]] const Eigen::Vector3d& GetVelocity() const { return velocity_; }
 
-  const Eigen::Vector3d& GetAngularVelocity() const { return angular_velocity_; }
+  [[nodiscard]] const Eigen::Vector3d& GetAngularVelocity() const { return angular_velocity_; }
 
-  const Eigen::Matrix3d& GetRotationMatrix() const { return rotation_matrix_; }
+  [[nodiscard]] const Eigen::Matrix3d& GetRotationMatrix() const { return rotation_matrix_; }
 
-  int GetDimension() const { return dimension_; }
+  [[nodiscard]] int GetDimension() const { return dimension_; }
 
-  std::vector<MapFeature*> GetDepthFeatures() const {
-    std::vector<MapFeature*> features;
-    std::ranges::transform(depth_features_.begin(), depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
+  [[nodiscard]] std::vector<std::shared_ptr<MapFeature>> GetDepthFeatures() const {
+    std::vector<std::shared_ptr<MapFeature>> features;
+    std::transform(depth_features_.begin(), depth_features_.end(), std::back_inserter(features),
+                   [](auto& f) -> auto { return f; });
     return features;
   };
 
-  std::vector<MapFeature*> GetInverseDepthFeatures() const {
-    std::vector<MapFeature*> features;
-    std::ranges::transform(inverse_depth_features_.begin(), inverse_depth_features_.end(), std::back_inserter(features), [](auto& f) -> auto { return f.get(); });
+  [[nodiscard]] std::vector<std::shared_ptr<MapFeature>> GetInverseDepthFeatures() const {
+    std::vector<std::shared_ptr<MapFeature>> features;
+    std::transform(inverse_depth_features_.begin(), inverse_depth_features_.end(), std::back_inserter(features),
+                   [](auto& f) -> auto { return f; });
     return features;
   };
 
   void PredictState(int delta_t);
-  void Add(const ImageFeatureMeasurement* image_feature_measurement);
-  void Add(MapFeature* feature);
-  void Remove(const MapFeature* feature);
+  void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement);
+  void Add(const std::shared_ptr<MapFeature>& feature);
+  void Remove(const std::shared_ptr<MapFeature>& feature);
 
  private:
   Eigen::Vector3d position_;
@@ -65,9 +68,9 @@ class State final {
   Eigen::Quaterniond orientation_;
   Eigen::Matrix3d rotation_matrix_;
 
-  std::vector<std::unique_ptr<MapFeature>> features_;
-  std::vector<std::unique_ptr<MapFeature>> inverse_depth_features_;
-  std::vector<std::unique_ptr<MapFeature>> depth_features_;
+  std::vector<std::shared_ptr<MapFeature>> features_;
+  std::vector<std::shared_ptr<MapFeature>> inverse_depth_features_;
+  std::vector<std::shared_ptr<MapFeature>> depth_features_;
 
   int dimension_;
 };

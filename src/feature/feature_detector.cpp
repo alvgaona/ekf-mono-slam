@@ -1,17 +1,24 @@
 #include "feature/feature_detector.h"
 
-FeatureDetector::FeatureDetector(cv::Ptr<cv::FeatureDetector> detector,
-                                 cv::Ptr<cv::DescriptorExtractor> descriptor_extractor, cv::Size img_size) {
-  detector_ = std::move(detector);
-  extractor_ = std::move(descriptor_extractor);
+#include <configuration/image_feature_parameters.h>
+#include <visual/visual.h>
+
+#include <random>
+
+FeatureDetector::FeatureDetector(const cv::Ptr<cv::FeatureDetector>& detector,
+                                 const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor,
+                                 const cv::Size img_size) {
+  detector_ = detector;
+  extractor_ = descriptor_extractor;
   img_size_ = img_size;
-  zones_in_row_ = std::exp2(ImageFeatureParameters::IMAGE_AREA_DIVIDE_TIMES);
-  zone_size_ = cv::Size(img_size.height / zones_in_row_, img_size.width / zones_in_row_);
+  zones_in_row_ = static_cast<int>(std::exp2(ImageFeatureParameters::IMAGE_AREA_DIVIDE_TIMES));
+  zone_size_ = cv::Size(img_size.width / zones_in_row_, img_size.height / zones_in_row_);
 }
 
-void FeatureDetector::DetectFeatures(cv::Mat& image, std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
-                                     bool visualize) {
-  cv::Mat image_mask(cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255);
+void FeatureDetector::DetectFeatures(const cv::Mat& image,
+                                     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+                                     const bool visualize) {
+  const cv::Mat image_mask(cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255);
 
   BuildImageMask(image_mask, predictions);
 
@@ -30,13 +37,13 @@ void FeatureDetector::DetectFeatures(cv::Mat& image, std::vector<std::unique_ptr
   ComputeImageFeatureMeasurements(image_mask, descriptors, predictions, image_keypoints);
 }
 
-void FeatureDetector::DetectFeatures(cv::Mat& image, bool visualize) {
-  std::vector<std::unique_ptr<ImageFeaturePrediction>> empty_predictions;
+void FeatureDetector::DetectFeatures(const cv::Mat& image, const bool visualize) {
+  const std::vector<std::shared_ptr<ImageFeaturePrediction>> empty_predictions;
   DetectFeatures(image, empty_predictions, visualize);
 }
 
-void FeatureDetector::BuildImageMask(cv::Mat& image_mask,
-                                     std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions) {
+void FeatureDetector::BuildImageMask(const cv::Mat& image_mask,
+                                     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions) {
   if (predictions.empty()) {
     return;
   }
@@ -48,62 +55,58 @@ void FeatureDetector::BuildImageMask(cv::Mat& image_mask,
   }
 }
 
-void FeatureDetector::SearchFeaturesByZone(cv::Mat& image_mask, std::vector<cv::KeyPoint>& keypoints,
-                                           cv::Mat& descriptors,
-                                           std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions) {
-  std::vector<std::unique_ptr<Zone>> zones = CreateZones();
+void FeatureDetector::SearchFeaturesByZone(const cv::Mat& image_mask, const std::vector<cv::KeyPoint>& keypoints,
+                                           const cv::Mat& descriptors,
+                                           const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions) {
+  std::vector<std::shared_ptr<Zone>> zones = CreateZones();
   GroupFeaturesAndPredictionsByZone(zones, predictions, keypoints, descriptors);
 
-  std::list<std::unique_ptr<Zone>> zones_list(std::make_move_iterator(zones.begin()),
-                                              std::make_move_iterator(zones.end()));
+  std::list zones_list(std::make_move_iterator(zones.begin()), std::make_move_iterator(zones.end()));
 
   SelectImageMeasurementsFromZones(zones_list, image_mask);
 }
 
-std::vector<std::unique_ptr<Zone>> FeatureDetector::CreateZones() {
-  int zones_count = std::pow(zones_in_row_, 2);
-  std::vector<std::unique_ptr<Zone>> zones;
+std::vector<std::shared_ptr<Zone>> FeatureDetector::CreateZones() {
+  const int zones_count = static_cast<int>(std::pow(zones_in_row_, 2));
+  std::vector<std::shared_ptr<Zone>> zones;
 
   for (auto i = 0; i < zones_count; i++) {
     spdlog::debug("Creating Zone {} with size {}x{}", i, zone_size_.width, zone_size_.height);
-    zones.emplace_back(std::make_unique<Zone>(i, cv::Size(zone_size_.width, zone_size_.height)));
+    zones.emplace_back(std::make_shared<Zone>(i, cv::Size(zone_size_.width, zone_size_.height)));
   }
   return zones;
 }
 
 void FeatureDetector::GroupFeaturesAndPredictionsByZone(
-    std::vector<std::unique_ptr<Zone>>& zones, std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
-    std::vector<cv::KeyPoint>& keypoints, cv::Mat& descriptors) {
-  auto keypoints_size = keypoints.size();
+    std::vector<std::shared_ptr<Zone>>& zones, const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+    const std::vector<cv::KeyPoint>& keypoints, const cv::Mat& descriptors) const {
+  const auto keypoints_size = keypoints.size();
 
   for (auto i = 0; i < keypoints_size; i++) {
-    cv::KeyPoint& keypoint = keypoints.at(i);
+    const cv::KeyPoint& keypoint = keypoints.at(i);
 
-    std::shared_ptr<ImageFeatureMeasurement> image_feature_measurement =
-        std::make_shared<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i));
+    const auto image_feature_measurement = std::make_shared<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i));
 
-    int zone_id =
+    const int zone_id =
         image_feature_measurement->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width, img_size_.height);
 
-    Zone* zone = zones[zone_id].get();
-    zone->AddCandidate(image_feature_measurement);
-    int candidates_left = zone->GetCandidatesLeft();
-    zone->SetCandidatesLeft(++candidates_left);
+    zones[zone_id]->AddCandidate(image_feature_measurement);
+    int candidates_left = zones[zone_id]->GetCandidatesLeft();
+    zones[zone_id]->SetCandidatesLeft(++candidates_left);
   }
 
-  auto predictions_size = predictions.size();
+  const auto predictions_size = predictions.size();
 
   for (auto i = 0; i < predictions_size; i++) {
-    ImageFeaturePrediction* prediction = predictions[i].get();
-    int zone_id = prediction->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width, img_size_.height);
+    const int zone_id =
+        predictions[i]->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width, img_size_.height);
 
-    Zone* zone = zones[zone_id].get();
-    zone->AddPrediction(prediction);
-    int predictions_features_count = zone->GetPredictionsFeaturesCount();
-    zone->SetPredictionsFeaturesCount(++predictions_features_count);
+    zones[zone_id]->AddPrediction(predictions[i]);
+    int predictions_features_count = zones[zone_id]->GetPredictionsFeaturesCount();
+    zones[zone_id]->SetPredictionsFeaturesCount(++predictions_features_count);
   }
 
-  std::ranges::sort(zones.begin(), zones.end(), [](const std::unique_ptr<Zone>& a, const std::unique_ptr<Zone>& b) {
+  std::sort(zones.begin(), zones.end(), [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
     return a->GetPredictionsFeaturesCount() > b->GetPredictionsFeaturesCount();
   });
 }
@@ -134,14 +137,14 @@ cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(const
   }
 }
 
-void FeatureDetector::ComputeImageFeatureMeasurements(cv::Mat& image_mask, cv::Mat& descriptors,
-                                                      std::vector<std::unique_ptr<ImageFeaturePrediction>>& predictions,
-                                                      std::vector<cv::KeyPoint>& image_keypoints) {
+void FeatureDetector::ComputeImageFeatureMeasurements(
+    const cv::Mat& image_mask, const cv::Mat& descriptors,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+    const std::vector<cv::KeyPoint>& image_keypoints) {
   const auto keypoints_size = image_keypoints.size();
-
   if (keypoints_size <= ImageFeatureParameters::FEATURES_PER_IMAGE) {
     for (int i = 0; i < keypoints_size; i++) {
-      cv::KeyPoint& keypoint = image_keypoints[i];
+      const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i)));
     }
   } else {
@@ -149,8 +152,9 @@ void FeatureDetector::ComputeImageFeatureMeasurements(cv::Mat& image_mask, cv::M
   }
 }
 
-void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::unique_ptr<Zone>>& zones, cv::Mat& image_mask) {
-  cv::Mat1d measurementEllipseMatrix(2, 2);
+void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::shared_ptr<Zone>>& zones,
+                                                       const cv::Mat& image_mask) {
+  const cv::Mat1d measurementEllipseMatrix(2, 2);
   measurementEllipseMatrix << ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE, 0.0, 0.0,
       ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE;
 
@@ -159,7 +163,7 @@ void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::unique_ptr
   // TODO: Change features_needed to be passed when calling DetectFeatures.
   int features_needed = ImageFeatureParameters::FEATURES_PER_IMAGE;
   while (zones_left > 0 && features_needed > 0) {
-    Zone* curr_zone = zones.front().get();
+    const std::shared_ptr<Zone> curr_zone = zones.front();
     int curr_zone_candidates_left = curr_zone->GetCandidatesLeft();
     int curr_zone_predictions_count = curr_zone->GetPredictionsFeaturesCount();
 
@@ -174,7 +178,7 @@ void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::unique_ptr
 
       auto& curr_candidates = curr_zone->GetCandidates();
       std::shared_ptr<ImageFeatureMeasurement> candidate = curr_candidates.at(candidate_idx);
-      cv::Point2f candidate_coordinates = candidate->GetCoordinates();
+      const cv::Point2f candidate_coordinates = candidate->GetCoordinates();
 
       if (image_mask.at<int>(static_cast<int>(candidate_coordinates.y), static_cast<int>(candidate_coordinates.x))) {
         image_features_.emplace_back(candidate);
@@ -182,7 +186,7 @@ void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::unique_ptr
         curr_zone->SetPredictionsFeaturesCount(curr_zone_predictions_count);
 
         // Reorder zones based on predictions feature count
-        zones.sort([](std::unique_ptr<Zone>& a, std::unique_ptr<Zone>& b) {
+        zones.sort([](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
           return a->GetPredictionsFeaturesCount() >= b->GetPredictionsFeaturesCount();
         });
 

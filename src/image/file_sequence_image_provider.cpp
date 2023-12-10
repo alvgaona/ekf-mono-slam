@@ -1,8 +1,11 @@
-#include <spdlog/spdlog.h>
-#include "image/image_file_utils.h"
 #include "image/file_sequence_image_provider.h"
 
-FileSequenceImageProvider::FileSequenceImageProvider(const std::string& directory, const int start_index, const int end_index) {
+#include <spdlog/spdlog.h>
+
+#include "image/image_file_utils.h"
+
+FileSequenceImageProvider::FileSequenceImageProvider(const std::string& directory, const int start_index,
+                                                     const int end_index) {
   this->directory = std::filesystem::path(directory);
   this->image_counter_ = 0;
   this->start_index_ = start_index;

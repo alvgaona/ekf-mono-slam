@@ -8,7 +8,7 @@ class ImageFeature {
   ImageFeature() = default;
   virtual ~ImageFeature() = default;
 
-  cv::Point2f GetCoordinates() const { return coordinates_; }
+  [[nodiscard]] cv::Point2f GetCoordinates() const { return coordinates_; }
 
   virtual int ComputeZone(int zone_width, int zone_height, int image_width, int image_height);
 
