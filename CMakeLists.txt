@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.25.0)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-set(CMAKE_CXX_COMPILER g++)
-set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_C_COMPILER clang)
 
 project(ekf_mono_slam)
 
@@ -16,7 +16,7 @@ file(GLOB_RECURSE TESTS_SOURCES test/*.cpp)
 file(GLOB_RECURSE SOURCES_FOR_TESTS src/*.cpp)
 list(FILTER SOURCES_FOR_TESTS EXCLUDE REGEX "src/main.cpp")
 
-add_subdirectory(thirdparty/googletest)
+add_subdirectory(third-party/googletest)
 
 # App configuration
 add_executable(ekf_mono_slam ${SOURCES})
