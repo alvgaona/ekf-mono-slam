@@ -1,9 +1,7 @@
 #include "filter/state.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-
 #include <vector>
-#include <span>
 
 //-------------------------------------//
 //   Beginning EkfStateTest Tests.     //
@@ -87,14 +85,14 @@ TEST(TestAddMapFeature, AddMapFeature) {
 
   const cv::Mat descriptor_data = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
 
-  MapFeature* inverse_depth_map_feature = new MapFeature(feature_state, 6, descriptor_data, MapFeatureType::INVERSE_DEPTH);
-  MapFeature* depth_map_feature = new MapFeature(feature_state, 6, descriptor_data, MapFeatureType::DEPTH);
+  const auto inverse_depth_map_feature = std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::INVERSE_DEPTH);
+  const auto depth_map_feature = std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::DEPTH);
 
   state.Add(inverse_depth_map_feature);
   state.Add(depth_map_feature);
 
-  const std::vector<MapFeature*> inverse_depth_features = state.GetInverseDepthFeatures();
-  const std::vector<MapFeature*> depth_features = state.GetDepthFeatures();
+  const std::vector<std::shared_ptr<MapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
+  const std::vector<std::shared_ptr<MapFeature>> depth_features = state.GetDepthFeatures();
 
   EXPECT_THAT(depth_features, SizeIs(1));
   EXPECT_THAT(depth_features, Contains(depth_map_feature));
@@ -110,31 +108,20 @@ TEST(TestRemoveMapFeature, RemoveMapFeature) {
 
   const cv::Mat descriptor_data = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
 
-  MapFeature* inverse_map_feature = new MapFeature(feature_state, 6, descriptor_data, MapFeatureType::INVERSE_DEPTH);
-  MapFeature* depth_map_feature = new MapFeature(feature_state, 6, descriptor_data, MapFeatureType::DEPTH);
+  const auto inverse_map_feature = std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::INVERSE_DEPTH);
+  const auto depth_map_feature = std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::DEPTH);
 
   state.Add(inverse_map_feature);
   state.Add(depth_map_feature);
 
-  state.Remove(const_cast<MapFeature*>(inverse_map_feature));
-  state.Remove(const_cast<MapFeature*>(depth_map_feature));
+  state.Remove(inverse_map_feature);
+  state.Remove(depth_map_feature);
 
-  const std::vector<MapFeature*> inverse_depth_features = state.GetInverseDepthFeatures();
-  const std::vector<MapFeature*> depth_features = state.GetDepthFeatures();
+  const std::vector<std::shared_ptr<MapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
+  const std::vector<std::shared_ptr<MapFeature>> depth_features = state.GetDepthFeatures();
 
   std::cout << inverse_map_feature << std::endl;
 
   EXPECT_THAT(inverse_depth_features, SizeIs(0));
   EXPECT_THAT(depth_features, SizeIs(0));
-}
-
-TEST(Test, Test01) {
-  std::vector<std::unique_ptr<MapFeature>> vec;
-  vec.emplace_back(std::make_unique<MapFeature>(Eigen::Vector3d::Ones(), 6, cv::Mat::zeros(cv::Size(3,3), CV_64FC1), MapFeatureType::DEPTH));
-  MapFeature* f = vec.at(0).get();
-
-  std::cout << *f << std::endl;
-
-
-  std::cout << *f << std::endl;
 }
