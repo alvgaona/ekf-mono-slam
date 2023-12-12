@@ -5,7 +5,7 @@
 
 class ImageFeaturePrediction final : public ImageFeature {
  public:
-  ImageFeaturePrediction() = default;
+  explicit ImageFeaturePrediction(cv::Mat covariance_matrix);
   ~ImageFeaturePrediction() override = default;
 
   cv::Mat& GetCovarianceMatrix() { return covariance_matrix_; }

@@ -10,6 +10,23 @@ Ellipse::Ellipse(const cv::Point2f center, const cv::Mat& matrix) {
   eigen(matrix, eigen_values_, eigen_vectors_);
 }
 
+/**
+ * \brief Computes the axes of the ellipse representing the feature's covariance matrix.
+ *
+ * This method calculates the major and minor axes of the ellipse based on the feature's covariance matrix and the
+ * chi-squared threshold for 95% confidence.
+ *
+ * \return A `cv::Size2f` object containing the major and minor axes of the ellipse.
+ *
+ * The calculation involves the following steps:
+ * 1. Extracts the eigenvalues from the covariance matrix.
+ * 2. Applies the chi-squared distribution with 2 degrees of freedom (CHISQ_95_2) to each eigenvalue.
+ * 3. Computes the square root of each scaled eigenvalue to obtain the ellipse's axes lengths.
+ * 4. Returns a `cv::Size2f` object containing the major and minor axes.
+ *
+ * The size of the returned ellipse reflects the uncertainty associated with the feature's location. A larger ellipse
+ * indicates higher uncertainty, while a smaller ellipse signifies better localization precision.
+ */
 cv::Size2f Ellipse::Axes() {
   const cv::Size2f axes(static_cast<float>(2.0L * sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)),
                         static_cast<float>(2.0L * sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)));

@@ -8,6 +8,13 @@ ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, 
   this->descriptor_data_ = descriptor_data;
 }
 
+/**
+ * \brief Undistorts the image feature coordinates to compensate for camera lens distortion. This method applies the
+ * camera's intrinsic distortion model to transform the feature's pixel coordinates from the distorted image plane to
+ * the ideal normalized plane.
+ *
+ * \return An `UndistortedImageFeature` object containing the undistorted coordinates of the feature.
+ */
 UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {
   const Eigen::Vector2d point(coordinates_.x, coordinates_.y);
 
