@@ -41,8 +41,8 @@ class FeatureDetector final {
   cv::Size zone_size_;
   int zones_in_row_;
 
-  void BuildImageMask(const cv::Mat& image_mask,
-                      const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions);
+  static void BuildImageMask(const cv::Mat& image_mask,
+                             const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions);
 
   void SearchFeaturesByZone(const cv::Mat& image_mask, const std::vector<cv::KeyPoint>& keypoints,
                             const cv::Mat& descriptors,

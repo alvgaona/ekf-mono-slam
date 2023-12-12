@@ -1,11 +1,11 @@
 #include "feature/image_feature_measurement.h"
 
 #include "configuration/camera_parameters.h"
+#include "feature/image_feature.h"
 
-ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat& descriptor_data) {
-  this->coordinates_ = coordinates;
+ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat& descriptor_data)
+    : ImageFeature(coordinates) {
   this->descriptor_data_ = descriptor_data;
-  this->feature_index_ = -1;
 }
 
 UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {

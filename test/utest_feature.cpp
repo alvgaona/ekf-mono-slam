@@ -64,5 +64,17 @@ TEST(Zones, AddFeature) {
   EXPECT_EQ(zone.GetDimensions(), cv::Size(100, 100));
 }
 
+TEST(Zones, ComputeZone) {
+  const cv::Mat descriptor = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
+  const ImageFeatureMeasurement feature1(cv::Point2f(0, 0), descriptor);
+  EXPECT_EQ(feature1.ComputeZone(480, 270, 1920, 1080), 0);
+
+  const ImageFeatureMeasurement feature2(cv::Point2f(1900, 1000), descriptor);
+  EXPECT_EQ(feature2.ComputeZone(480, 270, 1920, 1080), 15);
+
+  const ImageFeatureMeasurement feature3(cv::Point2f(959, 271),  descriptor);
+  EXPECT_EQ(feature3.ComputeZone(480, 270, 1920, 1080), 5);
+}
+
 
 

@@ -5,12 +5,14 @@
 
 class ImageFeature {
  public:
-  ImageFeature() = default;
+  explicit ImageFeature(cv::Point2f coordinates);
+  explicit ImageFeature(cv::Point2f coordinates, int feature_index);
+
   virtual ~ImageFeature() = default;
 
-  [[nodiscard]] cv::Point2f GetCoordinates() const { return coordinates_; }
+  [[nodiscard]] virtual cv::Point2f GetCoordinates() const { return coordinates_; }
 
-  virtual int ComputeZone(int zone_width, int zone_height, int image_width, int image_height);
+  [[nodiscard]] virtual int ComputeZone(int zone_width, int zone_height, int image_width, int image_height) const;
 
  protected:
   cv::Point2f coordinates_;
