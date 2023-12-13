@@ -1,5 +1,20 @@
 #include "math/ekf_math.h"
 
+/**
+ * \brief Computes the Jacobian matrix of a directional vector with respect to a quaternion.
+ *
+ * This function calculates the derivative of a directional vector expressed in the global reference frame with respect
+ * to changes in a quaternion representing the rotation of a local frame.
+ *
+ * \param q The quaternion representing the rotation of the local frame.
+ * \param directionalVector The directional vector expressed in the global reference frame.
+ *
+ * \return A 3x4 Jacobian matrix representing the partial derivatives of the directional vector with respect to each
+ * element of the quaternion.
+ *
+ * This Jacobian matrix is useful for applying the chain rule in various calculations involving rotations and
+ * directional vectors.
+ */
 Eigen::MatrixXd EkfMath::computeJacobianDirectionalVector(const Eigen::Quaterniond& q,
                                                           const Eigen::Vector3d& directionalVector) {
   Eigen::MatrixXd jacobian(3, 4);

@@ -6,7 +6,7 @@
 class Ellipse final {
  public:
   Ellipse(cv::Point2f center, const cv::Mat& matrix);
-  virtual ~Ellipse() = default;
+  ~Ellipse() = default;
 
   [[nodiscard]] cv::Point2f GetCenter() const { return center_; }
 

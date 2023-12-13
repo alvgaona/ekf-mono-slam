@@ -1,10 +1,31 @@
 #include "feature/image_feature.h"
 
+/**
+ * \brief Constructs an ImageFeature object with specified coordinates but no assigned index.
+ *
+ * This constructor initializes a new ImageFeature object with the provided `coordinates` representing its location in
+ * the image plane. The feature index remains unassigned (set to -1) until explicitly assigned later.
+ *
+ * \param coordinates The feature's location as a cv::Point2f in the image coordinate system.
+ *
+ */
 ImageFeature::ImageFeature(const cv::Point2f coordinates) {
   this->coordinates_ = coordinates;
   this->feature_index_ = -1;
 }
 
+/**
+ * \brief Constructs an ImageFeature object with specified coordinates and feature index.
+ *
+ * This constructor initializes a new ImageFeature object with the provided `coordinates` and `feature_index`. The
+ * feature index identifies the feature within a specific context, such as a feature list or tracked set.
+ *
+ * \param coordinates The feature's location as a cv::Point2f in the image coordinate system.
+ * \param feature_index The unique identifier for the feature within its designated context.
+ *
+ * This constructor provides a more complete configuration for the ImageFeature, allowing immediate identification and
+ * usage based on the assigned index.
+ */
 ImageFeature::ImageFeature(const cv::Point2f coordinates, const int feature_index) {
   this->coordinates_ = coordinates;
   this->feature_index_ = feature_index;

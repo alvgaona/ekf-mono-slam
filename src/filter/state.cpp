@@ -2,6 +2,20 @@
 
 #include "configuration/image_feature_parameters.h"
 
+/**
+ * \brief Constructs a State object with default initial values.
+ *
+ * This constructor initializes a new State object with default values for the state variables representing the pose and
+ * motion of a tracked object.
+ *
+ * The default values represent a static object at the origin (position) with no velocity or angular velocity. The
+ * initial orientation is the identity quaternion and the corresponding rotation matrix is also set to the identity
+ * matrix. The dimension of the state vector is specified as 13, reflecting the combined size of the position, velocity,
+ * angular velocity, and quaternion elements.
+ *
+ * This constructor provides a convenient starting point for tracking tasks where you can further update the state
+ * variables based on sensor measurements and dynamic models.
+ */
 State::State() {
   position_ = Eigen::Vector3d(0, 0, 0);
   velocity_ = Eigen::Vector3d(0, 0, 0);
@@ -11,6 +25,28 @@ State::State() {
   dimension_ = 13;
 }
 
+/**
+ * \brief Predicts the future state of the object based on its current state and time interval.
+ *
+ * This method updates the state of the object by integrating its velocity and angular velocity over the specified time
+ * interval.
+ *
+ * \param delta_t The time interval (in seconds) for which the prediction is made.
+ *
+ * The prediction involves the following steps:
+ * 1. Advance the object's position by its current velocity multiplied by the time interval.
+ * 2. Calculate the total angular displacement due to the angular velocity applied over the time interval.
+ * 3. Compute the rotation axis and angle from the accumulated angular displacement.
+ * 4. Create a quaternion representing the incremental rotation.
+ * 5. Update the current orientation by multiplying the existing quaternion with the incremental rotation quaternion.
+ * 6. Update the rotation matrix from the updated orientation.
+ *
+ * This method assumes a constant or linear motion model for the object. The predicted state provides an estimated pose
+ * and motion based on the latest available information.
+ *
+ * Note that this is a simplified prediction and might not be accurate for more complex motion models or external
+ * influences.
+ */
 void State::PredictState(const int delta_t) {
   position_ += velocity_ * delta_t;
   const Eigen::Vector3d angles = angular_velocity_ * delta_t;
@@ -25,6 +61,17 @@ void State::PredictState(const int delta_t) {
   rotation_matrix_ = q.toRotationMatrix();
 }
 
+/**
+ * \brief Removes a specified MapFeature object from the State's associated feature lists.
+ *
+ * This method searches for the provided MapFeature object within the internal lists of depth and inverse depth features
+ * and removes it if found.
+ *
+ * \param feature The MapFeature object to be removed.
+ *
+ * This method facilitates managing the associated MapFeature objects within the State and keeping the lists consistent
+ * with the current state of feature tracking.
+ */
 void State::Remove(const std::shared_ptr<MapFeature>& feature) {
   std::vector<std::unique_ptr<MapFeature>>::iterator it;
   switch (feature->GetType()) {
@@ -44,6 +91,18 @@ void State::Remove(const std::shared_ptr<MapFeature>& feature) {
   }
 }
 
+/**
+ * \brief Adds a new image feature measurement to the State's associated MapFeature list.
+ *
+ * This method converts the image feature measurement into a map feature and adds it to the internal list of inverse
+ * depth features.
+ *
+ * \param image_feature_measurement The `ImageFeatureMeasurement` object containing the measurement data.
+ *
+ * Adding image feature measurements allows the State to build and maintain a map of features observed in the world,
+ * contributing to tasks like localization and mapping.
+ *
+ */
 void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
   Eigen::VectorXd feature_state(6);
 
@@ -64,12 +123,20 @@ void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_me
   feature_state(5) = ImageFeatureParameters::INIT_INV_DEPTH;
 
   // TODO: Check if we really need to store the position in the covariance matrix within the MapFeature object
-  auto map_feature = std::make_shared<MapFeature>(feature_state, 6, image_feature_measurement->GetDescriptorData(),
-                                                  MapFeatureType::INVERSE_DEPTH);
+  const auto map_feature = std::make_shared<MapFeature>(
+      feature_state, 6, image_feature_measurement->GetDescriptorData(), MapFeatureType::INVERSE_DEPTH);
 
   Add(map_feature);
 }
 
+/**
+ * \brief Adds a provided MapFeature object to the State's internal list based on its type.
+ *
+ * This method adds the specified MapFeature object to the appropriate internal list, differentiating between depth and
+ * inverse depth features.
+ *
+ * \param feature The MapFeature object to be added.
+ */
 void State::Add(const std::shared_ptr<MapFeature>& feature) {
   switch (feature->GetType()) {
     case MapFeatureType::DEPTH:

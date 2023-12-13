@@ -3,6 +3,16 @@
 #include "configuration/camera_parameters.h"
 #include "feature/image_feature.h"
 
+/**
+ * \brief Constructs an ImageFeatureMeasurement object with the provided coordinates and descriptor data.
+ *
+ * \param coordinates The pixel coordinates of the feature in the image.
+ * \param descriptor_data The feature descriptor data extracted by the OpenCV descriptor extractor.
+ *
+ * This constructor builds upon the base `ImageFeature` class and adds the ability to store and access the feature
+ * descriptor data. This information is crucial for matching and identifying features across different images.
+ *
+ */
 ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat& descriptor_data)
     : ImageFeature(coordinates) {
   this->descriptor_data_ = descriptor_data;
@@ -14,6 +24,7 @@ ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, 
  * the ideal normalized plane.
  *
  * \return An `UndistortedImageFeature` object containing the undistorted coordinates of the feature.
+ *
  */
 UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {
   const Eigen::Vector2d point(coordinates_.x, coordinates_.y);
