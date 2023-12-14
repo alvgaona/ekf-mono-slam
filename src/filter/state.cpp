@@ -99,7 +99,6 @@ void State::Remove(const std::shared_ptr<MapFeature>& feature) {
  */
 void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
   Eigen::VectorXd feature_state(6);
-  feature_state << 0, 0, 0, 0, 0, 0;
 
   const UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
   Eigen::Vector3d back_projected_point = undistorted_feature.BackProject();
