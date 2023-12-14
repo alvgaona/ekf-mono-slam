@@ -50,7 +50,7 @@ CovarianceMatrix::CovarianceMatrix() {
  *
  */
 void CovarianceMatrix::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
-                           const std::unique_ptr<State>& state) {
+                           const std::shared_ptr<State>& state) {
   const int n = state->GetDimension();
   const int new_covariance_matrix_dim = n + 6;
   Eigen::MatrixXd new_covariance_matrix(new_covariance_matrix_dim, new_covariance_matrix_dim);

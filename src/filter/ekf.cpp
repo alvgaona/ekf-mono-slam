@@ -8,8 +8,8 @@
  * This constructor initializes a new EKF object with default values for its internal state variables and parameters.
  */
 EKF::EKF() {
-  this->covariance_matrix_ = std::make_unique<CovarianceMatrix>();
-  this->state_ = std::make_unique<State>();
+  this->covariance_matrix_ = std::make_shared<CovarianceMatrix>();
+  this->state_ = std::make_shared<State>();
   this->delta_t_ = 1;
   this->step_ = 0;
 }

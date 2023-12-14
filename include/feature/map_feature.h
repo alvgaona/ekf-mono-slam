@@ -14,7 +14,7 @@ class MapFeature final {
   MapFeature(const Eigen::VectorXd& position, int position_dimension, const cv::Mat& descriptor_data,
              MapFeatureType type);
 
-  ~MapFeature();
+  ~MapFeature() = default;
 
   MapFeature(MapFeature const& source) = delete;
 
@@ -31,7 +31,7 @@ class MapFeature final {
 
   [[nodiscard]] const MapFeatureType& GetType() const { return type_; };
 
-  void ComputeJacobian(State& state, std::vector<double>& image_feature_pos);
+  void ComputeJacobian(const State& state, std::vector<double>& image_feature_pos);
 
  private:
   Eigen::VectorXd position_;

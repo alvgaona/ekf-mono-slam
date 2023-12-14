@@ -25,7 +25,13 @@ class FeatureDetector final {
   static cv::Ptr<cv::FeatureDetector> BuildDetector(DetectorType type);
   static cv::Ptr<cv::DescriptorExtractor> BuildDescriptorExtractor(DescriptorExtractorType type);
 
-  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetImageFeatures() { return image_features_; }
+  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetImageFeatures() { return image_features_; }
+
+  [[nodiscard]] int GetZonesInRow() const { return zones_in_row_; }
+
+  [[nodiscard]] cv::Size GetZoneSize() const { return zone_size_; }
+
+  [[nodiscard]] cv::Size GetImageSize() const { return img_size_; }
 
   void DetectFeatures(const cv::Mat& image, bool visualize = false);
 

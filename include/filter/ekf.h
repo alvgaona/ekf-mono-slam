@@ -29,8 +29,8 @@ class EKF final {
   void PredictMeasurementCovariance();
 
  private:
-  std::unique_ptr<CovarianceMatrix> covariance_matrix_;
-  std::unique_ptr<State> state_;
+  std::shared_ptr<CovarianceMatrix> covariance_matrix_;
+  std::shared_ptr<State> state_;
   int step_;
   double delta_t_;
 

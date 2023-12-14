@@ -19,6 +19,7 @@ void MonoSlam::run() {
 
   while (!image.empty()) {
     image = image_provider.GetNextImage();
+    ekf.Step(image);
   }
   const auto end = std::chrono::steady_clock::now();
 

@@ -42,21 +42,13 @@ class State final {
 
   [[nodiscard]] int GetDimension() const { return dimension_; }
 
-  [[nodiscard]] std::vector<std::shared_ptr<MapFeature>> GetDepthFeatures() const {
-    std::vector<std::shared_ptr<MapFeature>> features;
-    std::transform(depth_features_.begin(), depth_features_.end(), std::back_inserter(features),
-                   [](auto& f) -> auto { return f; });
-    return features;
-  };
+  [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& GetDepthFeatures() const { return depth_features_; };
 
   [[nodiscard]] std::vector<std::shared_ptr<MapFeature>> GetInverseDepthFeatures() const {
-    std::vector<std::shared_ptr<MapFeature>> features;
-    std::transform(inverse_depth_features_.begin(), inverse_depth_features_.end(), std::back_inserter(features),
-                   [](auto& f) -> auto { return f; });
-    return features;
+    return inverse_depth_features_;
   };
 
-  void PredictState(int delta_t);
+  void PredictState(double delta_t);
   void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement);
   void Add(const std::shared_ptr<MapFeature>& feature);
   void Remove(const std::shared_ptr<MapFeature>& feature);

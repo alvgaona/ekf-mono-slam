@@ -26,4 +26,4 @@ MapFeature::MapFeature(const Eigen::VectorXd& position, const int position_dimen
 }
 
 // TODO: Implement
-void MapFeature::ComputeJacobian(State& state, std::vector<double>& image_feature_pos) {}
+void MapFeature::ComputeJacobian(const State& state, std::vector<double>& image_feature_pos) {}

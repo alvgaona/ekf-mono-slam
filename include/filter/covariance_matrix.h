@@ -21,8 +21,8 @@ class CovarianceMatrix final {
     return os;
   }
 
-  static void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
-                  const std::unique_ptr<State>& state);
+  void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
+           const std::shared_ptr<State>& state);
 
  private:
   Eigen::MatrixXd matrix_;

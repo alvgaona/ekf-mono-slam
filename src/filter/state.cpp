@@ -47,7 +47,7 @@ State::State() {
  * Note that this is a simplified prediction and might not be accurate for more complex motion models or external
  * influences.
  */
-void State::PredictState(const int delta_t) {
+void State::PredictState(const double delta_t) {
   position_ += velocity_ * delta_t;
   const Eigen::Vector3d angles = angular_velocity_ * delta_t;
 
@@ -73,18 +73,12 @@ void State::PredictState(const int delta_t) {
  * with the current state of feature tracking.
  */
 void State::Remove(const std::shared_ptr<MapFeature>& feature) {
-  std::vector<std::unique_ptr<MapFeature>>::iterator it;
   switch (feature->GetType()) {
     case MapFeatureType::DEPTH:
-      depth_features_.erase(
-          std::remove_if(depth_features_.begin(), depth_features_.end(),
-                         [&feature](const std::shared_ptr<MapFeature>& f) { return f.get() == feature.get(); }));
+      std::erase_if(depth_features_, [&feature](const std::shared_ptr<MapFeature>& f) { return f == feature; });
       break;
     case MapFeatureType::INVERSE_DEPTH:
-      inverse_depth_features_.erase(
-          std::remove_if(inverse_depth_features_.begin(), inverse_depth_features_.end(),
-                         [&feature](const std::shared_ptr<MapFeature>& f) { return f.get() == feature.get(); }),
-          inverse_depth_features_.end());
+      std::erase_if(inverse_depth_features_, [&feature](const std::shared_ptr<MapFeature>& f) { return f == feature; });
       break;
     default:
       throw std::runtime_error("Feature to be removed is invalid");
@@ -105,6 +99,7 @@ void State::Remove(const std::shared_ptr<MapFeature>& feature) {
  */
 void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
   Eigen::VectorXd feature_state(6);
+  feature_state << 0, 0, 0, 0, 0, 0;
 
   const UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
   Eigen::Vector3d back_projected_point = undistorted_feature.BackProject();
