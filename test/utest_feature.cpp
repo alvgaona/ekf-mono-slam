@@ -26,27 +26,28 @@ TEST(FeatureDetectors, CreateFeatureDetector) {
 }
 
 TEST(FeatureDetectors, NotSupportedDetector) {
-  EXPECT_THROW(
-    { FeatureDetector::BuildDetector(DetectorType::FAST); },
-    std::runtime_error);
+  EXPECT_THROW({ FeatureDetector::BuildDetector(DetectorType::FAST); }, std::runtime_error);
 }
 
 TEST(FeatureDetectors, DetectFeatures) {
-  spdlog::set_level(spdlog::level::debug);
   FileSequenceImageProvider image_provider("./test/resources/AGZ_subset/MAV Images/");
   const cv::Mat image = image_provider.GetNextImage();
 
-  FeatureDetector detector(
-    FeatureDetector::BuildDetector(DetectorType::BRISK),
-    FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::BRISK),
-    cv::Size(1920, 1080)
-    );
+  FeatureDetector detector(FeatureDetector::BuildDetector(DetectorType::BRISK),
+                           FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::BRISK),
+                           cv::Size(1920, 1080));
 
   detector.DetectFeatures(image);
+
+  EXPECT_EQ(detector.GetImageFeatures().size(), 20);
+  EXPECT_EQ(detector.GetZoneSize(), cv::Size(480, 270));
+  EXPECT_EQ(detector.GetImageSize(), cv::Size(1920, 1080));
+  EXPECT_EQ(detector.GetZonesInRow(), 4);
 }
 
 TEST(ImageFeature, UndistortImageFeatureMeasurement) {
-  const ImageFeatureMeasurement image_feature_measurement(cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
+  const ImageFeatureMeasurement image_feature_measurement(cv::Point2f(0, 0),
+                                                          cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
   const UndistortedImageFeature undistorted_image_feature = image_feature_measurement.Undistort();
 
   EXPECT_EQ(undistorted_image_feature.GetCoordinates(), Eigen::Vector2d(1.4040732757828778, 1.0760232978706483));
@@ -72,9 +73,6 @@ TEST(Zones, ComputeZone) {
   const ImageFeatureMeasurement feature2(cv::Point2f(1900, 1000), descriptor);
   EXPECT_EQ(feature2.ComputeZone(480, 270, 1920, 1080), 15);
 
-  const ImageFeatureMeasurement feature3(cv::Point2f(959, 271),  descriptor);
+  const ImageFeatureMeasurement feature3(cv::Point2f(959, 271), descriptor);
   EXPECT_EQ(feature3.ComputeZone(480, 270, 1920, 1080), 5);
 }
-
-
-

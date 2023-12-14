@@ -1,6 +1,7 @@
-#include "math/ekf_math.h"
-#include "gtest/gtest.h"
 #include <Eigen/Dense>
+
+#include "gtest/gtest.h"
+#include "math/ekf_math.h"
 
 //-------------------------------------//
 //   Beginning EKFMath Tests.          //
