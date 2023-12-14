@@ -7,10 +7,6 @@
 #include "gtest/gtest.h"
 #include "image/file_sequence_image_provider.h"
 
-//-------------------------------------//
-//   Beginning Feature Tests.          //
-//-------------------------------------//
-
 using namespace ::testing;
 
 using ::testing::NotNull;
@@ -20,13 +16,13 @@ TEST(FeatureDetectors, CreateFeatureDetector) {
   const cv::Ptr<cv::FeatureDetector> orb_detector = FeatureDetector::BuildDetector(DetectorType::ORB);
   const cv::Ptr<cv::FeatureDetector> brisk_detector = FeatureDetector::BuildDetector(DetectorType::BRISK);
 
-  EXPECT_NE(akaze_detector, nullptr);
-  EXPECT_NE(orb_detector, nullptr);
-  EXPECT_NE(brisk_detector, nullptr);
+  ASSERT_NE(akaze_detector, nullptr);
+  ASSERT_NE(orb_detector, nullptr);
+  ASSERT_NE(brisk_detector, nullptr);
 }
 
 TEST(FeatureDetectors, NotSupportedDetector) {
-  EXPECT_THROW({ FeatureDetector::BuildDetector(DetectorType::FAST); }, std::runtime_error);
+  ASSERT_THROW({ FeatureDetector::BuildDetector(DetectorType::FAST); }, std::runtime_error);
 }
 
 TEST(FeatureDetectors, DetectFeatures) {
@@ -39,10 +35,10 @@ TEST(FeatureDetectors, DetectFeatures) {
 
   detector.DetectFeatures(image);
 
-  EXPECT_EQ(detector.GetImageFeatures().size(), 20);
-  EXPECT_EQ(detector.GetZoneSize(), cv::Size(480, 270));
-  EXPECT_EQ(detector.GetImageSize(), cv::Size(1920, 1080));
-  EXPECT_EQ(detector.GetZonesInRow(), 4);
+  ASSERT_EQ(detector.GetImageFeatures().size(), 20);
+  ASSERT_EQ(detector.GetZoneSize(), cv::Size(480, 270));
+  ASSERT_EQ(detector.GetImageSize(), cv::Size(1920, 1080));
+  ASSERT_EQ(detector.GetZonesInRow(), 4);
 }
 
 TEST(ImageFeature, UndistortImageFeatureMeasurement) {
@@ -50,29 +46,29 @@ TEST(ImageFeature, UndistortImageFeatureMeasurement) {
                                                           cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
   const UndistortedImageFeature undistorted_image_feature = image_feature_measurement.Undistort();
 
-  EXPECT_EQ(undistorted_image_feature.GetCoordinates(), Eigen::Vector2d(1.4040732757828778, 1.0760232978706483));
+  ASSERT_EQ(undistorted_image_feature.GetCoordinates(), Eigen::Vector2d(1.4040732757828778, 1.0760232978706483));
 }
 
 TEST(Zones, CreateZone) {
   const Zone zone(0, cv::Size(100, 100));
-  EXPECT_EQ(zone.GetId(), 0);
-  EXPECT_EQ(zone.GetDimensions(), cv::Size(100, 100));
+  ASSERT_EQ(zone.GetId(), 0);
+  ASSERT_EQ(zone.GetDimensions(), cv::Size(100, 100));
 }
 
 TEST(Zones, AddFeature) {
   const Zone zone(0, cv::Size(100, 100));
-  EXPECT_EQ(zone.GetId(), 0);
-  EXPECT_EQ(zone.GetDimensions(), cv::Size(100, 100));
+  ASSERT_EQ(zone.GetId(), 0);
+  ASSERT_EQ(zone.GetDimensions(), cv::Size(100, 100));
 }
 
 TEST(Zones, ComputeZone) {
   const cv::Mat descriptor = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
   const ImageFeatureMeasurement feature1(cv::Point2f(0, 0), descriptor);
-  EXPECT_EQ(feature1.ComputeZone(480, 270, 1920, 1080), 0);
+  ASSERT_EQ(feature1.ComputeZone(480, 270, 1920, 1080), 0);
 
   const ImageFeatureMeasurement feature2(cv::Point2f(1900, 1000), descriptor);
-  EXPECT_EQ(feature2.ComputeZone(480, 270, 1920, 1080), 15);
+  ASSERT_EQ(feature2.ComputeZone(480, 270, 1920, 1080), 15);
 
   const ImageFeatureMeasurement feature3(cv::Point2f(959, 271), descriptor);
-  EXPECT_EQ(feature3.ComputeZone(480, 270, 1920, 1080), 5);
+  ASSERT_EQ(feature3.ComputeZone(480, 270, 1920, 1080), 5);
 }

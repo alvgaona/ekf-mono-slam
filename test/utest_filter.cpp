@@ -1,3 +1,4 @@
+#include <configuration/kinematics_parameters.h>
 #include <gmock/gmock-matchers.h>
 #include <spdlog/spdlog.h>
 
@@ -7,10 +8,6 @@
 #include "gtest/gtest.h"
 #include "image/file_sequence_image_provider.h"
 
-//-------------------------------------//
-//   Beginning Feature Tests.          //
-//-------------------------------------//
-
 using namespace ::testing;
 
 using ::testing::NotNull;
@@ -18,12 +15,12 @@ using ::testing::NotNull;
 TEST(ExtendedKalmanFilter, StateInit) {
   const State state;
 
-  EXPECT_EQ(state.GetPosition(), Eigen::Vector3d(0, 0, 0));
-  EXPECT_EQ(state.GetVelocity(), Eigen::Vector3d(0, 0, 0));
-  EXPECT_EQ(state.GetAngularVelocity(), Eigen::Vector3d(0, 0, 0));
-  EXPECT_EQ(state.GetOrientation(), Eigen::Quaterniond(1, 0, 0, 0));
-  EXPECT_EQ(state.GetRotationMatrix(), Eigen::MatrixXd::Identity(3, 3));
-  EXPECT_EQ(state.GetDimension(), 13);
+  ASSERT_EQ(state.GetPosition(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.GetVelocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.GetAngularVelocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.GetOrientation(), Eigen::Quaterniond(1, 0, 0, 0));
+  ASSERT_EQ(state.GetRotationMatrix(), Eigen::MatrixXd::Identity(3, 3));
+  ASSERT_EQ(state.GetDimension(), 13);
 }
 
 TEST(TestPredictState, PredictState) {
@@ -31,11 +28,11 @@ TEST(TestPredictState, PredictState) {
 
   state.PredictState(2);
 
-  EXPECT_EQ(state.GetPosition(), Eigen::Vector3d(0, 0, 0));
-  EXPECT_EQ(state.GetVelocity(), Eigen::Vector3d(0, 0, 0));
-  EXPECT_EQ(state.GetAngularVelocity(), Eigen::Vector3d(0, 0, 0));
-  EXPECT_EQ(state.GetOrientation(), Eigen::Quaterniond(1, 0, 0, 0));
-  EXPECT_EQ(state.GetRotationMatrix(), Eigen::MatrixXd::Identity(3, 3));
+  ASSERT_EQ(state.GetPosition(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.GetVelocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.GetAngularVelocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.GetOrientation(), Eigen::Quaterniond(1, 0, 0, 0));
+  ASSERT_EQ(state.GetRotationMatrix(), Eigen::MatrixXd::Identity(3, 3));
 }
 
 TEST(TestAddMapFeature, AddMapFeature) {
@@ -56,10 +53,10 @@ TEST(TestAddMapFeature, AddMapFeature) {
   const std::vector<std::shared_ptr<MapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
   const std::vector<std::shared_ptr<MapFeature>> depth_features = state.GetDepthFeatures();
 
-  EXPECT_THAT(depth_features, SizeIs(1));
-  EXPECT_THAT(depth_features, Contains(depth_map_feature));
-  EXPECT_THAT(inverse_depth_features, SizeIs(1));
-  EXPECT_THAT(inverse_depth_features, Contains(inverse_depth_map_feature));
+  ASSERT_THAT(depth_features, SizeIs(1));
+  ASSERT_THAT(depth_features, Contains(depth_map_feature));
+  ASSERT_THAT(inverse_depth_features, SizeIs(1));
+  ASSERT_THAT(inverse_depth_features, Contains(inverse_depth_map_feature));
 }
 
 TEST(TestRemoveMapFeature, RemoveMapFeature) {
@@ -83,21 +80,41 @@ TEST(TestRemoveMapFeature, RemoveMapFeature) {
   const std::vector<std::shared_ptr<MapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
   const std::vector<std::shared_ptr<MapFeature>> depth_features = state.GetDepthFeatures();
 
-  std::cout << inverse_map_feature << std::endl;
-
-  EXPECT_THAT(inverse_depth_features, SizeIs(0));
-  EXPECT_THAT(depth_features, SizeIs(0));
+  ASSERT_THAT(inverse_depth_features, SizeIs(0));
+  ASSERT_THAT(depth_features, SizeIs(0));
 }
 
 TEST(StateFeatures, AddImageFeatureMeasurement) {
   State state;
-  const auto image_feature_measurement = std::make_shared<ImageFeatureMeasurement>(cv::Point2f(0, 0),
-                                                                           cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
+  const auto image_feature_measurement =
+      std::make_shared<ImageFeatureMeasurement>(cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
 
   state.Add(image_feature_measurement);
 
-  EXPECT_EQ(state.GetInverseDepthFeatures().size(), 1);
-  EXPECT_EQ(state.GetDepthFeatures().size(), 0);
+  ASSERT_EQ(state.GetInverseDepthFeatures().size(), 1);
+  ASSERT_EQ(state.GetDepthFeatures().size(), 0);
 }
 
-TEST(ExtendedKalmanFilter, FilterInit) { EXPECT_EQ(1, 0); }
+TEST(Covariance, CovarianceInit) {
+  const CovarianceMatrix covariance_matrix;
+
+  ASSERT_EQ(covariance_matrix.GetMatrix().rows(), 13);
+  ASSERT_EQ(covariance_matrix.GetMatrix().cols(), 13);
+
+  Eigen::VectorXd expected_diagonal(13);
+  expected_diagonal << KinematicsParameters::EPSILON, KinematicsParameters::EPSILON, KinematicsParameters::EPSILON,
+      KinematicsParameters::EPSILON, KinematicsParameters::EPSILON, KinematicsParameters::EPSILON,
+      KinematicsParameters::EPSILON, KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD,
+      KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD,
+      KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD,
+      KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD,
+      KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD,
+      KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD;
+  ASSERT_TRUE(covariance_matrix.GetMatrix().diagonal().isApprox(expected_diagonal));
+
+  Eigen::MatrixXd m = Eigen::MatrixXd::Identity(13, 13);
+  m.diagonal() << expected_diagonal;
+  const Eigen::MatrixXd& a = covariance_matrix.GetMatrix();
+
+  ASSERT_EQ(a - m, Eigen::MatrixXd::Zero(13, 13));
+}
