@@ -193,7 +193,7 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
     zones[zone_id]->SetPredictionsFeaturesCount(++predictions_features_count);
   }
 
-  std::sort(zones.begin(), zones.end(), [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
+  std::ranges::sort(zones.begin(), zones.end(), [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
     return a->GetPredictionsFeaturesCount() > b->GetPredictionsFeaturesCount();
   });
 }
