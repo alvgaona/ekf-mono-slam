@@ -13,20 +13,20 @@ using namespace ::testing;
 using ::testing::NotNull;
 
 TEST(ExtendedKalmanFilter, StateInit) {
-  const State state;
+  const auto state = std::make_shared<State>();
 
-  ASSERT_EQ(state.GetPosition(), Eigen::Vector3d(0, 0, 0));
-  ASSERT_EQ(state.GetVelocity(), Eigen::Vector3d(0, 0, 0));
-  ASSERT_EQ(state.GetAngularVelocity(), Eigen::Vector3d(0, 0, 0));
-  ASSERT_EQ(state.GetOrientation(), Eigen::Quaterniond(1, 0, 0, 0));
-  ASSERT_EQ(state.GetRotationMatrix(), Eigen::MatrixXd::Identity(3, 3));
-  ASSERT_EQ(state.GetDimension(), 13);
+  ASSERT_EQ(state->GetPosition(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state->GetVelocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state->GetAngularVelocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state->GetOrientation(), Eigen::Quaterniond(1, 0, 0, 0));
+  ASSERT_EQ(state->GetRotationMatrix(), Eigen::MatrixXd::Identity(3, 3));
+  ASSERT_EQ(state->GetDimension(), 13);
 }
 
 TEST(TestPredictState, PredictState) {
   State state;
 
-  state.PredictState(2);
+  state.Predict(2);
 
   ASSERT_EQ(state.GetPosition(), Eigen::Vector3d(0, 0, 0));
   ASSERT_EQ(state.GetVelocity(), Eigen::Vector3d(0, 0, 0));
@@ -117,4 +117,15 @@ TEST(Covariance, CovarianceInit) {
   const Eigen::MatrixXd& a = covariance_matrix.GetMatrix();
 
   ASSERT_EQ(a - m, Eigen::MatrixXd::Zero(13, 13));
+}
+
+// TODO: test is incomplete
+TEST(Covariance, PredictCovariance) {
+  const auto state = std::make_shared<State>();
+
+  CovarianceMatrix covariance_matrix;
+
+  covariance_matrix.Predict(state, 1.0L);
+
+  ASSERT_EQ(covariance_matrix.GetMatrix(), Eigen::MatrixXd::Zero(13, 13));
 }
