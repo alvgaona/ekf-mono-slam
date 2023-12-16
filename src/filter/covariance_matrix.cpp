@@ -38,6 +38,15 @@ CovarianceMatrix::CovarianceMatrix() {
       0, 0, 0, 0, 0, 0, 0, KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD;
 }
 
+void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double dt) {
+  Eigen::MatrixXd F = Eigen::MatrixXd::Identity(13, 13);
+  F.block(0, 7, 3, 3).diagonal().setConstant(dt);
+
+  const Eigen::Quaterniond& q = state->GetOrientation();
+  F.block(3, 3, 4, 4) << q.w(), -q.x(), -q.y(), -q.z(), q.x(), q.w(), q.z(), -q.y(), q.y(), -q.z(), q.w(), q.y(), q.z(),
+      q.y(), -q.x(), q.w();
+}
+
 /**
  * \brief Updates the covariance matrix with information from a new image feature measurement.
  *

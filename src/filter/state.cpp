@@ -47,7 +47,7 @@ State::State() {
  * Note that this is a simplified prediction and might not be accurate for more complex motion models or external
  * influences.
  */
-void State::PredictState(const double delta_t) {
+void State::Predict(const double delta_t) {
   position_ += velocity_ * delta_t;
   const Eigen::Vector3d angles = angular_velocity_ * delta_t;
 

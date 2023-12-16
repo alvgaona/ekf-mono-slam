@@ -32,17 +32,15 @@ void EKF::Init(const cv::Mat& image) {
       FeatureDetector::BuildDetector(DetectorType::AKAZE),
       FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE), cv::Size(image.rows, image.cols));
 
-  feature_detector_->DetectFeatures(image, true);
+  feature_detector_->DetectFeatures(image, false);
 
   AddFeatures(feature_detector_->GetImageFeatures());
 }
 
-void EKF::Step(const cv::Mat& image) {}
-
-void EKF::PredictState() { state_->PredictState(delta_t_); }
-
-// TODO: Implement
-void EKF::PredictCovarianceMatrix() {}
+void EKF::Step(const cv::Mat& image) {
+  covariance_matrix_->Predict(state_, delta_t_);
+  state_->Predict(delta_t_);
+}
 
 // TODO: Implement
 void EKF::PredictMeasurementState() {}
@@ -62,7 +60,7 @@ void EKF::PredictMeasurementCovariance() {}
  * conversion to a `MapFeature` and covariance matrix update. Ensure the provided measurements hold the required data
  * for proper integration.
  */
-void EKF::AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) {
+void EKF::AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const {
   std::ranges::for_each(features.begin(), features.end(),
                         [this](const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
                           this->state_->Add(image_feature_measurement);
