@@ -23,8 +23,6 @@ class EKF final {
   void Init(const cv::Mat& image);
   void Step(const cv::Mat& image);
 
-  void PredictState();
-  void PredictCovarianceMatrix();
   void PredictMeasurementState();
   void PredictMeasurementCovariance();
 
@@ -36,7 +34,7 @@ class EKF final {
 
   std::unique_ptr<FeatureDetector> feature_detector_;
 
-  void AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features);
+  void AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const;
 };
 
 #endif /* EKF_MONO_SLAM_EKF_H */

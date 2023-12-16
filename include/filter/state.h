@@ -48,7 +48,7 @@ class State final {
     return inverse_depth_features_;
   };
 
-  void PredictState(double delta_t);
+  void Predict(double delta_t);
   void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement);
   void Add(const std::shared_ptr<MapFeature>& feature);
   void Remove(const std::shared_ptr<MapFeature>& feature);
