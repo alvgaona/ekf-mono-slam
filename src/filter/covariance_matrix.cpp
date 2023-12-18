@@ -39,12 +39,33 @@ CovarianceMatrix::CovarianceMatrix() {
 }
 
 void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double dt) {
+  const Eigen::Vector3d angles = state->GetAngularVelocity() * dt;
+  // Compute the orientation and its rotation matrix from angles
+  Eigen::Quaterniond q1;
+  q1 = Eigen::AngleAxisd(angles.norm(), angles.normalized());
+
   Eigen::MatrixXd F = Eigen::MatrixXd::Identity(13, 13);
   F.block(0, 7, 3, 3).diagonal().setConstant(dt);
 
-  const Eigen::Quaterniond& q = state->GetOrientation();
-  F.block(3, 3, 4, 4) << q.w(), -q.x(), -q.y(), -q.z(), q.x(), q.w(), q.z(), -q.y(), q.y(), -q.z(), q.w(), q.y(), q.z(),
-      q.y(), -q.x(), q.w();
+  F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(), q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(),
+      q1.y(), q1.z(), q1.y(), -q1.x(), q1.w();
+
+  Eigen::Quaterniond q2 = state->GetOrientation();
+  Eigen::MatrixXd dq3dq1 = Eigen::MatrixXd::Zero(4, 4);
+  dq3dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(), q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(),
+      -q2.y(), q2.x(), q2.w();
+
+  Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
+
+  dq1domega.row(0) = computePartialDerivativeq0byOmegai(state->GetAngularVelocity(), dt);
+  dq1domega.block(1, 0, 3, 3).diagonal() = computePartialDerivativeqibyOmegai(state->GetAngularVelocity(), dt);
+  dq1domega.block(1, 0, 3, 3) += computePartialDerivativeqibyOmegaj(state->GetAngularVelocity(), dt);
+
+  F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
+
+  Eigen::MatrixXd G = Eigen::MatrixXd::Identity(13, 6);
+
+  matrix_ += Eigen::MatrixXd::Zero(13, 13);  // TODO: replace sum
 }
 
 /**

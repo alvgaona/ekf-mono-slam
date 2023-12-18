@@ -25,6 +25,16 @@ State::State() {
   dimension_ = 13;
 }
 
+State::State(const Eigen::Vector3d& position, const Eigen::Vector3d& velocity, const Eigen::Quaterniond& orientation,
+             const Eigen::Vector3d& angular_velocity) {
+  position_ = position;
+  velocity_ = velocity;
+  angular_velocity_ = angular_velocity;
+  orientation_ = orientation;
+  rotation_matrix_ = orientation_.toRotationMatrix();
+  dimension_ = 13;
+}
+
 /**
  * \brief Predicts the future state of the object based on its current state and time interval.
  *

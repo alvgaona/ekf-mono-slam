@@ -22,6 +22,9 @@ class State final {
   State& operator=(const State& source) = delete;
   State& operator=(State&& source) = delete;
 
+  State(const Eigen::Vector3d& position, const Eigen::Vector3d& velocity, const Eigen::Quaterniond& orientation,
+        const Eigen::Vector3d& angular_velocity);
+
   friend std::ostream& operator<<(std::ostream& os, const State& state) {
     os << state.position_ << std::endl
        << state.velocity_ << std::endl

@@ -121,7 +121,8 @@ TEST(Covariance, CovarianceInit) {
 
 // TODO: test is incomplete
 TEST(Covariance, PredictCovariance) {
-  const auto state = std::make_shared<State>();
+  const auto state = std::make_shared<State>(Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0),
+                                             Eigen::Quaterniond(1, 0, 0, 0), Eigen::Vector3d(0, 0, 1));
 
   CovarianceMatrix covariance_matrix;
 

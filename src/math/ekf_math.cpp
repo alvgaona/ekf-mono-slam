@@ -1,5 +1,7 @@
 #include "math/ekf_math.h"
 
+#include <iostream>
+
 /**
  * \brief Computes the Jacobian matrix of a directional vector with respect to a quaternion.
  *
@@ -39,4 +41,52 @@ Eigen::MatrixXd EkfMath::computeJacobianDirectionalVector(const Eigen::Quaternio
   jacobian.block(0, 3, 3, 1) = rotationMatrixJacobianQz * directionalVector;
 
   return jacobian;
+}
+
+Eigen::Vector3d EkfMath::computePartialDerivativeq0byOmegai(const Eigen::Vector3d& omega, const double dt) {
+  const double theta = omega.norm();
+
+  if (theta == 0.0) {
+    return {0, 0, 0};
+  }
+
+  return -dt / 2 * omega / theta * sin(theta * dt / 2);
+}
+
+Eigen::Vector3d EkfMath::computePartialDerivativeqibyOmegai(const Eigen::Vector3d& omega, const double dt) {
+  const double theta = omega.norm();
+
+  if (theta == 0.0) {
+    return {0, 0, 0};
+  }
+
+  return -dt / 2 * Eigen::pow(omega.array() / theta, 2) * cos(theta * dt / 2) +
+         1 / theta * (1 - Eigen::pow(omega.array() / theta, 2)) * sin(theta * dt / 2);
+}
+
+Eigen::Matrix3d EkfMath::computePartialDerivativeqibyOmegaj(const Eigen::Vector3d& omega, const double dt) {
+  const double theta = omega.norm();
+
+  // Do I need to do this check? Maybe with an epsilon rather than 0?
+  if (theta == 0.0) {
+    return Eigen::Matrix3d::Zero();
+  }
+
+  Eigen::Matrix3d out = Eigen::Matrix3d::Zero();
+  const auto f = [dt, theta](const double omegai, const double omegaj) {
+    return dt / 2 * omegai * omegaj / theta * theta * cos(theta * dt / 2) - 1 / theta * sin(theta * dt / 2);
+  };
+
+  const auto dq1dwy = f(omega[0], omega[1]);
+  const auto dq1dwz = f(omega[0], omega[2]);
+  const auto dq2dwz = f(omega[1], omega[2]);
+
+  out(0, 1) = dq1dwy;
+  out(1, 0) = dq1dwy;
+  out(0, 2) = dq1dwz;
+  out(2, 0) = dq1dwz;
+  out(1, 2) = dq2dwz;
+  out(2, 1) = dq2dwz;
+
+  return out;
 }
