@@ -119,7 +119,6 @@ TEST(Covariance, CovarianceInit) {
   ASSERT_EQ(a - m, Eigen::MatrixXd::Zero(13, 13));
 }
 
-// TODO: test is incomplete
 TEST(Covariance, PredictCovariance) {
   const auto state = std::make_shared<State>(Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0),
                                              Eigen::Quaterniond(1, 0, 0, 0), Eigen::Vector3d(0, 0, 1));
@@ -128,5 +127,66 @@ TEST(Covariance, PredictCovariance) {
 
   covariance_matrix.Predict(state, 1.0L);
 
-  ASSERT_EQ(covariance_matrix.GetMatrix(), Eigen::MatrixXd::Zero(13, 13));
+  const auto matrix = covariance_matrix.GetMatrix();
+
+  ASSERT_NEAR(matrix(0, 0), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(1, 1), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(2, 2), 5e-07, 1e-3);
+
+  ASSERT_NEAR(matrix(0, 7), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(1, 8), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(2, 9), 5e-07, 1e-3);
+
+  ASSERT_NEAR(matrix(7, 0), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(8, 1), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(9, 2), 5e-07, 1e-3);
+
+  ASSERT_NEAR(matrix(7, 7), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(8, 8), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(9, 9), 5e-07, 1e-3);
+
+  ASSERT_NEAR(matrix(7, 7), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(8, 8), 5e-07, 1e-3);
+  ASSERT_NEAR(matrix(9, 9), 5e-07, 1e-3);
+
+  ASSERT_NEAR(matrix(10, 10), 5e-09, 1e-3);
+  ASSERT_NEAR(matrix(11, 11), 5e-09, 1e-3);
+  ASSERT_NEAR(matrix(12, 12), 5e-09, 1e-3);
+
+  ASSERT_NEAR(matrix(10, 4), 2.39713e-09, 1e-3);
+  ASSERT_NEAR(matrix(11, 4), -2.39713e-09, 1e-3);
+  ASSERT_NEAR(matrix(12, 4), -2.39713e-09, 1e-3);
+
+  ASSERT_NEAR(matrix(10, 5), -2.39713e-09, 1e-3);
+  ASSERT_NEAR(matrix(11, 5), 2.39713e-09, 1e-3);
+  ASSERT_NEAR(matrix(12, 5), -2.39713e-09, 1e-3);
+
+  ASSERT_NEAR(matrix(10, 6), -2.39713e-09, 1e-3);
+  ASSERT_NEAR(matrix(11, 6), -2.39713e-09, 1e-3);
+  ASSERT_NEAR(matrix(12, 6), -2.19396e-09, 1e-3);
+
+  ASSERT_EQ(matrix.block(4, 10, 3, 3), matrix.block(10, 4, 3, 3));
+
+  ASSERT_NEAR(matrix(3, 3), 2.87311e-10, 1e-3);
+  ASSERT_NEAR(matrix(4, 3), 5.74622e-10, 1e-3);
+  ASSERT_NEAR(matrix(5, 3), 5.74622e-10, 1e-3);
+  ASSERT_NEAR(matrix(6, 3), 5.25919e-10, 1e-3);
+
+  ASSERT_NEAR(matrix(3, 4), 5.74622e-10, 1e-3);
+  ASSERT_NEAR(matrix(4, 4), 3.44773e-09, 1e-3);
+  ASSERT_NEAR(matrix(5, 4), -1.14924e-09, 1e-3);
+  ASSERT_NEAR(matrix(6, 4), 1.05184e-09, 1e-3);
+
+  ASSERT_NEAR(matrix(3, 5), 5.74622e-10, 1e-3);
+  ASSERT_NEAR(matrix(4, 5), -1.14924e-09, 1e-3);
+  ASSERT_NEAR(matrix(5, 5), 3.44773e-09, 1e-3);
+  ASSERT_NEAR(matrix(6, 5), 1.05184e-09, 1e-3);
+
+  ASSERT_NEAR(matrix(3, 6), 5.25919e-10, 1e-3);
+  ASSERT_NEAR(matrix(4, 6), 1.05184e-09, 1e-3);
+  ASSERT_NEAR(matrix(5, 6), 1.05184e-09, 1e-3);
+  ASSERT_NEAR(matrix(6, 6), 3.26118e-09, 1e-3);
+
+  ASSERT_NEAR(matrix(3, 12), -1.19856e-09, 1e-3);
+  ASSERT_NEAR(matrix(12, 3), -1.19856e-09, 1e-3);
 }

@@ -1,5 +1,7 @@
 #include "filter/covariance_matrix.h"
 
+#include <configuration/camera_parameters.h>
+
 #include "configuration/kinematics_parameters.h"
 
 using namespace EkfMath;
@@ -39,6 +41,7 @@ CovarianceMatrix::CovarianceMatrix() {
 }
 
 void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double dt) {
+  // Compute df/dx
   const Eigen::Vector3d angles = state->GetAngularVelocity() * dt;
   // Compute the orientation and its rotation matrix from angles
   Eigen::Quaterniond q1;
@@ -47,6 +50,7 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
   Eigen::MatrixXd F = Eigen::MatrixXd::Identity(13, 13);
   F.block(0, 7, 3, 3).diagonal().setConstant(dt);
 
+  // This is dq3dq2
   F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(), q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(),
       q1.y(), q1.z(), q1.y(), -q1.x(), q1.w();
 
@@ -55,17 +59,36 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
   dq3dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(), q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(),
       -q2.y(), q2.x(), q2.w();
 
+  // Compute df/dn
   Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
 
-  dq1domega.row(0) = computePartialDerivativeq0byOmegai(state->GetAngularVelocity(), dt);
-  dq1domega.block(1, 0, 3, 3).diagonal() = computePartialDerivativeqibyOmegai(state->GetAngularVelocity(), dt);
-  dq1domega.block(1, 0, 3, 3) += computePartialDerivativeqibyOmegaj(state->GetAngularVelocity(), dt);
+  const auto& comega = state->GetAngularVelocity();
+  dq1domega.row(0) = computePartialDerivativeq0byOmegai(comega, dt);
+  dq1domega.block(1, 0, 3, 3).diagonal() = computePartialDerivativeqibyOmegai(comega, dt);
+  dq1domega.block(1, 0, 3, 3) += computePartialDerivativeqibyOmegaj(comega, dt);
 
   F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
 
-  Eigen::MatrixXd G = Eigen::MatrixXd::Identity(13, 6);
+  Eigen::MatrixXd G = Eigen::MatrixXd::Zero(13, 6);
 
-  matrix_ += Eigen::MatrixXd::Zero(13, 13);  // TODO: replace sum
+  G.block(0, 0, 3, 3) = Eigen::Matrix3d::Identity() * dt;
+  G.block(7, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
+
+  // This is actually not clear in the book. Looks like
+  // dq3dOmega is equal to dq3domegak.
+  // Other implementations like Scenelib2 and OpenEKFMonoSLAM seem to do this as well.
+  G.block(3, 3, 4, 3) = F.block(3, 10, 4, 3);
+
+  Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(6, 6);
+
+  Q.block(0, 0, 3, 3)
+      .diagonal()
+      .setConstant(KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD * dt * dt);
+  Q.block(3, 3, 3, 3)
+      .diagonal()
+      .setConstant(KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD * dt * dt);
+
+  matrix_ = F * matrix_ * F.transpose() + G * Q * G.transpose();
 }
 
 /**
