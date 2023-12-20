@@ -9,9 +9,9 @@
  * data, and type.
  *
  * \param position The pose (location) of the feature represented as an Eigen::VectorXd of dimension
- * `position_dimension`. \param position_dimension The dimension of the feature's position vector. \param
- * descriptor_data The descriptor data associated with the feature, typically represented as a cv::Mat. \param type The
- * type of the MapFeature, such as depth, inverse depth, or another relevant category.
+ * `position_dimension`. \param position_dimension The dimension of the feature's position vector.
+ * \param descriptor_data The descriptor data associated with the feature, typically represented as a cv::Mat.
+ * \param type The type of the MapFeature, such as depth, inverse depth, or another relevant category.
  *
  */
 
