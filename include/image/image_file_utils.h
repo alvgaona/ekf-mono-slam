@@ -1,17 +1,16 @@
 #ifndef EKF_MONO_SLAM_IMAGE_FILE_UTILS_H
 #define EKF_MONO_SLAM_IMAGE_FILE_UTILS_H
 
-#include <exception>
 #include <string>
 
 #include "image_file_format.h"
 
-class ImageFileUtils {
+class ImageFileUtils final {
  public:
   ImageFileUtils() = delete;
-  virtual ~ImageFileUtils() = delete;
+  ~ImageFileUtils() = delete;
 
-  static std::string ToString(ImageFileFormat format) {
+  static std::string ToString(const ImageFileFormat format) {
     switch (format) {
       case ImageFileFormat::JPG:
         return "jpg";

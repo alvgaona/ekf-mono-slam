@@ -1,18 +1,16 @@
-#ifndef EKF_MONO_SLAM_DRAW_H_
-#define EKF_MONO_SLAM_DRAW_H_
+#ifndef EKF_MONO_SLAM_VISUAL_H_
+#define EKF_MONO_SLAM_VISUAL_H_
 
-#include <opencv2/opencv.hpp>
-#include <string>
+#include <opencv4/opencv2/opencv.hpp>
 #include <vector>
 
 #include "ellipse.h"
-#include "feature/image_feature_prediction.h"
-#include "math.h"
 
 namespace Visual {
-void UncertaintyEllipse2D(cv::Mat& image, Ellipse& ellipse, int max_axes_size, cv::Scalar color, bool fill);
+void UncertaintyEllipse2D(const cv::Mat& image, Ellipse& ellipse, int max_axes_size, const cv::Scalar& color,
+                          bool fill);
 
-void VisualizeKeyPoints(cv::Mat& image, std::__1::vector<cv::KeyPoint>& keypoints);
-}
+void VisualizeKeyPoints(const cv::Mat& image, const std::vector<cv::KeyPoint>& keypoints);
+}  // namespace Visual
 
-#endif /* EKF_MONO_SLAM_DRAW_H_ */
+#endif /* EKF_MONO_SLAM_VISUAL_H_ */

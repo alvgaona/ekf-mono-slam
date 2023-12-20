@@ -1,3 +1,9 @@
+# Datasets
+test/**/AGZ_subset
+
+# Git submodules
+third-party/
+
 # JetBrains CLion
 .idea/
 
@@ -8,30 +14,10 @@
 build/
 cmake-build-debug/
 
-# macOS
-.DS_Store
-
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
 # Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
 
 # Compiled Static libraries
 *.lai

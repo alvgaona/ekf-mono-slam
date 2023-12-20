@@ -1,22 +1,42 @@
 #include "feature/image_feature_measurement.h"
 
-ImageFeatureMeasurement::ImageFeatureMeasurement(cv::Point2f coordinates, cv::Mat descriptor_data) {
-  this->coordinates_ = coordinates;
-  this->descriptor_data_ = std::move(descriptor_data);
-  this->feature_index_ = -1;
+#include "configuration/camera_parameters.h"
+#include "feature/image_feature.h"
+
+/**
+ * \brief Constructs an ImageFeatureMeasurement object with the provided coordinates and descriptor data.
+ *
+ * \param coordinates The pixel coordinates of the feature in the image.
+ * \param descriptor_data The feature descriptor data extracted by the OpenCV descriptor extractor.
+ *
+ * This constructor builds upon the base `ImageFeature` class and adds the ability to store and access the feature
+ * descriptor data. This information is crucial for matching and identifying features across different images.
+ *
+ */
+ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat& descriptor_data)
+    : ImageFeature(coordinates) {
+  this->descriptor_data_ = descriptor_data;
 }
 
-UndistortedImageFeature ImageFeatureMeasurement::Undistort() {
-  Eigen::Vector2d point(coordinates_.x, coordinates_.y);
+/**
+ * \brief Undistorts the image feature coordinates to compensate for camera lens distortion. This method applies the
+ * camera's intrinsic distortion model to transform the feature's pixel coordinates from the distorted image plane to
+ * the ideal normalized plane.
+ *
+ * \return An `UndistortedImageFeature` object containing the undistorted coordinates of the feature.
+ *
+ */
+UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {
+  const Eigen::Vector2d point(coordinates_.x, coordinates_.y);
 
-  Eigen::Vector2d principal_point(CameraParameters::cx, CameraParameters::cy);
+  const Eigen::Vector2d principal_point(CameraParameters::cx, CameraParameters::cy);
 
-  Eigen::Vector2d diff = point - principal_point;
-  Eigen::Vector2d distorted_diff(CameraParameters::dx * diff[0], CameraParameters::dy * diff[1]);
+  const Eigen::Vector2d diff = point - principal_point;
+  const Eigen::Vector2d distorted_diff(CameraParameters::dx * diff[0], CameraParameters::dy * diff[1]);
 
-  double rd = distorted_diff.norm();
+  const double rd = distorted_diff.norm();
 
-  double distortion = 1 + CameraParameters::k1 * rd * rd + CameraParameters::k2 * rd * rd * rd * rd;
+  const double distortion = 1 + CameraParameters::k1 * rd * rd + CameraParameters::k2 * rd * rd * rd * rd;
 
-  return UndistortedImageFeature(principal_point - diff * distortion);
+  return UndistortedImageFeature(principal_point + diff * distortion);
 }

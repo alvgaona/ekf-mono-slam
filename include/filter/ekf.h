@@ -3,18 +3,16 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
 #include <memory>
-#include <string>
 
 #include "covariance_matrix.h"
 #include "feature/feature_detector.h"
 #include "state.h"
 
-class EKF {
+class EKF final {
  public:
   EKF();
-  virtual ~EKF() = default;
+  ~EKF() = default;
 
   EKF(EKF const& source) = delete;
   EKF(EKF&& source) = delete;
@@ -22,23 +20,21 @@ class EKF {
   EKF& operator=(EKF const& source) = delete;
   EKF& operator=(EKF&& source) noexcept = delete;
 
-  void Init(cv::Mat& image);
-  void Step(cv::Mat& image);
+  void Init(const cv::Mat& image);
+  void Step(const cv::Mat& image);
 
-  void PredictState();
-  void PredictCovarianceMatrix();
   void PredictMeasurementState();
   void PredictMeasurementCovariance();
 
  private:
-  std::unique_ptr<CovarianceMatrix> covariance_matrix_;
-  std::unique_ptr<State> state_;
+  std::shared_ptr<CovarianceMatrix> covariance_matrix_;
+  std::shared_ptr<State> state_;
   int step_;
   double delta_t_;
 
   std::unique_ptr<FeatureDetector> feature_detector_;
 
-  void AddFeatures(std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features);
+  void AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const;
 };
 
 #endif /* EKF_MONO_SLAM_EKF_H */
