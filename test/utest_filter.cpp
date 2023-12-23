@@ -119,6 +119,17 @@ TEST(Covariance, CovarianceInit) {
   ASSERT_EQ(a - m, Eigen::MatrixXd::Zero(13, 13));
 }
 
+TEST(Covariance, CovarianceAddFeature) {
+  const auto state = std::make_shared<State>(Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0),
+                                             Eigen::Quaterniond(1, 0, 0, 0), Eigen::Vector3d(0, 0, 1));
+
+  CovarianceMatrix covariance_matrix;
+
+  const auto image_feature_measurement =
+      std::make_shared<ImageFeatureMeasurement>(cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
+  covariance_matrix.Add(image_feature_measurement, state);
+}
+
 TEST(Covariance, PredictCovariance) {
   const auto state = std::make_shared<State>(Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0),
                                              Eigen::Quaterniond(1, 0, 0, 0), Eigen::Vector3d(0, 0, 1));

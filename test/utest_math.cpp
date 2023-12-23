@@ -1,6 +1,5 @@
+#include <filter/state.h>
 #include <gmock/gmock-matchers.h>
-
-#include <Eigen/Dense>
 
 #include "gtest/gtest.h"
 #include "math/ekf_math.h"
@@ -66,4 +65,35 @@ TEST(ComputeQuaternionDerivatives, NonZeroAngularVelocity) {
   ASSERT_DOUBLE_EQ(dqidomegaj(0, 1), dqidomegaj(1, 0));
   ASSERT_DOUBLE_EQ(dqidomegaj(0, 2), dqidomegaj(2, 0));
   ASSERT_DOUBLE_EQ(dqidomegaj(1, 2), dqidomegaj(2, 1));
+}
+
+TEST(RotationDerivatives, RotationMatrixDerivativeByQuaternion) {
+  const Eigen::Quaterniond q(1, 1, 1, 1);
+
+  const Eigen::Matrix3d dRbyq0 = computeRotationMatrixDerivativesByq0(q);
+
+  Eigen::Matrix3d expected;
+  expected << 2, -2, 2, 2, 2, -2, -2, 2, 2;
+  ASSERT_EQ(dRbyq0, expected);
+
+  const Eigen::Matrix3d dRbyq1 = computeRotationMatrixDerivativesByq1(q);
+  expected << 2, 2, 2, 2, -2, -2, 2, 2, -2;
+  ASSERT_EQ(dRbyq1, expected);
+
+  const Eigen::Matrix3d dRbyq2 = computeRotationMatrixDerivativesByq2(q);
+  expected << -2, 2, 2, 2, 2, 2, -2, 2, -2;
+  ASSERT_EQ(dRbyq2, expected);
+
+  const Eigen::Matrix3d dRbyq3 = computeRotationMatrixDerivativesByq3(q);
+  expected << -2, -2, 2, 2, -2, 2, 2, 2, 2;
+  ASSERT_EQ(dRbyq3, expected);
+}
+
+TEST(RotationMatrix, ComputeRotationMatrix) {
+  const auto state = State(Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0), Eigen::Quaterniond(1, 1, 1, 1),
+                           Eigen::Vector3d(0, 0, 1));
+
+  Eigen::Matrix3d expected;
+  expected << 0, 0, 1, 1, 0, 0, 0, 1, 0;
+  ASSERT_EQ(state.GetRotationMatrix(), expected);
 }

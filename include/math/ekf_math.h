@@ -9,6 +9,14 @@ static constexpr double PI = 3.14159265L;
 
 inline double Rad2Deg(const double rads) { return rads * 180.0 / PI; }
 
+Eigen::Matrix3d computeRotationMatrixDerivativesByq0(const Eigen::Quaterniond& q);
+
+Eigen::Matrix3d computeRotationMatrixDerivativesByq1(const Eigen::Quaterniond& q);
+
+Eigen::Matrix3d computeRotationMatrixDerivativesByq2(const Eigen::Quaterniond& q);
+
+Eigen::Matrix3d computeRotationMatrixDerivativesByq3(const Eigen::Quaterniond& q);
+
 Eigen::Vector3d computePartialDerivativeq0byOmegai(const Eigen::Vector3d& omega, double dt);
 
 Eigen::Vector3d computePartialDerivativeqibyOmegai(const Eigen::Vector3d& omega, double dt);

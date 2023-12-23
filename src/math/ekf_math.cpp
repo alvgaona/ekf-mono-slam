@@ -90,3 +90,27 @@ Eigen::Matrix3d EkfMath::computePartialDerivativeqibyOmegaj(const Eigen::Vector3
 
   return out;
 }
+
+Eigen::Matrix3d EkfMath::computeRotationMatrixDerivativesByq0(const Eigen::Quaterniond& q) {
+  Eigen::Matrix3d out;
+  out << 2 * q.w(), -2 * q.z(), 2 * q.y(), 2 * q.z(), 2 * q.w(), -2 * q.x(), -2 * q.y(), 2 * q.x(), 2 * q.w();
+  return out;
+}
+
+Eigen::Matrix3d EkfMath::computeRotationMatrixDerivativesByq1(const Eigen::Quaterniond& q) {
+  Eigen::Matrix3d out;
+  out << 2 * q.x(), 2 * q.y(), 2 * q.z(), 2 * q.y(), -2 * q.x(), -2 * q.w(), 2 * q.z(), 2 * q.w(), -2 * q.x();
+  return out;
+}
+
+Eigen::Matrix3d EkfMath::computeRotationMatrixDerivativesByq2(const Eigen::Quaterniond& q) {
+  Eigen::Matrix3d out;
+  out << -2 * q.y(), 2 * q.x(), 2 * q.w(), 2 * q.x(), 2 * q.y(), 2 * q.z(), -2 * q.w(), 2 * q.z(), -2 * q.y();
+  return out;
+}
+
+Eigen::Matrix3d EkfMath::computeRotationMatrixDerivativesByq3(const Eigen::Quaterniond& q) {
+  Eigen::Matrix3d out;
+  out << -2 * q.z(), -2 * q.w(), 2 * q.x(), 2 * q.w(), -2 * q.z(), 2 * q.y(), 2 * q.x(), 2 * q.y(), 2 * q.z();
+  return out;
+}
