@@ -3,6 +3,8 @@
 #include "configuration/camera_parameters.h"
 #include "feature/image_feature.h"
 
+using namespace CameraParameters;
+
 /**
  * @brief Constructs an ImageFeatureMeasurement object with the provided coordinates and descriptor data.
  *
@@ -28,14 +30,14 @@ ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, 
  */
 UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {
   const Eigen::Vector2d point(coordinates_.x, coordinates_.y);
-  const Eigen::Vector2d principal_point(CameraParameters::cx, CameraParameters::cy);
+  const Eigen::Vector2d principal_point(cx, cy);
 
   const Eigen::Vector2d diff = point - principal_point;
-  const Eigen::Vector2d distorted_diff(CameraParameters::dx * diff[0], CameraParameters::dy * diff[1]);
+  const Eigen::Vector2d distorted_diff(dx * diff[0], dy * diff[1]);
 
   const double rd = distorted_diff.norm();
 
-  const double distortion = 1 + CameraParameters::k1 * rd * rd + CameraParameters::k2 * rd * rd * rd * rd;
+  const double distortion = 1 + k1 * rd * rd + k2 * rd * rd * rd * rd;
 
   return UndistortedImageFeature(principal_point + diff * distortion);
 }

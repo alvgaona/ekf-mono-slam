@@ -9,6 +9,7 @@
 #include "image/file_sequence_image_provider.h"
 
 using namespace ::testing;
+using namespace KinematicsParameters;
 
 using ::testing::NotNull;
 
@@ -102,14 +103,9 @@ TEST(Covariance, CovarianceInit) {
   ASSERT_EQ(covariance_matrix.GetMatrix().cols(), 13);
 
   Eigen::VectorXd expected_diagonal(13);
-  expected_diagonal << KinematicsParameters::EPSILON, KinematicsParameters::EPSILON, KinematicsParameters::EPSILON,
-      KinematicsParameters::EPSILON, KinematicsParameters::EPSILON, KinematicsParameters::EPSILON,
-      KinematicsParameters::EPSILON, KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD,
-      KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD,
-      KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD,
-      KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD,
-      KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD,
-      KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD;
+  expected_diagonal << epsilon, epsilon, epsilon, epsilon, epsilon, epsilon, epsilon, linear_accel_sd * linear_accel_sd,
+      linear_accel_sd * linear_accel_sd, linear_accel_sd * linear_accel_sd, angular_accel_sd * angular_accel_sd,
+      angular_accel_sd * angular_accel_sd, angular_accel_sd * angular_accel_sd;
   ASSERT_TRUE(covariance_matrix.GetMatrix().diagonal().isApprox(expected_diagonal));
 
   Eigen::MatrixXd m = Eigen::MatrixXd::Identity(13, 13);

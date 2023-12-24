@@ -3,6 +3,8 @@
 #include <configuration/camera_parameters.h>
 #include <feature/image_feature_measurement.h>
 
+using namespace CameraParameters;
+
 /**
  * @brief Computes the Jacobian matrix of a directional vector with respect to a quaternion.
  *
@@ -108,19 +110,12 @@ Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq3(const Eigen::Quaterniond&
 
 Eigen::Matrix2d EkfMath::jacobianUndistortion(const cv::Point& coordinates) {
   const Eigen::Vector2d point(coordinates.x, coordinates.y);
-  const Eigen::Vector2d principal_point(CameraParameters::cx, CameraParameters::cy);
+  const Eigen::Vector2d principal_point(cx, cy);
 
   const Eigen::Vector2d diff = point - principal_point;
-  const Eigen::Vector2d distorted_diff(CameraParameters::dx * diff[0], CameraParameters::dy * diff[1]);
+  const Eigen::Vector2d distorted_diff(dx * diff[0], dy * diff[1]);
 
   const double rd = distorted_diff.norm();
-
-  constexpr double k1 = CameraParameters::k1;
-  constexpr double k2 = CameraParameters::k2;
-  constexpr double dx = CameraParameters::dx;
-  constexpr double dy = CameraParameters::dy;
-  constexpr double cx = CameraParameters::cx;
-  constexpr double cy = CameraParameters::cy;
 
   Eigen::Matrix2d dhu_hd;
 

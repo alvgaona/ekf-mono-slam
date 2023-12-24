@@ -6,6 +6,8 @@
 #include "configuration/kinematics_parameters.h"
 
 using namespace EkfMath;
+using namespace KinematicsParameters;
+using namespace CameraParameters;
 
 /**
  * @brief Constructs a CovarianceMatrix object with default initial values.
@@ -14,12 +16,12 @@ using namespace EkfMath;
  * state variables.
  *
  * The initial values reflect the following assumptions:
- * - Position components have small uncertainties represented by `KinematicsParameters::EPSILON`.
+ * - Position components have small uncertainties represented by `EPSILON`.
  * - Velocity components are slightly more uncertain with the same epsilon value.
  * - Angular velocity components have similar uncertainties as velocity.
  * - Both linear and angular accelerations have significant uncertainties represented by their corresponding standard
- * deviations multiplied by themselves (`KinematicsParameters::LINEAR_ACCEL_SD^2` and
- * `KinematicsParameters::ANGULAR_ACCEL_SD^2`).
+ * deviations multiplied by themselves (`LINEAR_ACCEL_SD^2` and
+ * `ANGULAR_ACCEL_SD^2`).
  *
  * These initial values can be further adapted based on specific system dynamics and sensor characteristics.
  *
@@ -27,18 +29,10 @@ using namespace EkfMath;
  * acceleration(3), angular acceleration(3)]
  */
 CovarianceMatrix::CovarianceMatrix() {
-  matrix_ = Eigen::MatrixXd(13, 13);
-  matrix_ << KinematicsParameters::EPSILON, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, KinematicsParameters::EPSILON, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, KinematicsParameters::EPSILON, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      KinematicsParameters::EPSILON, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, KinematicsParameters::EPSILON, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, KinematicsParameters::EPSILON, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      KinematicsParameters::EPSILON, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD;
+  matrix_ = Eigen::MatrixXd::Identity(13, 13);
+  matrix_.diagonal() << epsilon, epsilon, epsilon, epsilon, epsilon, epsilon, epsilon,
+      linear_accel_sd * linear_accel_sd, linear_accel_sd * linear_accel_sd, linear_accel_sd * linear_accel_sd,
+      angular_accel_sd * angular_accel_sd, angular_accel_sd * angular_accel_sd, angular_accel_sd * angular_accel_sd;
 }
 
 void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double dt) {
@@ -82,12 +76,8 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
 
   Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(6, 6);
 
-  Q.block(0, 0, 3, 3)
-      .diagonal()
-      .setConstant(KinematicsParameters::LINEAR_ACCEL_SD * KinematicsParameters::LINEAR_ACCEL_SD * dt * dt);
-  Q.block(3, 3, 3, 3)
-      .diagonal()
-      .setConstant(KinematicsParameters::ANGULAR_ACCEL_SD * KinematicsParameters::ANGULAR_ACCEL_SD * dt * dt);
+  Q.block(0, 0, 3, 3).diagonal().setConstant(linear_accel_sd * linear_accel_sd * dt * dt);
+  Q.block(3, 3, 3, 3).diagonal().setConstant(angular_accel_sd * angular_accel_sd * dt * dt);
 
   matrix_ = F * matrix_ * F.transpose() + G * Q * G.transpose();
 }
@@ -157,8 +147,8 @@ void CovarianceMatrix::Add(const std::shared_ptr<ImageFeatureMeasurement>& image
   // The equation states this is a 2x3 matrix, but in reality, it should be 3x2.
   // FYI, I'm using the transposed version, otherwise, the matrix multiplication won't work.
   Eigen::MatrixXd dhc_dhu = Eigen::MatrixXd::Zero(3, 2);
-  dhc_dhu(0, 0) = CameraParameters::dx / CameraParameters::fx;
-  dhc_dhu(1, 1) = CameraParameters::dy / CameraParameters::fy;
+  dhc_dhu(0, 0) = dx / fx;
+  dhc_dhu(1, 1) = dy / fy;
 
   // Eq. (A.77). Again this equation appears to be wrong as well.
   // The theta and phi jacobians are considered row vectors in the book,
@@ -174,10 +164,8 @@ void CovarianceMatrix::Add(const std::shared_ptr<ImageFeatureMeasurement>& image
   jacobian.block(n, n, 6, 3) = dy_dh;
 
   // Adding image noise covariance. Eq (A.64)
-  matrix_.block(n, n, 2, 2).diagonal() =
-      Eigen::Vector2d(CameraParameters::pixel_error_x * CameraParameters::pixel_error_x,
-                      CameraParameters::pixel_error_y * CameraParameters::pixel_error_y);
-  matrix_(n + 2, n + 2) = ImageFeatureParameters::INIT_INV_DEPTH;
+  matrix_.block(n, n, 2, 2).diagonal() = Eigen::Vector2d(pixel_error_x * pixel_error_x, pixel_error_y * pixel_error_y);
+  matrix_(n + 2, n + 2) = ImageFeatureParameters::init_inv_depth;
 
   matrix_ = jacobian * matrix_ * jacobian.transpose();
 }
