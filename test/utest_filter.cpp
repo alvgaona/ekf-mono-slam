@@ -35,7 +35,7 @@ TEST(TestPredictState, PredictState) {
   ASSERT_EQ(state.GetRotationMatrix(), Eigen::MatrixXd::Identity(3, 3));
 }
 
-TEST(TestAddMapFeature, AddMapFeature) {
+TEST(TestAddMapFeature, StateAddMapFeature) {
   State state;
 
   Eigen::VectorXd feature_state(6);
@@ -119,7 +119,7 @@ TEST(Covariance, CovarianceInit) {
   ASSERT_EQ(a - m, Eigen::MatrixXd::Zero(13, 13));
 }
 
-TEST(Covariance, CovarianceAddFeature) {
+TEST(Covariance, CovarianceAddImageFeature) {
   const auto state = std::make_shared<State>(Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0),
                                              Eigen::Quaterniond(1, 0, 0, 0), Eigen::Vector3d(0, 0, 1));
 

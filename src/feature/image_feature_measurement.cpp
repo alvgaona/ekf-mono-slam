@@ -28,7 +28,6 @@ ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, 
  */
 UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {
   const Eigen::Vector2d point(coordinates_.x, coordinates_.y);
-
   const Eigen::Vector2d principal_point(CameraParameters::cx, CameraParameters::cy);
 
   const Eigen::Vector2d diff = point - principal_point;
