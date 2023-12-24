@@ -4,15 +4,15 @@
 #include <feature/image_feature_measurement.h>
 
 /**
- * \brief Computes the Jacobian matrix of a directional vector with respect to a quaternion.
+ * @brief Computes the Jacobian matrix of a directional vector with respect to a quaternion.
  *
  * This function calculates the derivative of a directional vector expressed in the global reference frame with respect
  * to changes in a quaternion representing the rotation of a local frame.
  *
- * \param q The quaternion representing the rotation of the local frame.
- * \param directionalVector The directional vector expressed in the global reference frame.
+ * @param q The quaternion representing the rotation of the local frame.
+ * @param directionalVector The directional vector expressed in the global reference frame.
  *
- * \return A 3x4 Jacobian matrix representing the partial derivatives of the directional vector with respect to each
+ * @return A 3x4 Jacobian matrix representing the partial derivatives of the directional vector with respect to each
  * element of the quaternion.
  *
  * This Jacobian matrix is useful for applying the chain rule in various calculations involving rotations and

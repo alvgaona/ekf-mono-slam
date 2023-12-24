@@ -5,12 +5,12 @@
 using namespace EkfMath;
 
 /**
- * \brief Constructs an Ellipse object from a center point and a covariance matrix.
+ * @brief Constructs an Ellipse object from a center point and a covariance matrix.
  *
  * This constructor initializes a new Ellipse object with the provided center point and covariance matrix.
  *
- * \param center The 2D center point of the ellipse.
- * \param matrix The 2x2 covariance matrix representing the ellipse's shape and orientation.
+ * @param center The 2D center point of the ellipse.
+ * @param matrix The 2x2 covariance matrix representing the ellipse's shape and orientation.
  *
  * The eigenvalues represent the variances of the ellipse along its principal axes, while the eigenvectors represent the
  * directions of those axes. This information is used to compute various properties of the ellipse, such as its axes
@@ -23,12 +23,12 @@ Ellipse::Ellipse(const cv::Point2f center, const cv::Mat& matrix) {
 }
 
 /**
- * \brief Computes the axes of the ellipse representing the feature's covariance matrix.
+ * @brief Computes the axes of the ellipse representing the feature's covariance matrix.
  *
  * This method calculates the major and minor axes of the ellipse based on the feature's covariance matrix and the
  * chi-squared threshold for 95% confidence.
  *
- * \return A `cv::Size2f` object containing the major and minor axes of the ellipse.
+ * @return A `cv::Size2f` object containing the major and minor axes of the ellipse.
  *
  * The calculation involves the following steps:
  * 1. Extracts the eigenvalues from the covariance matrix.
@@ -47,25 +47,25 @@ cv::Size2f Ellipse::Axes() {
 }
 
 /**
- * \brief Computes the angle of the ellipse's major axis with respect to the horizontal axis.
+ * @brief Computes the angle of the ellipse's major axis with respect to the horizontal axis.
  *
  * This method calculates the angle of the ellipse's major axis based on the eigenvectors of its covariance matrix.
  *
- * \return The angle of the major axis in radians.
+ * @return The angle of the major axis in radians.
  *
  * This angle represents the orientation of the ellipse and is used for visualization and analysis tasks.
  */
 double Ellipse::Angle() { return std::atan(eigen_vectors_.at<double>(1, 0) / eigen_vectors_.at<double>(0, 0)); }
 
 /**
- * \brief Checks if a given point lies within the ellipse.
+ * @brief Checks if a given point lies within the ellipse.
  *
  * This method uses the ellipse's properties (center, axes, and orientation) to determine whether the provided point
  * falls within its boundaries.
  *
- * \param point The point to be tested for containment.
+ * @param point The point to be tested for containment.
  *
- * \return True if the point is inside the ellipse, false otherwise.
+ * @return True if the point is inside the ellipse, false otherwise.
  *
  * The algorithm performs the following steps:
  * 1. Calculates the major and minor axes lengths of the ellipse.
