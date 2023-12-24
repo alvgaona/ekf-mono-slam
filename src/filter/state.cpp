@@ -3,7 +3,7 @@
 #include "configuration/image_feature_parameters.h"
 
 /**
- * \brief Constructs a State object with default initial values.
+ * @brief Constructs a State object with default initial values.
  *
  * This constructor initializes a new State object with default values for the state variables representing the pose and
  * motion of a tracked object.
@@ -40,12 +40,12 @@ State::State(const Eigen::Vector3d& position, const Eigen::Vector3d& velocity, c
 }
 
 /**
- * \brief Predicts the future state of the object based on its current state and time interval.
+ * @brief Predicts the future state of the object based on its current state and time interval.
  *
  * This method updates the state of the object by integrating its velocity and angular velocity over the specified time
  * interval.
  *
- * \param delta_t The time interval (in seconds) for which the prediction is made.
+ * @param delta_t The time interval (in seconds) for which the prediction is made.
  *
  * The prediction involves the following steps:
  * 1. Advance the object's position by its current velocity multiplied by the time interval.
@@ -76,12 +76,12 @@ void State::Predict(const double delta_t) {
 }
 
 /**
- * \brief Removes a specified MapFeature object from the State's associated feature lists.
+ * @brief Removes a specified MapFeature object from the State's associated feature lists.
  *
  * This method searches for the provided MapFeature object within the internal lists of depth and inverse depth features
  * and removes it if found.
  *
- * \param feature The MapFeature object to be removed.
+ * @param feature The MapFeature object to be removed.
  *
  * This method facilitates managing the associated MapFeature objects within the State and keeping the lists consistent
  * with the current state of feature tracking.
@@ -100,12 +100,12 @@ void State::Remove(const std::shared_ptr<MapFeature>& feature) {
 }
 
 /**
- * \brief Adds a new image feature measurement to the State's associated MapFeature list.
+ * @brief Adds a new image feature measurement to the State's associated MapFeature list.
  *
  * This method converts the image feature measurement into a map feature and adds it to the internal list of inverse
  * depth features.
  *
- * \param image_feature_measurement The `ImageFeatureMeasurement` object containing the measurement data.
+ * @param image_feature_measurement The `ImageFeatureMeasurement` object containing the measurement data.
  *
  * Adding image feature measurements allows the State to build and maintain a map of features observed in the world,
  * contributing to tasks like localization and mapping.
@@ -138,12 +138,12 @@ void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_me
 }
 
 /**
- * \brief Adds a provided MapFeature object to the State's internal list based on its type.
+ * @brief Adds a provided MapFeature object to the State's internal list based on its type.
  *
  * This method adds the specified MapFeature object to the appropriate internal list, differentiating between depth and
  * inverse depth features.
  *
- * \param feature The MapFeature object to be added.
+ * @param feature The MapFeature object to be added.
  */
 void State::Add(const std::shared_ptr<MapFeature>& feature) {
   switch (feature->GetType()) {

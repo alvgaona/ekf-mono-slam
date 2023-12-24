@@ -1,12 +1,12 @@
 #include "feature/image_feature.h"
 
 /**
- * \brief Constructs an ImageFeature object with specified coordinates but no assigned index.
+ * @brief Constructs an ImageFeature object with specified coordinates but no assigned index.
  *
  * This constructor initializes a new ImageFeature object with the provided `coordinates` representing its location in
  * the image plane. The feature index remains unassigned (set to -1) until explicitly assigned later.
  *
- * \param coordinates The feature's location as a cv::Point2f in the image coordinate system.
+ * @param coordinates The feature's location as a cv::Point2f in the image coordinate system.
  *
  */
 ImageFeature::ImageFeature(const cv::Point2f coordinates) {
@@ -15,13 +15,13 @@ ImageFeature::ImageFeature(const cv::Point2f coordinates) {
 }
 
 /**
- * \brief Constructs an ImageFeature object with specified coordinates and feature index.
+ * @brief Constructs an ImageFeature object with specified coordinates and feature index.
  *
  * This constructor initializes a new ImageFeature object with the provided `coordinates` and `feature_index`. The
  * feature index identifies the feature within a specific context, such as a feature list or tracked set.
  *
- * \param coordinates The feature's location as a cv::Point2f in the image coordinate system.
- * \param feature_index The unique identifier for the feature within its designated context.
+ * @param coordinates The feature's location as a cv::Point2f in the image coordinate system.
+ * @param feature_index The unique identifier for the feature within its designated context.
  *
  * This constructor provides a more complete configuration for the ImageFeature, allowing immediate identification and
  * usage based on the assigned index.
@@ -32,12 +32,12 @@ ImageFeature::ImageFeature(const cv::Point2f coordinates, const int feature_inde
 }
 
 /**
- * \brief Computes the zone ID for an image feature based on its location and the configured zone and image sizes.
- * \param zone_width The width of each zone in pixels.
- * \param zone_height The height of each zone in pixels.
- * \param image_width The width of the entire image in pixels.
- * \param image_height The height of the entire image in pixels.
- * \return The zone ID for the image feature.
+ * @brief Computes the zone ID for an image feature based on its location and the configured zone and image sizes.
+ * @param zone_width The width of each zone in pixels.
+ * @param zone_height The height of each zone in pixels.
+ * @param image_width The width of the entire image in pixels.
+ * @param image_height The height of the entire image in pixels.
+ * @return The zone ID for the image feature.
  *
  * This function calculates the zone ID for a given `ImageFeature` object based on its coordinates and the provided zone
  * and image sizes. It uses the following steps:

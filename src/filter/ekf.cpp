@@ -3,7 +3,7 @@
 #include "feature/feature_detector.h"
 
 /**
- * \brief Constructs an EKF object with default settings.
+ * @brief Constructs an EKF object with default settings.
  *
  * This constructor initializes a new EKF object with default values for its internal state variables and parameters.
  */
@@ -15,12 +15,12 @@ EKF::EKF() {
 }
 
 /**
- * \brief Initializes the EKF with features extracted from an input image.
+ * @brief Initializes the EKF with features extracted from an input image.
  *
  * This method performs the initial setup of the EKF by extracting features from a provided image and adding them to the
  * internal state.
  *
- * \param image The input image from which features will be extracted.
+ * @param image The input image from which features will be extracted.
  *
  * This method plays a crucial role in starting the EKF operation by establishing the initial set of features used for
  * tracking and state estimation.
@@ -49,12 +49,12 @@ void EKF::PredictMeasurementState() {}
 void EKF::PredictMeasurementCovariance() {}
 
 /**
- * \brief Adds a collection of image feature measurements to the EKF's internal state and covariance matrix.
+ * @brief Adds a collection of image feature measurements to the EKF's internal state and covariance matrix.
  *
  * This method integrates the provided image feature measurements into the EKF's internal data structures to establish
  * initial information or update existing features.
  *
- * \param features A vector containing the `ImageFeatureMeasurement` objects representing the extracted features.
+ * @param features A vector containing the `ImageFeatureMeasurement` objects representing the extracted features.
  *
  * **Note:** This implementation relies on the `ImageFeatureMeasurement` object containing all necessary information for
  * conversion to a `MapFeature` and covariance matrix update. Ensure the provided measurements hold the required data

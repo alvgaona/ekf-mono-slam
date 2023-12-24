@@ -6,11 +6,11 @@
 #include <random>
 
 /**
- * \brief Construct a FeatureDetector object.
+ * @brief Construct a FeatureDetector object.
  *
- * \param detector The underlying OpenCV feature detector to be used by this object.
- * \param descriptor_extractor The OpenCV descriptor extractor to be used for feature description.
- * \param img_size The size of the image this object will process.
+ * @param detector The underlying OpenCV feature detector to be used by this object.
+ * @param descriptor_extractor The OpenCV descriptor extractor to be used for feature description.
+ * @param img_size The size of the image this object will process.
  *
  * This constructor initializes a FeatureDetector object with the provided parameters. It stores references to the
  * underlying OpenCV detector and descriptor extractor, along with the image size. The constructor also calculates and
@@ -34,10 +34,10 @@ FeatureDetector::FeatureDetector(const cv::Ptr<cv::FeatureDetector>& detector,
 }
 
 /**
- * \brief Detects and describes features in an image, optionally visualizing the results.
- * \param image The image in which to detect features.
- * \param predictions Prior predictions about potential feature locations.
- * \param visualize Whether to visually show the detected keypoints on the image.
+ * @brief Detects and describes features in an image, optionally visualizing the results.
+ * @param image The image in which to detect features.
+ * @param predictions Prior predictions about potential feature locations.
+ * @param visualize Whether to visually show the detected keypoints on the image.
  *
  * This function performs the following steps:
  * 1. Builds an image mask based on the provided predictions using `BuildImageMask`.
@@ -72,11 +72,11 @@ void FeatureDetector::DetectFeatures(const cv::Mat& image,
 }
 
 /**
- * \brief Detects and describes features in an image, using an empty set of predictions by default. Optionally, it can
+ * @brief Detects and describes features in an image, using an empty set of predictions by default. Optionally, it can
  * visualize the results.
  *
- * \param image The image in which to detect features.
- * \param visualize Whether to visually show the detected keypoints on the image.
+ * @param image The image in which to detect features.
+ * @param visualize Whether to visually show the detected keypoints on the image.
  *
  * This function performs feature detection and description on the provided image when no predictions are provided
  * (recommended for most cases), the function will use an empty set of predictions internally.
@@ -88,9 +88,9 @@ void FeatureDetector::DetectFeatures(const cv::Mat& image, const bool visualize)
 }
 
 /**
- * \brief Builds an image mask based on feature detector predictions.
- * \param image_mask The current image mask, which will be updated with the new features.
- * \param predictions The feature predictions used to build the new mask.
+ * @brief Builds an image mask based on feature detector predictions.
+ * @param image_mask The current image mask, which will be updated with the new features.
+ * @param predictions The feature predictions used to build the new mask.
  *
  * This function iterates through the provided predictions and builds an uncertainty ellipse
  * around each feature's location using the provided covariance matrix. The ellipses are drawn
@@ -112,11 +112,11 @@ void FeatureDetector::BuildImageMask(const cv::Mat& image_mask,
 }
 
 /**
- * \brief Searches for and selects image features based on their location within zones.
- * \param image_mask The image mask defining the valid region for feature selection.
- * \param keypoints The detected keypoints in the image.
- * \param descriptors The extracted feature descriptors for the keypoints.
- * \param predictions The prior predictions about potential feature locations.
+ * @brief Searches for and selects image features based on their location within zones.
+ * @param image_mask The image mask defining the valid region for feature selection.
+ * @param keypoints The detected keypoints in the image.
+ * @param descriptors The extracted feature descriptors for the keypoints.
+ * @param predictions The prior predictions about potential feature locations.
  */
 void FeatureDetector::SearchFeaturesByZone(const cv::Mat& image_mask, const std::vector<cv::KeyPoint>& keypoints,
                                            const cv::Mat& descriptors,
@@ -130,8 +130,8 @@ void FeatureDetector::SearchFeaturesByZone(const cv::Mat& image_mask, const std:
 }
 
 /**
- * \brief Creates a vector of zone objects based on the configured zone size and number of zones per row.
- * \return A vector of `std::shared_ptr<Zone>` objects, each representing a zone in the image.
+ * @brief Creates a vector of zone objects based on the configured zone size and number of zones per row.
+ * @return A vector of `std::shared_ptr<Zone>` objects, each representing a zone in the image.
  */
 std::vector<std::shared_ptr<Zone>> FeatureDetector::CreateZones() {
   const int zones_count = static_cast<int>(std::pow(zones_in_row_, 2));
@@ -145,11 +145,11 @@ std::vector<std::shared_ptr<Zone>> FeatureDetector::CreateZones() {
 }
 
 /**
- * \brief Groups extracted feature measurements and predictions into corresponding zones.
- * \param zones The list of zones to be populated with features and predictions.
- * \param predictions The vector of prior predictions for potential feature locations.
- * \param keypoints The detected keypoints in the image.
- * \param descriptors The extracted feature descriptors for the keypoints.
+ * @brief Groups extracted feature measurements and predictions into corresponding zones.
+ * @param zones The list of zones to be populated with features and predictions.
+ * @param predictions The vector of prior predictions for potential feature locations.
+ * @param keypoints The detected keypoints in the image.
+ * @param descriptors The extracted feature descriptors for the keypoints.
  *
  * This function performs the following tasks:
  * 1. **Iterates through each detected keypoint:**
@@ -199,9 +199,9 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
 }
 
 /**
- * \brief Creates a feature detector object based on the specified type.
- * \param type The type of feature detector to be created.
- * \return A pointer to a cv::Ptr<cv::FeatureDetector> object representing the created feature detector.
+ * @brief Creates a feature detector object based on the specified type.
+ * @param type The type of feature detector to be created.
+ * @return A pointer to a cv::Ptr<cv::FeatureDetector> object representing the created feature detector.
  */
 cv::Ptr<cv::FeatureDetector> FeatureDetector::BuildDetector(const DetectorType type) {
   switch (type) {
@@ -217,9 +217,9 @@ cv::Ptr<cv::FeatureDetector> FeatureDetector::BuildDetector(const DetectorType t
 }
 
 /**
- * \brief Creates a descriptor extractor object based on the specified type.
- * \param type The type of descriptor extractor to be created.
- * \return A pointer to a cv::Ptr<cv::DescriptorExtractor> object representing the created descriptor extractor.
+ * @brief Creates a descriptor extractor object based on the specified type.
+ * @param type The type of descriptor extractor to be created.
+ * @return A pointer to a cv::Ptr<cv::DescriptorExtractor> object representing the created descriptor extractor.
  */
 cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(const DescriptorExtractorType type) {
   switch (type) {
@@ -235,11 +235,11 @@ cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(const
 }
 
 /**
- * \brief Computes and stores image feature measurements based on detected keypoints and descriptors.
- * \param image_mask The image mask defining the valid region for feature selection.
- * \param descriptors The extracted feature descriptors for detected keypoints.
- * \param predictions The prior predictions about potential feature locations.
- * \param image_keypoints The detected keypoints in the image.
+ * @brief Computes and stores image feature measurements based on detected keypoints and descriptors.
+ * @param image_mask The image mask defining the valid region for feature selection.
+ * @param descriptors The extracted feature descriptors for detected keypoints.
+ * @param predictions The prior predictions about potential feature locations.
+ * @param image_keypoints The detected keypoints in the image.
  *
  * This function performs the following tasks:
  * 1. Checks if the number of detected keypoints is less than or equal to the desired number of features (specified by
@@ -264,9 +264,9 @@ void FeatureDetector::ComputeImageFeatureMeasurements(
 }
 
 /**
- * \brief Selects feature measurements from zones based on their candidacy and location within the image mask.
- * \param zones The list of zones containing potential feature measurements.
- * \param image_mask The image mask defining the valid region for feature selection.
+ * @brief Selects feature measurements from zones based on their candidacy and location within the image mask.
+ * @param zones The list of zones containing potential feature measurements.
+ * @param image_mask The image mask defining the valid region for feature selection.
  *
  * This function iterates through the provided zones and selects feature measurements based on the following criteria:
  * 1. **Candidate Availability:** Only zones with remaining candidate measurements are considered.
