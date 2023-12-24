@@ -1,13 +1,14 @@
 #include "filter/covariance_matrix.h"
 
 #include <configuration/camera_parameters.h>
+#include <configuration/image_feature_parameters.h>
 
 #include "configuration/kinematics_parameters.h"
 
 using namespace EkfMath;
 
 /**
- * \brief Constructs a CovarianceMatrix object with default initial values.
+ * @brief Constructs a CovarianceMatrix object with default initial values.
  *
  * This constructor initializes the covariance matrix with specified diagonal elements representing uncertainties in the
  * state variables.
@@ -63,9 +64,9 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
   Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
 
   const auto& comega = state->GetAngularVelocity();
-  dq1domega.row(0) = computePartialDerivativeq0byOmegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3).diagonal() = computePartialDerivativeqibyOmegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3) += computePartialDerivativeqibyOmegaj(comega, dt);
+  dq1domega.row(0) = partialDerivativeq0byOmegai(comega, dt);
+  dq1domega.block(1, 0, 3, 3).diagonal() = partialDerivativeqibyOmegai(comega, dt);
+  dq1domega.block(1, 0, 3, 3) += partialDerivativeqibyOmegaj(comega, dt);
 
   F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
 
@@ -92,30 +93,35 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
 }
 
 /**
- * \brief Updates the covariance matrix with information from a new image feature measurement.
+ * @brief Updates the covariance matrix with a new inverse depth feature.
  *
- * This method integrates the information contained in a provided `ImageFeatureMeasurement` object into the existing
- * covariance matrix of the Extended Kalman Filter (EKF). The update accounts for the relationship between the feature
- * measurement and the EKF's state, incorporating additional uncertainty information into the matrix.
+ * This function incorporates a new inverse depth feature into the covariance matrix
+ * within an EKF SLAM framework. It performs the following steps:
  *
- * \param image_feature_measurement The `ImageFeatureMeasurement` object containing the extracted feature data.
- * \param state The current state of the EKF represented by the `State` object.
+ * 1. Resizes the covariance matrix to accommodate the new feature dimensions.
+ * 2. Computes necessary Jacobians for covariance propagation, including:
+ *     - Jacobian of the feature observation with respect to camera pose.
+ *     - Jacobian of the feature observation with respect to inverse depth.
+ *     - Jacobians related to camera distortion and undistortion.
+ * 3. Incorporates image noise covariance into the corresponding block of the matrix.
+ * 4. Sets the initial uncertainty for the inverse depth feature.
+ * 5. Propagates the covariance matrix using the computed Jacobian.
  *
+ * @param image_feature_measurement Shared pointer to the image feature measurement.
+ * @param state Shared pointer to the current state of the EKF.
  */
 void CovarianceMatrix::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
                            const std::shared_ptr<State>& state) {
   const int n = state->GetDimension();
-  const int new_covariance_matrix_dim = n + 6;
-  Eigen::MatrixXd new_covariance_matrix(new_covariance_matrix_dim, new_covariance_matrix_dim);
-  Eigen::MatrixXd jacobian(n + 6, n + 3);
+  matrix_.conservativeResize(n + 3, n + 3);
+  Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(n + 6, n + 3);
 
   jacobian.block(0, 0, n, n) = Eigen::MatrixXd::Identity(n, n);
-  jacobian.block(n, n, n, 6) = Eigen::MatrixXd::Zero(n, 6);
 
   const UndistortedImageFeature undistorted_feature = image_feature_measurement->Undistort();
-  Eigen::Vector3d hw = undistorted_feature.BackProject();
+  const Eigen::Vector3d hc = undistorted_feature.BackProject();
 
-  hw = state->GetRotationMatrix() * hw;
+  const Eigen::Vector3d hw = state->GetRotationMatrix() * hc;
 
   const double hx = hw[0];
   const double hy = hw[1];
@@ -125,11 +131,53 @@ void CovarianceMatrix::Add(const std::shared_ptr<ImageFeatureMeasurement>& image
   const double B = hx * hx + hy * hy + hz * hz;
   const double C = sqrt(A);
 
-  const Eigen::Vector3d dtheta_dhw(hz / A, 0, -hx / A);
-  const Eigen::Vector3d dphi_dhw(hx * hy / (B * C), -C / B, hy * hz / (B * C));
+  const Eigen::RowVector3d dtheta_dhw(hz / A, 0, -hx / A);                          // Eq. (A.71)
+  const Eigen::RowVector3d dphi_dhw(hx * hy / (B * C), -C / B, hy * hz / (B * C));  // Eq. (A.72)
 
-  const Eigen::MatrixXd dhw_dqwc = computeJacobianDirectionalVector(state->GetOrientation(), hw);
+  const Eigen::MatrixXd dhw_dqwc = jacobianDirectionalVector(state->GetOrientation(), hc);  // Eq. (A.73)
 
-  const Eigen::MatrixXd dtheta_dqwc = dtheta_dhw * dhw_dqwc;
-  const Eigen::MatrixXd dphi_dqwd = dphi_dhw * dhw_dqwc;
+  const Eigen::MatrixXd dtheta_dqwc = dtheta_dhw * dhw_dqwc;  // Eq. (A.69)
+  const Eigen::MatrixXd dphi_dqwc = dphi_dhw * dhw_dqwc;      // Eq. (A.70)
+
+  Eigen::MatrixXd dy_dqwc = Eigen::MatrixXd::Zero(6, 4);  // Eq. (A. 68)
+  dy_dqwc.block(3, 0, 1, 4) = dtheta_dqwc;
+  dy_dqwc.block(4, 0, 1, 4) = dphi_dqwc;
+
+  Eigen::MatrixXd dy_drwc(6, 3);                                        // Eq. (A. 67)
+  dy_drwc << Eigen::Matrix3d::Identity(), Eigen::MatrixXd::Zero(3, 3);  // stack vertically
+
+  // Eq. (A. 65) & Eq. (A. 66)
+  jacobian.block(n, 0, 6, 3) = dy_drwc;
+  jacobian.block(n, 3, 6, 4) = dy_dqwc;
+
+  // Eq. (A. 75)
+  const Eigen::Matrix2d dhu_dhd = jacobianUndistortion(image_feature_measurement->GetCoordinates());  // Eq. (A.32)
+
+  // Eq. (A.79). It is likely that in the book this equation is wrong, and it must be the transposed version.
+  // The equation states this is a 2x3 matrix, but in reality, it should be 3x2.
+  // FYI, I'm using the transposed version, otherwise, the matrix multiplication won't work.
+  Eigen::MatrixXd dhc_dhu = Eigen::MatrixXd::Zero(3, 2);
+  dhc_dhu(0, 0) = CameraParameters::dx / CameraParameters::fx;
+  dhc_dhu(1, 1) = CameraParameters::dy / CameraParameters::fy;
+
+  // Eq. (A.77). Again this equation appears to be wrong as well.
+  // The theta and phi jacobians are considered row vectors in the book,
+  // therefore, the equation needs to be transposed, i.e., vertically
+  // stacking the jacobians.
+  Eigen::MatrixXd dyprime_dhw = Eigen::MatrixXd::Zero(5, 3);
+  dyprime_dhw.block(3, 0, 2, 3) << dtheta_dhw, dphi_dhw;
+
+  Eigen::MatrixXd dy_dh(6, 3);                                                             // Eq. (A.75)
+  dy_dh.block(0, 0, 5, 2) = dyprime_dhw * state->GetRotationMatrix() * dhc_dhu * dhu_dhd;  // Eq. (A.76)
+  dy_dh(5, 2) = 1;
+
+  jacobian.block(n, n, 6, 3) = dy_dh;
+
+  // Adding image noise covariance. Eq (A.64)
+  matrix_.block(n, n, 2, 2).diagonal() =
+      Eigen::Vector2d(CameraParameters::pixel_error_x * CameraParameters::pixel_error_x,
+                      CameraParameters::pixel_error_y * CameraParameters::pixel_error_y);
+  matrix_(n + 2, n + 2) = ImageFeatureParameters::INIT_INV_DEPTH;
+
+  matrix_ = jacobian * matrix_ * jacobian.transpose();
 }

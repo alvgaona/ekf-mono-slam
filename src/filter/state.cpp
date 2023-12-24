@@ -30,7 +30,11 @@ State::State(const Eigen::Vector3d& position, const Eigen::Vector3d& velocity, c
   position_ = position;
   velocity_ = velocity;
   angular_velocity_ = angular_velocity;
-  orientation_ = orientation;
+
+  // It has to be normalized in order to compute the correct rotation matrix.
+  // The formula (A.45) - in J. I. Civera, A. J. Davison, and J. M. Montiel, Structure from Motion using the Extended
+  // Kalman Filter. 2012. doi: 10.1007/978-3-642-24834-4 - is exactly the same as the one used by Eigen.
+  orientation_ = orientation.normalized();
   rotation_matrix_ = orientation_.toRotationMatrix();
   dimension_ = 13;
 }

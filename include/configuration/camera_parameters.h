@@ -43,8 +43,8 @@ struct CameraParameters {
   static constexpr double cy = 236.536005491807288;
   static constexpr double dx = 0.007021618750000;
   static constexpr double dy = 0.007027222916667;
-  static constexpr double pixel_error_x = 1.0;
-  static constexpr double pixel_error_y = 1.0;
+  static constexpr double pixel_error_x = 1.0L;
+  static constexpr double pixel_error_y = 1.0L;
   static constexpr double angular_vision_x = 62.720770890650357;
   static constexpr double angular_vision_y = 49.163954709609868;
 };
