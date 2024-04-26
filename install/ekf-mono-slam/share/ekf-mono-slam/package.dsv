@@ -1,0 +1,8 @@
+source;share/ekf-mono-slam/hook/cmake_prefix_path.ps1
+source;share/ekf-mono-slam/hook/cmake_prefix_path.dsv
+source;share/ekf-mono-slam/hook/cmake_prefix_path.sh
+source;share/ekf-mono-slam/local_setup.bash
+source;share/ekf-mono-slam/local_setup.dsv
+source;share/ekf-mono-slam/local_setup.ps1
+source;share/ekf-mono-slam/local_setup.sh
+source;share/ekf-mono-slam/local_setup.zsh

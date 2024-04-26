@@ -45,3 +45,6 @@ CMakeLists.txt  text whitespace=tabwidth=2
 org.eclipse.jdt.core.prefs -text whitespace=cr-at-eol merge=union
 
 *.sh        text eol=lf
+# GitHub syntax highlighting
+pixi.lock linguist-language=YAML
+

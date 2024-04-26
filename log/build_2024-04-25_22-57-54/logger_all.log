@@ -1,0 +1,135 @@
+[0.172s] [34mcolcon[0m [1;30mDEBUG[0m [32mCommand line arguments: ['/Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/colcon', 'build'][0m
+[0.172s] [34mcolcon[0m [1;30mDEBUG[0m [32mParsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x110896910>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x11108c650>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x11108c650>>)[0m
+[0.221s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(colcon_meta) check parameters
+[0.221s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) check parameters
+[0.221s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) check parameters
+[0.221s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) check parameters
+[0.221s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(colcon_meta) discover
+[0.221s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) discover
+[0.221s] [34mcolcon.colcon_core.package_discovery[0m [1;30mINFO[0m Crawling recursively for packages in '/Users/agaona/github.com/ekf-mono-slam'
+[0.221s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.221s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ignore'
+[0.221s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ignore_ament_install'
+[0.221s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['colcon_pkg']
+[0.221s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'colcon_pkg'
+[0.222s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['colcon_meta']
+[0.222s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'colcon_meta'
+[0.222s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['ros']
+[0.222s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ros'
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['cmake', 'python']
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'cmake'
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'python'
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['python_setup_py']
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'python_setup_py'
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) by extension 'ignore'
+[0.250s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) ignored
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) by extension 'ignore'
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) ignored
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) by extension 'ignore'
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) ignored
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'ignore'
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'ignore_ament_install'
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['colcon_pkg']
+[0.251s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'colcon_pkg'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['colcon_meta']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'colcon_meta'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['ros']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'ros'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['cmake', 'python']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'cmake'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'python'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extensions ['python_setup_py']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src) by extension 'python_setup_py'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extensions ['ignore', 'ignore_ament_install']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extension 'ignore'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extension 'ignore_ament_install'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extensions ['colcon_pkg']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extension 'colcon_pkg'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extensions ['colcon_meta']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extension 'colcon_meta'
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extensions ['ros']
+[0.252s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(src/ekf-mono-slam) by extension 'ros'
+[0.255s] [34mcolcon.colcon_core.package_identification[0m [1;30mDEBUG[0m [32mPackage 'src/ekf-mono-slam' with type 'ros.ament_cmake' and name 'ekf-mono-slam'[0m
+[0.255s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) using defaults
+[0.255s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) discover
+[0.255s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) using defaults
+[0.255s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) discover
+[0.255s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) using defaults
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'cmake_args' from command line to 'None'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'cmake_target' from command line to 'None'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'cmake_clean_cache' from command line to 'False'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'cmake_clean_first' from command line to 'False'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'cmake_force_configure' from command line to 'False'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'ament_cmake_args' from command line to 'None'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'catkin_cmake_args' from command line to 'None'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'ekf-mono-slam' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.272s] [34mcolcon.colcon_core.verb[0m [1;30mDEBUG[0m [32mBuilding package 'ekf-mono-slam' with the following arguments: {'ament_cmake_args': None, 'build_base': '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam', 'merge_install': False, 'path': '/Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam', 'symlink_install': False, 'test_result_base': None}[0m
+[0.273s] [34mcolcon.colcon_core.executor[0m [1;30mINFO[0m Executing jobs using 'parallel' executor
+[0.273s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mrun_until_complete[0m
+[0.274s] [34mcolcon.colcon_ros.task.ament_cmake.build[0m [1;30mINFO[0m Building ROS package in '/Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam' with build type 'ament_cmake'
+[0.274s] [34mcolcon.colcon_cmake.task.cmake.build[0m [1;30mINFO[0m Building CMake package in '/Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam'
+[0.278s] [34mcolcon.colcon_core.plugin_system[0m [1;30mINFO[0m Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.278s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.278s] [34mcolcon.colcon_core.shell[0m [1;30mDEBUG[0m [32mSkip shell extension 'dsv' for command environment[0m
+[0.323s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoking command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake /Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam -DCMAKE_INSTALL_PREFIX=/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam[0m
+[1.997s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoked command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam' returned '0': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake /Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam -DCMAKE_INSTALL_PREFIX=/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam[0m
+[2.002s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoking command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake --build /Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam -- -j8 -l8[0m
+[2.178s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoked command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam' returned '0': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake --build /Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam -- -j8 -l8[0m
+[2.537s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoking command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake --install /Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam[0m
+[2.831s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m create_environment_scripts_only(ekf-mono-slam)
+[2.832s] [34mcolcon.colcon_core.event_handler.log_command[0m [1;30mDEBUG[0m [32mInvoked command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam' returned '0': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake --install /Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam[0m
+[2.835s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam' for CMake module files
+[2.836s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam' for CMake config files
+[2.837s] [34mcolcon.colcon_core.shell[0m [1;30mLevel 1[0m create_environment_hook('ekf-mono-slam', 'cmake_prefix_path')
+[2.837s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/hook/cmake_prefix_path.ps1'
+[2.838s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment descriptor '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/hook/cmake_prefix_path.dsv'
+[2.838s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/hook/cmake_prefix_path.sh'
+[2.840s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/lib'
+[2.840s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/bin'
+[2.840s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/lib/pkgconfig/ekf-mono-slam.pc'
+[2.841s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/lib/python3.11/site-packages'
+[2.841s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/bin'
+[2.841s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.ps1'
+[2.842s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package descriptor '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.dsv'
+[2.843s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.sh'
+[2.844s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.bash'
+[2.844s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.zsh'
+[2.845s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m create_file_with_runtime_dependencies(/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/colcon-core/packages/ekf-mono-slam)
+[3.190s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m create_environment_scripts_only(ekf-mono-slam)
+[3.191s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam' for CMake module files
+[3.191s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam' for CMake config files
+[3.192s] [34mcolcon.colcon_core.shell[0m [1;30mLevel 1[0m create_environment_hook('ekf-mono-slam', 'cmake_prefix_path')
+[3.192s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/hook/cmake_prefix_path.ps1'
+[3.193s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment descriptor '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/hook/cmake_prefix_path.dsv'
+[3.193s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/hook/cmake_prefix_path.sh'
+[3.194s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/lib'
+[3.194s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/bin'
+[3.194s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/lib/pkgconfig/ekf-mono-slam.pc'
+[3.195s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/lib/python3.11/site-packages'
+[3.195s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m checking '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/bin'
+[3.195s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.ps1'
+[3.196s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package descriptor '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.dsv'
+[3.196s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.sh'
+[3.197s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.bash'
+[3.197s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating package script '/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/ekf-mono-slam/package.zsh'
+[3.198s] [34mcolcon.colcon_core.environment[0m [1;30mLevel 1[0m create_file_with_runtime_dependencies(/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam/share/colcon-core/packages/ekf-mono-slam)
+[3.199s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mclosing loop[0m
+[3.199s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mloop closed[0m
+[3.199s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mrun_until_complete finished with '0'[0m
+[3.199s] [34mcolcon.colcon_core.event_reactor[0m [1;30mDEBUG[0m [32mjoining thread[0m
+[3.200s] [34mcolcon.colcon_core.event_reactor[0m [1;30mDEBUG[0m [32mjoined thread[0m
+[3.200s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/Users/agaona/github.com/ekf-mono-slam/install/local_setup.ps1'
+[3.201s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix util module '/Users/agaona/github.com/ekf-mono-slam/install/_local_setup_util_ps1.py'
+[3.203s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/Users/agaona/github.com/ekf-mono-slam/install/setup.ps1'
+[3.204s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/Users/agaona/github.com/ekf-mono-slam/install/local_setup.sh'
+[3.204s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix util module '/Users/agaona/github.com/ekf-mono-slam/install/_local_setup_util_sh.py'
+[3.205s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/Users/agaona/github.com/ekf-mono-slam/install/setup.sh'
+[3.206s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/Users/agaona/github.com/ekf-mono-slam/install/local_setup.bash'
+[3.207s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/Users/agaona/github.com/ekf-mono-slam/install/setup.bash'
+[3.209s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/Users/agaona/github.com/ekf-mono-slam/install/local_setup.zsh'
+[3.209s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/Users/agaona/github.com/ekf-mono-slam/install/setup.zsh'

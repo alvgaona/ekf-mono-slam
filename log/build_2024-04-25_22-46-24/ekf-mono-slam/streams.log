@@ -1,0 +1,4 @@
+[0.048s] Invoking command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake /Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam -G Ninja -vvv -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam
+[0.220s] CMake Error: Unknown argument -vvv
+[0.220s] CMake Error: Run 'cmake --help' for all supported options.
+[0.222s] Invoked command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam' returned '1': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake /Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam -G Ninja -vvv -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam

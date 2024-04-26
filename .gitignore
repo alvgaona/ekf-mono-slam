@@ -29,3 +29,7 @@ cmake-build-debug/
 *.exe
 *.out
 *.app
+# pixi environments
+.pixi
+*.egg-info
+

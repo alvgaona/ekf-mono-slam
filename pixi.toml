@@ -1,0 +1,22 @@
+[project]
+name = "ekf-mono-slam"
+version = "0.1.0"
+description = "Visual Mono SLAM with 1-Point RANSAC EKF"
+authors = ["Alvaro <agaona@asapp.com>"]
+channels = ["conda-forge", "robostack-staging"]
+platforms = ["osx-64", "linux-64"]
+
+[tasks]
+build = "colcon build --symlink-install"
+
+[dependencies]
+ros-humble-desktop = ">=0.10.0,<0.11"
+colcon-common-extensions = ">=0.3.0,<0.4"
+ninja = ">=1.12.0,<1.13"
+cmake = ">=3.28.3,<3.29"
+pkg-config = ">=0.29.2,<0.30"
+compilers = ">=1.7.0,<1.8"
+ros-humble-ament-cmake-auto = ">=1.3.7,<1.4"
+
+[activation]
+scripts = ["install/setup.sh"]
