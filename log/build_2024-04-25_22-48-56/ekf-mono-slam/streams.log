@@ -1,8 +1,0 @@
-[0.044s] Invoking command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake /Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam -G Ninja -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam
-[0.189s] CMake Error at CMakeLists.txt:8:
-[0.189s]   Parse error.  Expected a command name, got unquoted argument with text
-[0.189s]   "=find_package".
-[0.189s] 
-[0.189s] 
-[0.189s] -- Configuring incomplete, errors occurred!
-[0.191s] Invoked command in '/Users/agaona/github.com/ekf-mono-slam/build/ekf-mono-slam' returned '1': PIXI_PROMPT=(ekf-mono-slam) SHLVL=2 _=/usr/bin/env /Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/bin/cmake /Users/agaona/github.com/ekf-mono-slam/src/ekf-mono-slam -G Ninja -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/Users/agaona/github.com/ekf-mono-slam/install/ekf-mono-slam

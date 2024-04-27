@@ -1,3 +1,6 @@
+# ROS
+install/
+
 # Datasets
 test/**/AGZ_subset
 
@@ -29,7 +32,7 @@ cmake-build-debug/
 *.exe
 *.out
 *.app
-# pixi environments
-.pixi
-*.egg-info
 
+# pixi environments
+.pixi/
+*.egg-info

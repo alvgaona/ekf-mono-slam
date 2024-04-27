@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(ekf-mono-slam)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
@@ -13,21 +13,50 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(Eigen3 3.4.0 REQUIRED)
+find_package(OpenCV 4.9.0 REQUIRED)
 
-add_executable(publisher src/publisher.cpp)
-ament_target_dependencies(publisher rclcpp std_msgs)
+file(GLOB_RECURSE CONFIG_SOURCES src/configuration/*.cpp)
+file(GLOB_RECURSE MATH_SOURCES src/math/*.cpp)
+file(GLOB_RECURSE FILTER_SOURCES src/filter/*.cpp)
 
-add_executable(subscriber src/subscriber.cpp)
+add_executable(publisher src/publisher_node.cpp ${MATH_SOURCES} ${CONFIG_SOURCES})
+ament_target_dependencies(publisher PUBLIC rclcpp std_msgs)
+target_link_libraries(publisher PUBLIC ${OpenCV_LIBRARIES})
+target_include_directories(publisher
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+  ${OpenCV_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+)
+
+add_executable(subscriber src/subscriber_node.cpp)
 ament_target_dependencies(subscriber rclcpp std_msgs)
 
 install(TARGETS
   publisher
   subscriber
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
+  file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
+  file(GLOB_RECURSE SOURCES_FOR_TEST src/math/ekf_math.cpp)
+
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(some_test ${TEST_SOURCES} ${SOURCES_FOR_TEST})
+
+  target_include_directories(some_test PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    ${OpenCV_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}
+  )
+  ament_target_dependencies(some_test
+    std_msgs
+  )
 endif()
 
 ament_package()

@@ -1,6 +1,0 @@
-CMake Error at CMakeLists.txt:8:
-  Parse error.  Expected a command name, got unquoted argument with text
-  "=find_package".
-
-
--- Configuring incomplete, errors occurred!

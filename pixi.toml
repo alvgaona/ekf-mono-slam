@@ -8,6 +8,7 @@ platforms = ["osx-64", "linux-64"]
 
 [tasks]
 build = "colcon build --symlink-install"
+test = "colcon test --ctest-args tests ekf-mono-slam && ./build/ekf-mono-slam/some_test"
 
 [dependencies]
 ros-humble-desktop = ">=0.10.0,<0.11"
