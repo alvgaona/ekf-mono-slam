@@ -1,1 +1,0 @@
-/Users/agaona/github.com/ekf-mono-slam/.pixi/envs/default/share/ament_cmake_core/cmake/environment_hooks/environment/path.sh
