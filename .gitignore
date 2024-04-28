@@ -1,5 +1,6 @@
 # ROS
 install/
+log/
 
 # Datasets
 test/**/AGZ_subset

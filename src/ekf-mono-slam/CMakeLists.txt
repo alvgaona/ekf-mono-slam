@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
 find_package(OpenCV 4.9.0 REQUIRED)
+find_package(spdlog 1.12.0 REQUIRED)
 
 file(GLOB_RECURSE CONFIG_SOURCES src/configuration/*.cpp)
 file(GLOB_RECURSE MATH_SOURCES src/math/*.cpp)
@@ -22,7 +23,7 @@ file(GLOB_RECURSE FILTER_SOURCES src/filter/*.cpp)
 
 add_executable(publisher src/publisher_node.cpp ${MATH_SOURCES} ${CONFIG_SOURCES})
 ament_target_dependencies(publisher PUBLIC rclcpp std_msgs)
-target_link_libraries(publisher PUBLIC ${OpenCV_LIBRARIES})
+target_link_libraries(publisher PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(publisher
   PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -42,20 +43,18 @@ install(TARGETS
 
 if(BUILD_TESTING)
   file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
-  file(GLOB_RECURSE SOURCES_FOR_TEST src/math/ekf_math.cpp)
+  file(GLOB_RECURSE SOURCES_FOR_TESTS src/*.cpp)
+  list(FILTER SOURCES_FOR_TESTS EXCLUDE REGEX "src/.*_node.cpp")
 
   find_package(ament_cmake_gtest REQUIRED)
 
-  ament_add_gtest(some_test ${TEST_SOURCES} ${SOURCES_FOR_TEST})
-
+  ament_add_gtest(some_test ${TEST_SOURCES} ${SOURCES_FOR_TESTS})
+  ament_target_dependencies(some_test std_msgs OpenCV)
+  target_link_libraries(some_test spdlog::spdlog)
   target_include_directories(some_test PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
-    ${OpenCV_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
-  )
-  ament_target_dependencies(some_test
-    std_msgs
   )
 endif()
 
