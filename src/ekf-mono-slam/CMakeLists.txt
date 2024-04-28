@@ -21,10 +21,10 @@ file(GLOB_RECURSE CONFIG_SOURCES src/configuration/*.cpp)
 file(GLOB_RECURSE MATH_SOURCES src/math/*.cpp)
 file(GLOB_RECURSE FILTER_SOURCES src/filter/*.cpp)
 
-add_executable(publisher src/publisher_node.cpp ${MATH_SOURCES} ${CONFIG_SOURCES})
-ament_target_dependencies(publisher PUBLIC rclcpp std_msgs)
-target_link_libraries(publisher PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
-target_include_directories(publisher
+add_executable(file_sequence_image src/file_sequence_image_node.cpp ${MATH_SOURCES} ${CONFIG_SOURCES})
+ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs)
+target_link_libraries(file_sequence_image PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
+target_include_directories(file_sequence_image
   PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
@@ -32,12 +32,20 @@ target_include_directories(publisher
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_executable(subscriber src/subscriber_node.cpp)
-ament_target_dependencies(subscriber rclcpp std_msgs)
+add_executable(ekf src/ekf_node.cpp)
+ament_target_dependencies(ekf PUBLIC rclcpp std_msgs)
+target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
+target_include_directories(ekf
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+  ${OpenCV_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+)
 
 install(TARGETS
-  publisher
-  subscriber
+  file_sequence_image
+  ekf
   DESTINATION lib/${PROJECT_NAME}
 )
 
