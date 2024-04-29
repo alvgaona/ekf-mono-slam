@@ -9,7 +9,7 @@
 using namespace std::chrono_literals;
 
 FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image"), count_(0) {
-  publisher_ = this->create_publisher<std_msgs::msg::String>("slam/ekf/step, 10");
+  publisher_ = this->create_publisher<std_msgs::msg::String>("slam/ekf/step", 10);
   timer_ = this->create_wall_timer(500ms, std::bind(&FileSequenceImageNode::timer_callback, this));
 }
 
