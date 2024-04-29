@@ -128,7 +128,7 @@ void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_me
 
   feature_state(3) = atan2(hx, hz);
   feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));
-  feature_state(5) = ImageFeatureParameters::INIT_INV_DEPTH;
+  feature_state(5) = ImageFeatureParameters::init_inv_depth;
 
   // TODO: Check if we really need to store the position in the covariance matrix within the MapFeature object
   const auto map_feature = std::make_shared<MapFeature>(
