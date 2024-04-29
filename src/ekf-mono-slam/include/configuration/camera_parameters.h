@@ -2,51 +2,98 @@
 #define EKF_MONO_SLAM_CAMERA_PARAMETERS_H
 
 /**
- * \brief Structure containing camera calibration parameters.
+ * @defgroup camera_parameters Camera Parameters
+ * @brief Camera calibration parameters for distortion correction and image analysis.
  *
- * This structure holds various parameters necessary for camera calibration and distortion correction. It defines the
- * following properties:
+ * @namespace CameraParameters
+ * @brief Namespace containing camera calibration parameters.
  *
- * | Parameter          | Description                            | Units    |
- * |--------------------|----------------------------------------|----------|
- * | `px`               | Image width in pixels                  | pixels   |
- * | `py`               | Image height in pixels                 | pixels   |
- * | `fx`               | Focal length in the x-axis             | pixels   |
- * | `fy`               | Focal length in the y-axis             | pixels   |
- * | `k1`               | First radial distortion coefficient    | unitless |
- * | `k2`               | Second radial distortion coefficient   | unitless |
- * | `cx`               | Principal point x-coordinate           | pixels   |
- * | `cy`               | Principal point y-coordinate           | pixels   |
- * | `dx`               | Distortion coefficient for x-axis      | unitless |
- * | `dy`               | Distortion coefficient for y-axis      | unitless |
- * | `pixel_error_x`    | Standard deviation of pixel error in x | pixels   |
- * | `pixel_error_y`    | Standard deviation of pixel error in y | pixels   |
- * | `angular_vision_x` | Horizontal field of view               | degrees  |
- * | `angular_vision_y` | Vertical field of view                 | degrees  |
- *
- * These parameters are used for various tasks related to image analysis and object detection, including:
- * * Distortion correction: Correcting image distortion caused by the camera lens.
- * * Depth estimation: Calculating the depth of objects in the image based on their size and position.
- * * Camera pose estimation: Determining the position and orientation of the camera in the 3D world.
- *
- * This structure provides a convenient way to store and access all necessary camera parameters for various computer
- * vision applications.
  */
-struct CameraParameters {
-  static constexpr int px = 640;
-  static constexpr int py = 480;
-  static constexpr double fx = 525.060143149240389;
-  static constexpr double fy = 524.245488213640215;
-  static constexpr double k1 = -7.613e-003;
-  static constexpr double k2 = 9.388e-004;
-  static constexpr double cx = 308.649343121753361;
-  static constexpr double cy = 236.536005491807288;
-  static constexpr double dx = 0.007021618750000;
-  static constexpr double dy = 0.007027222916667;
-  static constexpr double pixel_error_x = 1.0L;
-  static constexpr double pixel_error_y = 1.0L;
-  static constexpr double angular_vision_x = 62.720770890650357;
-  static constexpr double angular_vision_y = 49.163954709609868;
-};
+namespace CameraParameters {
+
+/**
+ * @brief Image width in pixels.
+ * @units pixels
+ */
+static constexpr int px = 640;
+
+/**
+ * @brief Image height in pixels.
+ * @units pixels
+ */
+static constexpr int py = 480;
+
+/**
+ * @brief Focal length in the x-axis (pixels).
+ * @units pixels
+ */
+static constexpr double fx = 525.060143149240389;
+
+/**
+ * @brief Focal length in the y-axis (pixels).
+ * @units pixels
+ */
+static constexpr double fy = 524.245488213640215;
+
+/**
+ * @brief First radial distortion coefficient.
+ * @units unitless
+ */
+static constexpr double k1 = -7.613e-003;
+
+/**
+ * @brief Second radial distortion coefficient.
+ * @units unitless
+ */
+static constexpr double k2 = 9.388e-004;
+
+/**
+ * @brief Principal point x-coordinate (pixels).
+ * @units pixels
+ */
+static constexpr double cx = 308.649343121753361;
+
+/**
+ * @brief Principal point y-coordinate (pixels).
+ * @units pixels
+ */
+static constexpr double cy = 236.536005491807288;
+
+/**
+ * @brief Distortion coefficient for x-axis.
+ * @units unitless
+ */
+static constexpr double dx = 0.007021618750000;
+
+/**
+ * @brief Distortion coefficient for y-axis.
+ * @units unitless
+ */
+static constexpr double dy = 0.007027222916667;
+
+/**
+ * @brief Standard deviation of pixel error in x.
+ * @units pixels
+ */
+static constexpr double pixel_error_x = 1.0L;
+
+/**
+ * @brief Standard deviation of pixel error in y.
+ * @units pixels
+ */
+static constexpr double pixel_error_y = 1.0L;
+
+/**
+ * @brief Horizontal field of view (degrees).
+ * @units degrees
+ */
+static constexpr double angular_vision_x = 62.720770890650357;
+
+/**
+ * @brief Vertical field of view (degrees).
+ * @units degrees
+ */
+static constexpr double angular_vision_y = 49.163954709609868;
+};  // namespace CameraParameters
 
 #endif  // EKF_MONO_SLAM_CAMERA_PARAMETERS_H

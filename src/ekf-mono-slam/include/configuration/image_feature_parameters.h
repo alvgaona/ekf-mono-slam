@@ -2,36 +2,42 @@
 #define EKF_MONO_SLAM_CONFIGURATION_H_
 
 /**
- * \brief Structure containing configuration parameters for image feature detection and processing.
+ * @defgroup image_feature_config Image Feature Configuration
+ * @brief Configuration parameters for image feature detection and processing.
  *
- * This structure holds various constants defining the behavior and settings used by the image feature detection and
- processing algorithms. It defines the following parameters:
+ * This module encapsulates constants that govern the behavior and settings of image feature detection and processing
+ * algorithms.
  *
- * | Parameter                 | Description                                                              | Units    |
- * |---------------------------|--------------------------------------------------------------------------|----------|
- * | `IMAGE_AREA_DIVIDE_TIMES` | Number of times to divide the image area into zones for efficient search | unitless |
- * | `IMAGE_MASK_ELLIPSE_SIZE` | Size factor for the elliptical mask used for filtering features          | unitless |
- * | `FEATURES_PER_IMAGE`      | Expected number of features to be extracted from each image              | features |
- * | `INIT_INV_DEPTH`          | Initial inverse depth value assigned to extracted features               | unitless |
- *
- * These parameters influence various aspects of the feature detection process, including:
- * * **Zone management:** Dividing the image into zones based on `IMAGE_AREA_DIVIDE_TIMES` allows for efficient search
- and organization of features within specific areas.
- * * **Feature filtering:** Applying an elliptical mask with size `IMAGE_MASK_ELLIPSE_SIZE` helps focus on relevant
- features and discard unwanted ones.
- * * **Feature selection:** Limiting the number of extracted features to `FEATURES_PER_IMAGE` ensures efficient
- processing and avoids redundant information.
- * * **Depth initialization:** Setting the initial inverse depth to `INIT_INV_DEPTH` provides a starting point for depth
- estimation algorithms.
- *
- * This structure allows for customization and adaptation of the image feature detection and processing pipeline based
- on specific requirements and desired outcomes.
+ * @namespace ImageFeatureParameters
+ * @brief Namespace containing configuration parameters for image feature detection.
  */
-struct ImageFeatureParameters {
-  static constexpr int IMAGE_AREA_DIVIDE_TIMES = 2;
-  static constexpr double IMAGE_MASK_ELLIPSE_SIZE = 5.0L;
-  static constexpr int FEATURES_PER_IMAGE = 20;
-  static constexpr double INIT_INV_DEPTH = 1.0L;
-};
+namespace ImageFeatureParameters {
+/**
+ * @brief Number of times to subdivide the image area for efficient feature search.
+ * @details Increasing this value can improve search accuracy but may incur computational overhead.
+ * @units unitless
+ */
+static constexpr int image_area_divide_times = 2;
+/**
+ * @brief Size factor for the elliptical mask used to filter features.
+ * @details A larger value yields a wider mask, potentially retaining more features.
+ * @units unitless
+ */
+static constexpr double image_mask_ellipse_size = 5.0L;
+
+/**
+ * @brief Expected number of features to be extracted from each image.
+ * @details Adjust this value to balance feature density and computational cost.
+ * @units features
+ */
+static constexpr int features_per_image = 20;
+
+/**
+ * @brief Initial inverse depth value assigned to extracted features.
+ * @details This value serves as a starting point for depth estimation algorithms.
+ * @units unitless
+ */
+static constexpr double init_inv_depth = 1.0L;
+};  // namespace ImageFeatureParameters
 
 #endif /* EKF_MONO_SLAM_CONFIGURATION_H_ */
