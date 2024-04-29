@@ -10,7 +10,7 @@ TEST(FileSequenceImageProvider, InitFileSequenceImageProvider) {
 TEST(FileSequenceImageProvider, GetFirstImage) {
   FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
 
-  const cv::Mat image = image_provider.GetNextImage();
+  cv::Mat image = image_provider.GetNextImage();
 
   ASSERT_EQ(image_provider.GetImageCounter(), 1);
   ASSERT_EQ(image.size().width, 640);
