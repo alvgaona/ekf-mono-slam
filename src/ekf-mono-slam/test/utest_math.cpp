@@ -4,7 +4,7 @@
 
 using namespace EkfMath;
 
-TEST(ComputeJacobianDirectionalVector, JacobianDirectionalVector) {
+TEST(JacobianDirectionalVector, ComputeJacobianDirectionalVector) {
   const Eigen::Quaterniond q(1, 1, 1, 1);
 
   const Eigen::Vector3d directionalVector(0.5, 0.5, 0.5);
@@ -17,14 +17,14 @@ TEST(ComputeJacobianDirectionalVector, JacobianDirectionalVector) {
   ASSERT_EQ(jacobian.col(3), Eigen::Vector3d(-1, 1, 3));
 }
 
-TEST(ComputeQuaternionDerivatives, ZeroAngularVelocity) {
+TEST(QuaternionDerivatives, ZeroAngularVelocity) {
   const Eigen::Vector3d omega(0, 0, 0);
   const Eigen::Vector3d dq0domegai = partialDerivativeq0byOmegai(omega, 1.0);
 
   ASSERT_EQ(dq0domegai, Eigen::Vector3d(0, 0, 0));
 }
 
-TEST(ComputeQuaternionDerivatives, NonZeroAngularVelocity) {
+TEST(QuaternionDerivatives, NonZeroAngularVelocity) {
   const Eigen::Vector3d omega(0.35, 0.45, -0.34);
   const Eigen::Vector3d dq0domegai = partialDerivativeq0byOmegai(omega, 1.0);
 
@@ -50,7 +50,7 @@ TEST(ComputeQuaternionDerivatives, NonZeroAngularVelocity) {
   ASSERT_DOUBLE_EQ(dqidomegaj(1, 2), dqidomegaj(2, 1));
 }
 
-TEST(RotationDerivatives, RotationMatrixDerivativeByQuaternion) {
+TEST(RotationMatrix, RotationMatrixDerivativeByQuaternion) {
   const Eigen::Quaterniond q(1, 1, 1, 1);
 
   const Eigen::Matrix3d dRbyq0 = rotationMatrixDerivativesByq0(q);
