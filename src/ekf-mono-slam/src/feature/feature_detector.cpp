@@ -29,7 +29,7 @@ FeatureDetector::FeatureDetector(const cv::Ptr<cv::FeatureDetector>& detector,
   detector_ = detector;
   extractor_ = descriptor_extractor;
   img_size_ = img_size;
-  zones_in_row_ = static_cast<int>(std::exp2(ImageFeatureParameters::IMAGE_AREA_DIVIDE_TIMES));
+  zones_in_row_ = static_cast<int>(std::exp2(ImageFeatureParameters::image_area_divide_times));
   zone_size_ = cv::Size(img_size.width / zones_in_row_, img_size.height / zones_in_row_);
 }
 
@@ -253,7 +253,7 @@ void FeatureDetector::ComputeImageFeatureMeasurements(
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
     const std::vector<cv::KeyPoint>& image_keypoints) {
   if (const auto keypoints_size = image_keypoints.size();
-      keypoints_size <= ImageFeatureParameters::FEATURES_PER_IMAGE) {
+      keypoints_size <= ImageFeatureParameters::features_per_image) {
     for (int i = 0; i < keypoints_size; i++) {
       const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i)));
@@ -287,13 +287,13 @@ void FeatureDetector::ComputeImageFeatureMeasurements(
 void FeatureDetector::SelectImageMeasurementsFromZones(std::list<std::shared_ptr<Zone>>& zones,
                                                        const cv::Mat& image_mask) {
   const cv::Mat1d measurementEllipseMatrix(2, 2);
-  measurementEllipseMatrix << ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE, 0.0, 0.0,
-      ImageFeatureParameters::IMAGE_MASK_ELLIPSE_SIZE;
+  measurementEllipseMatrix << ImageFeatureParameters::image_mask_ellipse_size, 0.0, 0.0,
+      ImageFeatureParameters::image_mask_ellipse_size;
 
   auto zones_left = zones.size();
 
   // TODO: Change features_needed to be passed when calling DetectFeatures.
-  int features_needed = ImageFeatureParameters::FEATURES_PER_IMAGE;
+  int features_needed = ImageFeatureParameters::features_per_image;
   while (zones_left > 0 && features_needed > 0) {
     const std::shared_ptr<Zone> curr_zone = zones.front();
     int curr_zone_candidates_left = curr_zone->GetCandidatesLeft();
