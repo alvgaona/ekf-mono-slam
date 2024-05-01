@@ -1,6 +1,6 @@
-#ifndef EKF_NODE_MONO_SLAM_EKF_H
-#define EKF_NODE_MONO_SLAM_EKF_H
+#pragma once
 
+#include "image_transport/image_transport.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -11,9 +11,7 @@ class EKFNode : public rclcpp::Node {
   ~EKFNode() = default;
 
  private:
-  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
+  std::shared_ptr<image_transport::Subscriber> image_subscriber_;
 
-  void step_callback(sensor_msgs::msg::Image::SharedPtr msg);
+  void step_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
 };
-
-#endif /* EKF_NODE_MONO_SLAM_EKF_H */

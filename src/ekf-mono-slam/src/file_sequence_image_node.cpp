@@ -14,7 +14,8 @@ FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image") {
   auto image_dir = this->get_parameter("image_dir").get_value<std::string>();
 
   image_provider_ = std::make_unique<FileSequenceImageProvider>(image_dir, 1, 359);
-  publisher_ = this->create_publisher<sensor_msgs::msg::Image>("camera/image", 10);
+  image_publisher_ =
+      std::make_shared<image_transport::Publisher>(image_transport::create_publisher(this, "camera/image"));
   timer_ = this->create_wall_timer(40ms, std::bind(&FileSequenceImageNode::timer_callback, this));
 }
 
@@ -28,7 +29,7 @@ void FileSequenceImageNode::timer_callback() {
   sensor_msgs::msg::Image::SharedPtr image_msg =
       cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", image).toImageMsg();
 
-  publisher_->publish(*image_msg);
+  image_publisher_->publish(*image_msg);
 }
 
 int main(int argc, char *argv[]) {
