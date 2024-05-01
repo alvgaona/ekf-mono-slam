@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(ekf-mono-slam)
+project(ekf_mono_slam)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 20)
@@ -19,6 +19,7 @@ find_package(image_transport REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
 find_package(OpenCV 4.9.0 REQUIRED)
 find_package(spdlog 1.12.0 REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
 file(GLOB_RECURSE CONFIG_SOURCES src/configuration/*.cpp)
 file(GLOB_RECURSE MATH_SOURCES src/math/*.cpp)
@@ -35,7 +36,7 @@ target_include_directories(file_sequence_image
   ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(ekf src/ekf_node.cpp)
+add_executable(ekf src/ekf_node.cpp ${FILTER_SOURCES} ${MATH_SOURCES})
 ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(ekf
@@ -56,6 +57,13 @@ install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}
 )
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/ImageFeatureMeasurement.msg"
+  "srv/FeatureDetector.srv"
+  DEPENDENCIES sensor_msgs
+ )
+
 
 if(BUILD_TESTING)
   file(GLOB_RECURSE TEST_SOURCES test/*.cpp)

@@ -12,7 +12,12 @@ EKFNode::EKFNode() : Node("ekf_node") {
 void EKFNode::step_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg) {
   cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   cv::Mat image = cv_ptr->image;
-  RCLCPP_INFO(this->get_logger(), "Image size '%d'", image.size().width);
+
+  // if (ekf_.GetFeatureDetector() == nullptr) {
+  //   ekf_.Init(image);
+  // }
+
+  // ekf_.Step(image);
 }
 
 int main(int argc, char* argv[]) {

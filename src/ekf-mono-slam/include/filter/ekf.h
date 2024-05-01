@@ -20,6 +20,8 @@ class EKF final {
   EKF& operator=(EKF const& source) = delete;
   EKF& operator=(EKF&& source) noexcept = delete;
 
+  std::shared_ptr<FeatureDetector> GetFeatureDetector() const { return feature_detector_; }
+
   void Init(const cv::Mat& image);
   void Step(const cv::Mat& image);
 
@@ -29,10 +31,9 @@ class EKF final {
  private:
   std::shared_ptr<CovarianceMatrix> covariance_matrix_;
   std::shared_ptr<State> state_;
+  std::shared_ptr<FeatureDetector> feature_detector_;
   int step_;
   double delta_t_;
-
-  std::unique_ptr<FeatureDetector> feature_detector_;
 
   void AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const;
 };

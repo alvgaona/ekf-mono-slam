@@ -11,7 +11,7 @@ def generate_launch_description():
                 "image_dir", default_value="./resources/desk_translation/"
             ),
             Node(
-                package="ekf-mono-slam",
+                package="ekf_mono_slam",
                 executable="file_sequence_image",
                 name="file_sequence_image",
                 namespace="slam",
