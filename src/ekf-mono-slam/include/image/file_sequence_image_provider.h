@@ -2,6 +2,7 @@
 #define EKF_MONO_SLAM_FILE_SEQUENCE_IMAGE_PROVIDER_H_
 
 #include <filesystem>
+#include <memory>
 #include <string>
 
 #include "image_file_format.h"

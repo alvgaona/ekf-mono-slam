@@ -14,7 +14,7 @@ class FileSequenceImageNode : public rclcpp::Node {
  private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
-  FileSequenceImageProvider image_provider_;
+  std::unique_ptr<FileSequenceImageProvider> image_provider_;
 
   void timer_callback();
 };

@@ -10,14 +10,17 @@
 
 using namespace std::chrono_literals;
 
-FileSequenceImageNode::FileSequenceImageNode()
-    : Node("file_sequence_image"), image_provider_("./resources/desk_translation/", 1, 359) {
+FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image") {
+  this->declare_parameter("image_dir", "");
+  auto image_dir = this->get_parameter("image_dir").get_value<std::string>();
+
+  image_provider_ = std::make_unique<FileSequenceImageProvider>(image_dir, 1, 359);
   publisher_ = this->create_publisher<sensor_msgs::msg::Image>("slam/ekf/step", 10);
   timer_ = this->create_wall_timer(40ms, std::bind(&FileSequenceImageNode::timer_callback, this));
 }
 
 void FileSequenceImageNode::timer_callback() {
-  cv::Mat image = image_provider_.GetNextImage();
+  cv::Mat image = image_provider_->GetNextImage();
 
   cv_bridge::CvImage cv_bridge_image;
   cv_bridge_image.encoding = sensor_msgs::image_encodings::BGR8;

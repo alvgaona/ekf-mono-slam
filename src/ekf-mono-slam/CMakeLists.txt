@@ -53,6 +53,11 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
   file(GLOB_RECURSE SOURCES_FOR_TESTS src/*.cpp)
