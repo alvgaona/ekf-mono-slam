@@ -6,20 +6,30 @@
 #include <memory>
 #include <string>
 
+#include "cv_bridge/cv_bridge.h"
+
 using namespace std::chrono_literals;
 
-FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image"), count_(0) {
-  publisher_ = this->create_publisher<std_msgs::msg::String>("slam/ekf/step", 10);
-  timer_ = this->create_wall_timer(500ms, std::bind(&FileSequenceImageNode::timer_callback, this));
+FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image") {
+  this->declare_parameter("image_dir", "");
+  auto image_dir = this->get_parameter("image_dir").get_value<std::string>();
+
+  image_provider_ = std::make_unique<FileSequenceImageProvider>(image_dir, 1, 359);
+  publisher_ = this->create_publisher<sensor_msgs::msg::Image>("slam/ekf/step", 10);
+  timer_ = this->create_wall_timer(40ms, std::bind(&FileSequenceImageNode::timer_callback, this));
 }
 
 void FileSequenceImageNode::timer_callback() {
-  Eigen::Vector2i v(1, 2);
-  Eigen::Vector2i w(1, 2);
-  auto message = std_msgs::msg::String();
-  message.data = "The result is " + std::to_string(v.dot(w));
-  RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
-  publisher_->publish(message);
+  cv::Mat image = image_provider_->GetNextImage();
+
+  cv_bridge::CvImage cv_bridge_image;
+  cv_bridge_image.encoding = sensor_msgs::image_encodings::BGR8;
+  cv_bridge_image.image = image;
+
+  sensor_msgs::msg::Image::SharedPtr image_msg =
+      cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", image).toImageMsg();
+
+  publisher_->publish(*image_msg);
 }
 
 int main(int argc, char *argv[]) {

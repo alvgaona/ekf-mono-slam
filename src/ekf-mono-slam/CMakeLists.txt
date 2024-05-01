@@ -13,6 +13,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
 find_package(OpenCV 4.9.0 REQUIRED)
 find_package(spdlog 1.12.0 REQUIRED)
@@ -24,7 +26,7 @@ file(GLOB_RECURSE IMAGE_SOURCES src/image/*.cpp)
 
 
 add_executable(file_sequence_image src/file_sequence_image_node.cpp ${MATH_SOURCES} ${CONFIG_SOURCES} ${IMAGE_SOURCES})
-ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs)
+ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(file_sequence_image PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(file_sequence_image
   PUBLIC
@@ -35,7 +37,7 @@ target_include_directories(file_sequence_image
 )
 
 add_executable(ekf src/ekf_node.cpp)
-ament_target_dependencies(ekf PUBLIC rclcpp std_msgs)
+ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(ekf
   PUBLIC
@@ -49,6 +51,11 @@ install(TARGETS
   file_sequence_image
   ekf
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
