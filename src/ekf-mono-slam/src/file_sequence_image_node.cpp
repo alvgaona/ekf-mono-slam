@@ -1,6 +1,5 @@
 #include "file_sequence_image_node.h"
 
-#include <Eigen/Dense>
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -15,7 +14,7 @@ FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image") {
   auto image_dir = this->get_parameter("image_dir").get_value<std::string>();
 
   image_provider_ = std::make_unique<FileSequenceImageProvider>(image_dir, 1, 359);
-  publisher_ = this->create_publisher<sensor_msgs::msg::Image>("slam/ekf/step", 10);
+  publisher_ = this->create_publisher<sensor_msgs::msg::Image>("camera/image", 10);
   timer_ = this->create_wall_timer(40ms, std::bind(&FileSequenceImageNode::timer_callback, this));
 }
 

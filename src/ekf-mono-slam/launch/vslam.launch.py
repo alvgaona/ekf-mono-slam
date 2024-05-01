@@ -14,6 +14,7 @@ def generate_launch_description():
                 package="ekf-mono-slam",
                 executable="file_sequence_image",
                 name="file_sequence_image",
+                namespace="slam",
                 output="screen",
                 parameters=[
                     {"image_dir": LaunchConfiguration("image_dir")},

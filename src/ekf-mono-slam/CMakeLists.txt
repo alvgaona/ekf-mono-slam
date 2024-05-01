@@ -24,8 +24,7 @@ file(GLOB_RECURSE MATH_SOURCES src/math/*.cpp)
 file(GLOB_RECURSE FILTER_SOURCES src/filter/*.cpp)
 file(GLOB_RECURSE IMAGE_SOURCES src/image/*.cpp)
 
-
-add_executable(file_sequence_image src/file_sequence_image_node.cpp ${MATH_SOURCES} ${CONFIG_SOURCES} ${IMAGE_SOURCES})
+add_executable(file_sequence_image src/file_sequence_image_node.cpp ${CONFIG_SOURCES} ${IMAGE_SOURCES})
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(file_sequence_image PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(file_sequence_image
@@ -33,7 +32,6 @@ target_include_directories(file_sequence_image
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
   ${OpenCV_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
 )
 
 add_executable(ekf src/ekf_node.cpp)
