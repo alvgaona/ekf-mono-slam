@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_FILE_SEQUENCE_IMAGE_PROVIDER_H_
-#define EKF_MONO_SLAM_FILE_SEQUENCE_IMAGE_PROVIDER_H_
+#pragma once
 
 #include <filesystem>
 #include <memory>
@@ -24,5 +23,3 @@ class FileSequenceImageProvider final : public ImageProvider {
   int image_counter_;
   ImageFileFormat image_type_;
 };
-
-#endif /* EKF_MONO_SLAM_FILE_SEQUENCE_IMAGE_PROVIDER_H_ */

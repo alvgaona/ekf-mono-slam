@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
 find_package(OpenCV 4.9.0 REQUIRED)
 find_package(spdlog 1.12.0 REQUIRED)
@@ -24,20 +25,18 @@ file(GLOB_RECURSE MATH_SOURCES src/math/*.cpp)
 file(GLOB_RECURSE FILTER_SOURCES src/filter/*.cpp)
 file(GLOB_RECURSE IMAGE_SOURCES src/image/*.cpp)
 
-
-add_executable(file_sequence_image src/file_sequence_image_node.cpp ${MATH_SOURCES} ${CONFIG_SOURCES} ${IMAGE_SOURCES})
-ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
+add_executable(file_sequence_image src/file_sequence_image_node.cpp ${CONFIG_SOURCES} ${IMAGE_SOURCES})
+ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 target_link_libraries(file_sequence_image PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(file_sequence_image
   PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
   ${OpenCV_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
 )
 
 add_executable(ekf src/ekf_node.cpp)
-ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
+ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(ekf
   PUBLIC
