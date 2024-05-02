@@ -7,9 +7,8 @@ channels = ["conda-forge", "robostack-staging"]
 platforms = ["osx-64", "linux-64"]
 
 [tasks]
-build = "colcon build --symlink-install --event-handler console_direct+ --cmake-args -G Ninja -DPython_EXECUTABLE='$CONDA_PREFIX/bin/python' -DPython3_EXECUTABLE='$CONDA_PREFIX/bin/python'"
+build = "colcon build --symlink-install --event-handler console_direct+ --cmake-args -G Ninja -DPython_EXECUTABLE=$CONDA_PREFIX/bin/python -DPython3_EXECUTABLE=$CONDA_PREFIX/bin/python"
 test = "colcon test --ctest-args tests ekf_mono_slam && ./build/ekf_mono_slam/some_test"
-some = "echo $CONDA_PREFIX"
 
 [dependencies]
 ros-humble-desktop = ">=0.10.0,<0.11"

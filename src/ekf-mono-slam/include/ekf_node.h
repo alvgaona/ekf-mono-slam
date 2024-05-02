@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ekf_mono_slam/srv/feature_detector.hpp"
 #include "filter/ekf.h"
 #include "image_transport/image_transport.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -13,6 +14,7 @@ class EKFNode : public rclcpp::Node {
 
  private:
   std::shared_ptr<image_transport::Subscriber> image_subscriber_;
+  rclcpp::Client<ekf_mono_slam::srv::FeatureDetector>::SharedPtr detect_client_;
   EKF ekf_;
 
   void step_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg);

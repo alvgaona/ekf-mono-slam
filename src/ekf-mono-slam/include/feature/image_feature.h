@@ -1,7 +1,7 @@
 #ifndef EKF_MONO_SLAM_IMAGE_FEATURE_H_
 #define EKF_MONO_SLAM_IMAGE_FEATURE_H_
 
-#include <opencv4/opencv2/core/types.hpp>
+#include "opencv2/opencv.hpp"
 
 class ImageFeature {
  public:

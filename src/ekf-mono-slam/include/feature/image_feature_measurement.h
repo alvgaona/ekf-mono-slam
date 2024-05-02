@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H_
-#define EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H_
+#pragma once
 
 #include <opencv2/opencv.hpp>
 
@@ -24,5 +23,3 @@ class ImageFeatureMeasurement final : public ImageFeature {
  private:
   cv::Mat descriptor_data_;
 };
-
-#endif /* EKF_MONO_SLAM_IMAGE_FEATURE_MEASUREMENT_H_ */
