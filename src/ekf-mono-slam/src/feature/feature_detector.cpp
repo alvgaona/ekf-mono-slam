@@ -58,7 +58,6 @@ void FeatureDetector::DetectFeatures(const cv::Mat& image,
   BuildImageMask(image_mask, predictions);
 
   std::vector<cv::KeyPoint> image_keypoints;
-  spdlog::info("Detecting keypoints");
   detector_->detect(image, image_keypoints, image_mask);
   spdlog::debug("Number of keypoints detected: {}", image_keypoints.size());
 
