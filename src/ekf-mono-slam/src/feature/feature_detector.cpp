@@ -1,9 +1,11 @@
 #include "feature/feature_detector.h"
 
 #include <configuration/image_feature_parameters.h>
-#include <visual/visual.h>
 
 #include <random>
+
+#include "feature/ellipse.h"
+#include "visual/visual.h"
 
 /**
  * @brief Construct a FeatureDetector object.
@@ -50,8 +52,7 @@ FeatureDetector::FeatureDetector(const cv::Ptr<cv::FeatureDetector>& detector,
  * accessed later.
  */
 void FeatureDetector::DetectFeatures(const cv::Mat& image,
-                                     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-                                     const bool visualize) {
+                                     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions) {
   const cv::Mat image_mask(cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255);
 
   BuildImageMask(image_mask, predictions);
@@ -60,10 +61,6 @@ void FeatureDetector::DetectFeatures(const cv::Mat& image,
   spdlog::info("Detecting keypoints");
   detector_->detect(image, image_keypoints, image_mask);
   spdlog::debug("Number of keypoints detected: {}", image_keypoints.size());
-
-  if (visualize) {
-    Visual::VisualizeKeyPoints(image, image_keypoints);
-  }
 
   cv::Mat descriptors;
   extractor_->compute(image, image_keypoints, descriptors);
@@ -82,9 +79,9 @@ void FeatureDetector::DetectFeatures(const cv::Mat& image,
  * (recommended for most cases), the function will use an empty set of predictions internally.
  * Additionally, the function offers the option to visualize the detected keypoints on the image for debugging purposes.
  */
-void FeatureDetector::DetectFeatures(const cv::Mat& image, const bool visualize) {
+void FeatureDetector::DetectFeatures(const cv::Mat& image) {
   const std::vector<std::shared_ptr<ImageFeaturePrediction>> empty_predictions;
-  DetectFeatures(image, empty_predictions, visualize);
+  DetectFeatures(image, empty_predictions);
 }
 
 /**

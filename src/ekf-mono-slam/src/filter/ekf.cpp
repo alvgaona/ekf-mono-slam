@@ -32,7 +32,7 @@ void EKF::Init(const cv::Mat& image) {
       FeatureDetector::BuildDetector(DetectorType::AKAZE),
       FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE), cv::Size(image.rows, image.cols));
 
-  feature_detector_->DetectFeatures(image, false);
+  feature_detector_->DetectFeatures(image);
 
   AddFeatures(feature_detector_->GetImageFeatures());
 }

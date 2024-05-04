@@ -1,15 +1,13 @@
-#ifndef EKF_MONO_SLAM_FEATURE_DETECTOR_H_
-#define EKF_MONO_SLAM_FEATURE_DETECTOR_H_
+#pragma once
 
 #include <spdlog/spdlog.h>
-
-#include <opencv2/core/types.hpp>
-#include <opencv2/features2d.hpp>
 
 #include "descriptor_extractor_type.h"
 #include "detector_type.h"
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
+#include "opencv2/core/types.hpp"
+#include "opencv2/features2d.hpp"
 #include "zone.h"
 
 class FeatureDetector final {
@@ -33,10 +31,9 @@ class FeatureDetector final {
 
   [[nodiscard]] cv::Size GetImageSize() const { return img_size_; }
 
-  void DetectFeatures(const cv::Mat& image, bool visualize = false);
+  void DetectFeatures(const cv::Mat& image);
 
-  void DetectFeatures(const cv::Mat& image, const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-                      bool visualize = false);
+  void DetectFeatures(const cv::Mat& image, const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions);
 
  private:
   std::vector<std::shared_ptr<ImageFeatureMeasurement>> image_features_;
@@ -66,5 +63,3 @@ class FeatureDetector final {
 
   void SelectImageMeasurementsFromZones(std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask);
 };
-
-#endif /* EKF_MONO_SLAM_FEATURE_DETECTOR_H_ */

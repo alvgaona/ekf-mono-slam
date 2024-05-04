@@ -19,9 +19,9 @@ void FeatureDetectorNode::detect_callback(const std::shared_ptr<ekf_mono_slam::s
                                    FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE),
                                    cv::Size(image.rows, image.cols));
 
-  feature_detector.DetectFeatures(image, false);
+  feature_detector.DetectFeatures(image);
 
-  RCLCPP_INFO(this->get_logger(), "Image size '%d'", image.size().width);
+  // RCLCPP_INFO(this->get_logger(), "Image size '%d'", image.size().width);
 }
 
 int main(int argc, char *argv[]) {

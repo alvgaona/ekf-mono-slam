@@ -1,4 +1,4 @@
-#include "visual/ellipse.h"
+#include "feature/ellipse.h"
 
 #include "math/ekf_math.h"
 

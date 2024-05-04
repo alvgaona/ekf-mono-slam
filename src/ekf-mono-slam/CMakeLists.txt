@@ -21,30 +21,31 @@ find_package(OpenCV 4.9.0 REQUIRED)
 find_package(spdlog 1.12.0 REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-file(GLOB_RECURSE CONFIG_SOURCES src/configuration/*.cpp)
-file(GLOB_RECURSE MATH_SOURCES src/math/*.cpp)
-file(GLOB_RECURSE FILTER_SOURCES src/filter/*.cpp)
-file(GLOB_RECURSE IMAGE_SOURCES src/image/*.cpp)
-file(GLOB_RECURSE FEATURE_SOURCES src/feature/*.cpp)
+file(GLOB_RECURSE config_src src/configuration/*.cpp)
+file(GLOB_RECURSE math_src src/math/*.cpp)
+file(GLOB_RECURSE filter_src src/filter/*.cpp)
+file(GLOB_RECURSE image_src src/image/*.cpp)
+file(GLOB_RECURSE feature_src src/feature/*.cpp)
+file(GLOB_RECURSE visual_src src/visual/*.cpp)
 
-set(MSG_FILES
+set(msg_files
   "msg/ImageFeatureMeasurement.msg"
   "msg/ImageFeaturePrediction.msg"
 )
 
-set(SRV_FILES
+set(srv_files
   "srv/FeatureDetector.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  ${MSG_FILES}
-  ${SRV_FILES}
+  ${msg_files}
+  ${srv_files}
   DEPENDENCIES sensor_msgs
 )
 
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 
-add_executable(file_sequence_image src/file_sequence_image_node.cpp ${CONFIG_SOURCES} ${IMAGE_SOURCES})
+add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src} ${image_src})
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 target_link_libraries(file_sequence_image PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
 target_include_directories(file_sequence_image
@@ -54,7 +55,7 @@ target_include_directories(file_sequence_image
   ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(feature_detector src/feature_detector_node.cpp ${FEATURE_SOURCES})
+add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src})
 ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(feature_detector PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
 target_include_directories(feature_detector
@@ -65,7 +66,7 @@ target_include_directories(feature_detector
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_executable(ekf src/ekf_node.cpp ${FILTER_SOURCES} ${MATH_SOURCES})
+add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src})
 ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
 target_include_directories(ekf
@@ -89,13 +90,13 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
-  file(GLOB_RECURSE SOURCES_FOR_TESTS src/*.cpp)
-  list(FILTER SOURCES_FOR_TESTS EXCLUDE REGEX "src/.*_node.cpp")
+  file(GLOB_RECURSE test_src test/*.cpp)
+  file(GLOB_RECURSE src_for_test src/*.cpp)
+  list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 
   find_package(ament_cmake_gmock REQUIRED)
 
-  ament_add_gmock(some_test ${TEST_SOURCES} ${SOURCES_FOR_TESTS})
+  ament_add_gmock(some_test ${test_src} ${src_for_test})
   ament_target_dependencies(some_test std_msgs OpenCV)
   target_link_libraries(some_test spdlog::spdlog)
   target_include_directories(some_test PUBLIC
