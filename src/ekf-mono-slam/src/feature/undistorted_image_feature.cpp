@@ -28,7 +28,7 @@ Eigen::Vector3d UndistortedImageFeature::BackProject() const {
   // doi: 10.1007/978-3-642-24834-4.
   const double x = -(coordinates_.x() - cx) * dx / fx;
   const double y = -(coordinates_.y() - cy) * dy / fy;
-  constexpr double z = 1.0L;
+  constexpr double z = 1L;
 
   return {x, y, z};
 }

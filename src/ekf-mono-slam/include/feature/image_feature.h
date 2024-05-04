@@ -12,7 +12,9 @@ class ImageFeature {
 
   [[nodiscard]] virtual cv::Point2f GetCoordinates() const { return coordinates_; }
 
-  [[nodiscard]] virtual int ComputeZone(int zone_width, int zone_height, int image_width, int image_height) const;
+  [[nodiscard]] virtual int GetFeatureIndex() const { return feature_index_; }
+
+  [[nodiscard]] virtual int ComputeZone(int zone_width, int zone_height, int image_width) const;
 
  protected:
   cv::Point2f coordinates_;

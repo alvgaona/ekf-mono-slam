@@ -4,15 +4,14 @@
 #include "feature/feature_detector.h"
 
 FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
-  service_ = this->create_service<ekf_mono_slam::srv::FeatureDetector>(
-      "feature_detect",
-      std::bind(&FeatureDetectorNode::detect_callback, this, std::placeholders::_1, std::placeholders::_2));
+  image_subscriber_ = std::make_shared<image_transport::Subscriber>(image_transport::create_subscription(
+      this, "camera/image", std::bind(&FeatureDetectorNode::image_callback, this, std::placeholders::_1), "raw"));
+  image_measurements_publisher_ =
+      this->create_publisher<ekf_mono_slam::msg::ImageFeatureMeasurements>("features/image/measurements", 10);
 }
 
-void FeatureDetectorNode::detect_callback(const std::shared_ptr<ekf_mono_slam::srv::FeatureDetector::Request> request,
-                                          std::shared_ptr<ekf_mono_slam::srv::FeatureDetector::Response> response) {
-  auto image_msg = request->image;
-  cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
+void FeatureDetectorNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg) {
+  cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   cv::Mat image = cv_ptr->image;
 
   FeatureDetector feature_detector(FeatureDetector::BuildDetector(DetectorType::AKAZE),
@@ -21,10 +20,25 @@ void FeatureDetectorNode::detect_callback(const std::shared_ptr<ekf_mono_slam::s
 
   feature_detector.DetectFeatures(image);
 
-  // RCLCPP_INFO(this->get_logger(), "Image size '%d'", image.size().width);
+  ekf_mono_slam::msg::ImageFeatureMeasurements image_feature_measurements;
+
+  for (auto m : feature_detector.GetImageFeatures()) {
+    ekf_mono_slam::msg::ImageFeatureMeasurement feature;
+    auto coordinates = m->GetCoordinates();
+    auto descriptor = m->GetDescriptorData();
+
+    feature.feature_index = m->GetFeatureIndex();
+    feature.x = coordinates.x;
+    feature.y = coordinates.y;
+    feature.descriptor.assign(descriptor.datastart, descriptor.dataend);
+
+    image_feature_measurements.features.push_back(feature);
+  }
+
+  image_measurements_publisher_->publish(image_feature_measurements);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<FeatureDetectorNode>());
   rclcpp::shutdown();

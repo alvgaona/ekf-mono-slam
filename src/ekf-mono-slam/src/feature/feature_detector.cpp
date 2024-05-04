@@ -165,13 +165,12 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
     const std::vector<cv::KeyPoint>& keypoints, const cv::Mat& descriptors) const {
   const auto keypoints_size = keypoints.size();
 
-  for (auto i = 0; i < keypoints_size; i++) {
+  for (auto i = 0U; i < keypoints_size; i++) {
     const cv::KeyPoint& keypoint = keypoints.at(i);
 
     const auto image_feature_measurement = std::make_shared<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i));
 
-    const int zone_id =
-        image_feature_measurement->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width, img_size_.height);
+    const int zone_id = image_feature_measurement->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width);
 
     zones[zone_id]->AddCandidate(image_feature_measurement);
     int candidates_left = zones[zone_id]->GetCandidatesLeft();
@@ -180,9 +179,8 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
 
   const auto predictions_size = predictions.size();
 
-  for (auto i = 0; i < predictions_size; i++) {
-    const int zone_id =
-        predictions[i]->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width, img_size_.height);
+  for (auto i = 0U; i < predictions_size; i++) {
+    const int zone_id = predictions[i]->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width);
 
     zones[zone_id]->AddPrediction(predictions[i]);
     int predictions_features_count = zones[zone_id]->GetPredictionsFeaturesCount();
@@ -250,7 +248,7 @@ void FeatureDetector::ComputeImageFeatureMeasurements(
     const std::vector<cv::KeyPoint>& image_keypoints) {
   if (const auto keypoints_size = image_keypoints.size();
       keypoints_size <= ImageFeatureParameters::features_per_image) {
-    for (int i = 0; i < keypoints_size; i++) {
+    for (auto i = 0U; i < keypoints_size; i++) {
       const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i)));
     }

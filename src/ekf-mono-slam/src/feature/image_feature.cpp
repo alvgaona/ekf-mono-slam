@@ -36,7 +36,6 @@ ImageFeature::ImageFeature(const cv::Point2f coordinates, const int feature_inde
  * @param zone_width The width of each zone in pixels.
  * @param zone_height The height of each zone in pixels.
  * @param image_width The width of the entire image in pixels.
- * @param image_height The height of the entire image in pixels.
  * @return The zone ID for the image feature.
  *
  * This function calculates the zone ID for a given `ImageFeature` object based on its coordinates and the provided zone
@@ -49,8 +48,7 @@ ImageFeature::ImageFeature(const cv::Point2f coordinates, const int feature_inde
  * This method allows for efficient organization and retrieval of features and predictions associated with specific
  * zones within the image.
  */
-int ImageFeature::ComputeZone(const int zone_width, const int zone_height, const int image_width,
-                              const int image_height) const {
+int ImageFeature::ComputeZone(const int zone_width, const int zone_height, const int image_width) const {
   const int zone_x = static_cast<int>(coordinates_.x) / zone_width;
   const int zone_y = static_cast<int>(coordinates_.y) / zone_height;
   return zone_y * (image_width / zone_width) + zone_x;

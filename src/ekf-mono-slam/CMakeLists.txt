@@ -30,16 +30,12 @@ file(GLOB_RECURSE visual_src src/visual/*.cpp)
 
 set(msg_files
   "msg/ImageFeatureMeasurement.msg"
+  "msg/ImageFeatureMeasurements.msg"
   "msg/ImageFeaturePrediction.msg"
-)
-
-set(srv_files
-  "srv/FeatureDetector.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
-  ${srv_files}
   DEPENDENCIES sensor_msgs
 )
 
@@ -56,7 +52,7 @@ target_include_directories(file_sequence_image
 )
 
 add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src})
-ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
+ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 target_link_libraries(feature_detector PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
 target_include_directories(feature_detector
   PUBLIC
@@ -67,7 +63,7 @@ target_include_directories(feature_detector
 )
 
 add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src})
-ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
+ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
 target_include_directories(ekf
   PUBLIC

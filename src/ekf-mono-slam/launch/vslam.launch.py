@@ -21,13 +21,13 @@ def generate_launch_description():
                 ],
                 arguments=["--ros-args", "--log-level", "warn"],
             ),
-            Node(
-                package="ekf_mono_slam",
-                executable="ekf",
-                name="ekf",
-                namespace="slam",
-                output="screen",
-                arguments=["--ros-args", "--log-level", "warn"],
-            ),
+            # Node(
+            #     package="ekf_mono_slam",
+            #     executable="ekf",
+            #     name="ekf",
+            #     namespace="slam",
+            #     output="screen",
+            #     arguments=["--ros-args", "--log-level", "warn"],
+            # ),
         ]
     )
