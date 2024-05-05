@@ -2,6 +2,7 @@
 
 #include "cv_bridge/cv_bridge.h"
 #include "feature/feature_detector.h"
+#include "spdlog/spdlog.h"
 
 FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
   image_subscriber_ = std::make_shared<image_transport::Subscriber>(image_transport::create_subscription(
@@ -30,7 +31,8 @@ void FeatureDetectorNode::image_callback(const sensor_msgs::msg::Image::ConstSha
     feature.feature_index = m->GetFeatureIndex();
     feature.x = coordinates.x;
     feature.y = coordinates.y;
-    feature.descriptor.assign(descriptor.datastart, descriptor.dataend);
+
+    descriptor.copyTo(feature.descriptor);
 
     image_feature_measurements.features.push_back(feature);
   }

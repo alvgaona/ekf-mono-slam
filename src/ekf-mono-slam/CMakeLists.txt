@@ -62,7 +62,7 @@ target_include_directories(feature_detector
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src})
+add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src} ${feature_src} ${visual_src})
 ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
 target_include_directories(ekf
