@@ -24,7 +24,7 @@ TEST(FeatureDetectors, NotSupportedDetector) {
 }
 
 TEST(FeatureDetectors, DetectFeatures) {
-  FileSequenceImageProvider image_provider("./src/ekf-mono-slam//test/resources/desk_translation/");
+  FileSequenceImageProvider image_provider("./src/ekf_mono_slam/test/resources/desk_translation/");
   const cv::Mat image = image_provider.GetNextImage();
 
   FeatureDetector detector(FeatureDetector::BuildDetector(DetectorType::BRISK),
@@ -62,11 +62,11 @@ TEST(Zones, AddFeature) {
 TEST(Zones, ComputeZone) {
   const cv::Mat descriptor = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
   const ImageFeatureMeasurement feature1(cv::Point2f(0, 0), descriptor);
-  ASSERT_EQ(feature1.ComputeZone(480, 270, 1920, 1080), 0);
+  ASSERT_EQ(feature1.ComputeZone(480, 270, 1920), 0);
 
   const ImageFeatureMeasurement feature2(cv::Point2f(1900, 1000), descriptor);
-  ASSERT_EQ(feature2.ComputeZone(480, 270, 1920, 1080), 15);
+  ASSERT_EQ(feature2.ComputeZone(480, 270, 1920), 15);
 
   const ImageFeatureMeasurement feature3(cv::Point2f(959, 271), descriptor);
-  ASSERT_EQ(feature3.ComputeZone(480, 270, 1920, 1080), 5);
+  ASSERT_EQ(feature3.ComputeZone(480, 270, 1920), 5);
 }

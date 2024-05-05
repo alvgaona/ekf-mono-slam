@@ -1,7 +1,6 @@
-#ifndef EKF_MONO_SLAM_ELLIPSE_H_
-#define EKF_MONO_SLAM_ELLIPSE_H_
+#pragma once
 
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 
 class Ellipse final {
  public:
@@ -21,5 +20,3 @@ class Ellipse final {
   cv::Mat eigen_values_;
   cv::Mat eigen_vectors_;
 };
-
-#endif /* EKF_MONO_SLAM_ELLIPSE_H_ */

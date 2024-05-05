@@ -1,9 +1,11 @@
 #include "feature/feature_detector.h"
 
 #include <configuration/image_feature_parameters.h>
-#include <visual/visual.h>
 
 #include <random>
+
+#include "feature/ellipse.h"
+#include "visual/visual.h"
 
 /**
  * @brief Construct a FeatureDetector object.
@@ -50,20 +52,14 @@ FeatureDetector::FeatureDetector(const cv::Ptr<cv::FeatureDetector>& detector,
  * accessed later.
  */
 void FeatureDetector::DetectFeatures(const cv::Mat& image,
-                                     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-                                     const bool visualize) {
+                                     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions) {
   const cv::Mat image_mask(cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255);
 
   BuildImageMask(image_mask, predictions);
 
   std::vector<cv::KeyPoint> image_keypoints;
-  spdlog::info("Detecting keypoints");
   detector_->detect(image, image_keypoints, image_mask);
   spdlog::debug("Number of keypoints detected: {}", image_keypoints.size());
-
-  if (visualize) {
-    Visual::VisualizeKeyPoints(image, image_keypoints);
-  }
 
   cv::Mat descriptors;
   extractor_->compute(image, image_keypoints, descriptors);
@@ -82,9 +78,9 @@ void FeatureDetector::DetectFeatures(const cv::Mat& image,
  * (recommended for most cases), the function will use an empty set of predictions internally.
  * Additionally, the function offers the option to visualize the detected keypoints on the image for debugging purposes.
  */
-void FeatureDetector::DetectFeatures(const cv::Mat& image, const bool visualize) {
+void FeatureDetector::DetectFeatures(const cv::Mat& image) {
   const std::vector<std::shared_ptr<ImageFeaturePrediction>> empty_predictions;
-  DetectFeatures(image, empty_predictions, visualize);
+  DetectFeatures(image, empty_predictions);
 }
 
 /**
@@ -169,13 +165,12 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
     const std::vector<cv::KeyPoint>& keypoints, const cv::Mat& descriptors) const {
   const auto keypoints_size = keypoints.size();
 
-  for (auto i = 0; i < keypoints_size; i++) {
+  for (auto i = 0U; i < keypoints_size; i++) {
     const cv::KeyPoint& keypoint = keypoints.at(i);
 
     const auto image_feature_measurement = std::make_shared<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i));
 
-    const int zone_id =
-        image_feature_measurement->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width, img_size_.height);
+    const int zone_id = image_feature_measurement->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width);
 
     zones[zone_id]->AddCandidate(image_feature_measurement);
     int candidates_left = zones[zone_id]->GetCandidatesLeft();
@@ -184,9 +179,8 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
 
   const auto predictions_size = predictions.size();
 
-  for (auto i = 0; i < predictions_size; i++) {
-    const int zone_id =
-        predictions[i]->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width, img_size_.height);
+  for (auto i = 0U; i < predictions_size; i++) {
+    const int zone_id = predictions[i]->ComputeZone(zone_size_.width, zone_size_.height, img_size_.width);
 
     zones[zone_id]->AddPrediction(predictions[i]);
     int predictions_features_count = zones[zone_id]->GetPredictionsFeaturesCount();
@@ -254,7 +248,7 @@ void FeatureDetector::ComputeImageFeatureMeasurements(
     const std::vector<cv::KeyPoint>& image_keypoints) {
   if (const auto keypoints_size = image_keypoints.size();
       keypoints_size <= ImageFeatureParameters::features_per_image) {
-    for (int i = 0; i < keypoints_size; i++) {
+    for (auto i = 0U; i < keypoints_size; i++) {
       const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(keypoint.pt, descriptors.row(i)));
     }
