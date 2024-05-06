@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_COVARIANCE_MATRIX_H_
-#define EKF_MONO_SLAM_COVARIANCE_MATRIX_H_
+#pragma once
 
 #include "feature/image_feature_measurement.h"
 #include "math/ekf_math.h"
@@ -31,5 +30,3 @@ class CovarianceMatrix final {
  private:
   Eigen::MatrixXd matrix_;
 };
-
-#endif /* EKF_MONO_SLAM_COVARIANCE_MATRIX_H_ */

@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_EKF_H
-#define EKF_MONO_SLAM_EKF_H
+#pragma once
 
 #include <spdlog/spdlog.h>
 
@@ -29,7 +28,8 @@ class EKF final {
   }
 
   void Init(const cv::Mat& image);
-  void Step(const cv::Mat& image);
+
+  void Predict();
 
   void PredictMeasurementState();
   void PredictMeasurementCovariance();
@@ -43,5 +43,3 @@ class EKF final {
   int step_;
   double delta_t_;
 };
-
-#endif /* EKF_MONO_SLAM_EKF_H */

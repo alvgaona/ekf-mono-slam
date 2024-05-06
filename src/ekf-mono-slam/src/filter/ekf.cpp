@@ -37,7 +37,7 @@ void EKF::Init(const cv::Mat& image) {
   AddFeatures(feature_detector_->GetImageFeatures());
 }
 
-void EKF::Step(const cv::Mat& image) {
+void EKF::Predict() {
   covariance_matrix_->Predict(state_, delta_t_);
   state_->Predict(delta_t_);
 }

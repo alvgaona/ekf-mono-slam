@@ -5,23 +5,38 @@
 #include "spdlog/spdlog.h"
 
 FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
-  image_subscriber_ = std::make_shared<image_transport::Subscriber>(image_transport::create_subscription(
-      this, "camera/image", std::bind(&FeatureDetectorNode::image_callback, this, std::placeholders::_1), "raw"));
+  detect_service_ = this->create_service<ekf_mono_slam::srv::FeatureDetect>(
+      "features/detect",
+      std::bind(&FeatureDetectorNode::detect_features, this, std::placeholders::_1, std::placeholders::_2));
   image_measurements_publisher_ =
-      this->create_publisher<ekf_mono_slam::msg::ImageFeatureMeasurements>("features/image/measurements", 10);
+      this->create_publisher<ekf_mono_slam::msg::ImageFeatureMeasurementArray>("features/image/measurements", 10);
 }
 
-void FeatureDetectorNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg) {
-  cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+void FeatureDetectorNode::detect_features(const std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Request> request,
+                                          std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Response> response) {
+  cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(request->image, sensor_msgs::image_encodings::BGR8);
   cv::Mat image = cv_ptr->image;
+
+  std::vector<std::shared_ptr<ImageFeaturePrediction>> predictions;
+
+  for (auto im_pred : request->predictions) {
+    // cv::Mat(1, descriptor_size, CV_8UC1, im_pred.covariance_matrix.data());
+    predictions.push_back(
+        std::make_shared<ImageFeaturePrediction>(cv::Point2f(im_pred.point.x, im_pred.point.y),
+                                                 cv::Mat(),  // TODO: add covariance matrix from message
+                                                 im_pred.feature_index));
+  }
 
   FeatureDetector feature_detector(FeatureDetector::BuildDetector(DetectorType::AKAZE),
                                    FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE),
                                    cv::Size(image.rows, image.cols));
 
-  feature_detector.DetectFeatures(image);
+  feature_detector.DetectFeatures(image, predictions);
 
-  ekf_mono_slam::msg::ImageFeatureMeasurements image_feature_measurements;
+  auto detected_image_features = feature_detector.GetImageFeatures();
+
+  ekf_mono_slam::msg::ImageFeatureMeasurementArray image_feature_measurements;
+  std::vector<ekf_mono_slam::msg::ImageFeatureMeasurement> response_features;
 
   for (auto m : feature_detector.GetImageFeatures()) {
     ekf_mono_slam::msg::ImageFeatureMeasurement feature;
@@ -29,14 +44,18 @@ void FeatureDetectorNode::image_callback(const sensor_msgs::msg::Image::ConstSha
     auto descriptor = m->GetDescriptorData();
 
     feature.feature_index = m->GetFeatureIndex();
-    feature.x = coordinates.x;
-    feature.y = coordinates.y;
+    feature.point.x = coordinates.x;
+    feature.point.y = coordinates.y;
 
     descriptor.copyTo(feature.descriptor);
-
+    response_features.push_back(feature);
     image_feature_measurements.features.push_back(feature);
   }
 
+  image_feature_measurements.header.frame_id = "image_link";
+  image_feature_measurements.header.stamp = this->get_clock()->now();
+
+  response->features = response_features;
   image_measurements_publisher_->publish(image_feature_measurements);
 }
 

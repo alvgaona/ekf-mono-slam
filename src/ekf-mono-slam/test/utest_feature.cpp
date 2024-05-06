@@ -24,7 +24,7 @@ TEST(FeatureDetectors, NotSupportedDetector) {
 }
 
 TEST(FeatureDetectors, DetectFeatures) {
-  FileSequenceImageProvider image_provider("./src/ekf_mono_slam/test/resources/desk_translation/");
+  FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
   const cv::Mat image = image_provider.GetNextImage();
 
   FeatureDetector detector(FeatureDetector::BuildDetector(DetectorType::BRISK),

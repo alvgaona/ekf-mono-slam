@@ -1,0 +1,4 @@
+sensor_msgs/Image image
+ekf_mono_slam/ImageFeaturePrediction[] predictions
+---
+ekf_mono_slam/ImageFeatureMeasurement[] features

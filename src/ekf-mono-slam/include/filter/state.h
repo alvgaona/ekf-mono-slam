@@ -1,7 +1,4 @@
-#ifndef EKF_MONO_SLAM_STATE_H_
-#define EKF_MONO_SLAM_STATE_H_
-
-#include <spdlog/spdlog.h>
+#pragma once
 
 #include <algorithm>
 #include <memory>
@@ -9,6 +6,7 @@
 
 #include "feature/image_feature_measurement.h"
 #include "feature/map_feature.h"
+#include "spdlog/spdlog.h"
 
 class MapFeature;
 
@@ -69,5 +67,3 @@ class State final {
 
   int dimension_;
 };
-
-#endif /* EKF_MONO_SLAM_STATE_H_ */
