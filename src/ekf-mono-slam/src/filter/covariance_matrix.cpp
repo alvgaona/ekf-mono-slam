@@ -1,8 +1,7 @@
 #include "filter/covariance_matrix.h"
 
-#include <configuration/camera_parameters.h>
-#include <configuration/image_feature_parameters.h>
-
+#include "configuration/camera_parameters.h"
+#include "configuration/image_feature_parameters.h"
 #include "configuration/kinematics_parameters.h"
 
 using namespace EkfMath;

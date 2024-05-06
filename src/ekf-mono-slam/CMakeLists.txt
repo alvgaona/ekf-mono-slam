@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
@@ -29,14 +30,24 @@ file(GLOB_RECURSE feature_src src/feature/*.cpp)
 file(GLOB_RECURSE visual_src src/visual/*.cpp)
 
 set(msg_files
+  "msg/State.msg"
+  "msg/ImagePoint.msg"
+  "msg/CovarianceMatrix.msg"
   "msg/ImageFeatureMeasurement.msg"
-  "msg/ImageFeatureMeasurements.msg"
+  "msg/ImageFeatureMeasurementArray.msg"
   "msg/ImageFeaturePrediction.msg"
+)
+
+set(srv_files
+  "srv/FeatureDetect.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
-  DEPENDENCIES sensor_msgs
+  ${srv_files}
+  DEPENDENCIES 
+  sensor_msgs 
+  std_msgs
 )
 
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
@@ -52,7 +63,7 @@ target_include_directories(file_sequence_image
 )
 
 add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src})
-ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
+ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(feature_detector PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
 target_include_directories(feature_detector
   PUBLIC
@@ -63,7 +74,7 @@ target_include_directories(feature_detector
 )
 
 add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src} ${feature_src} ${visual_src})
-ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
+ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs geometry_msgs cv_bridge image_transport)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
 target_include_directories(ekf
   PUBLIC

@@ -1,4 +1,3 @@
-float32 x
-float32 y
-uint8[] covariance_matrix
+ekf_mono_slam/ImagePoint point
+ekf_mono_slam/CovarianceMatrix covariance_matrix
 int32 feature_index

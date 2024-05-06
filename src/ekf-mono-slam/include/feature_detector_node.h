@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ekf_mono_slam/msg/image_feature_measurements.hpp"
+#include "ekf_mono_slam/msg/image_feature_measurement_array.hpp"
+#include "ekf_mono_slam/srv/feature_detect.hpp"
 #include "filter/ekf.h"
-#include "image_transport/image_transport.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
@@ -12,8 +12,10 @@ class FeatureDetectorNode : public rclcpp::Node {
   ~FeatureDetectorNode() = default;
 
  private:
-  std::shared_ptr<image_transport::Subscriber> image_subscriber_;
-  rclcpp::Publisher<ekf_mono_slam::msg::ImageFeatureMeasurements>::SharedPtr image_measurements_publisher_;
+  rclcpp::Service<ekf_mono_slam::srv::FeatureDetect>::SharedPtr detect_service_;
 
-  void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
+  rclcpp::Publisher<ekf_mono_slam::msg::ImageFeatureMeasurementArray>::SharedPtr image_measurements_publisher_;
+
+  void detect_features(const std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Request> request,
+                       std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Response> response);
 };

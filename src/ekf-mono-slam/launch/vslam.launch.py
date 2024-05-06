@@ -19,7 +19,7 @@ def generate_launch_description():
                 parameters=[
                     {"image_dir": LaunchConfiguration("image_dir")},
                 ],
-                arguments=["--ros-args", "--log-level", "warn"],
+                arguments=["--ros-args", "--log-level", "info"],
             ),
             Node(
                 package="ekf_mono_slam",
@@ -27,7 +27,15 @@ def generate_launch_description():
                 name="ekf",
                 namespace="slam",
                 output="screen",
-                arguments=["--ros-args", "--log-level", "warn"],
+                arguments=["--ros-args", "--log-level", "info"],
+            ),
+            Node(
+                package="ekf_mono_slam",
+                executable="feature_detector",
+                name="feature_detector",
+                namespace="slam",
+                output="screen",
+                arguments=["--ros-args", "--log-level", "info"],
             ),
         ]
     )

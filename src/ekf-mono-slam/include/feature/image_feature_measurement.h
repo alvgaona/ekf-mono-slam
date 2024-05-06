@@ -1,8 +1,7 @@
 #pragma once
 
-#include <opencv2/opencv.hpp>
-
 #include "image_feature.h"
+#include "opencv2/opencv.hpp"
 #include "undistorted_image_feature.h"
 
 class ImageFeatureMeasurement final : public ImageFeature {

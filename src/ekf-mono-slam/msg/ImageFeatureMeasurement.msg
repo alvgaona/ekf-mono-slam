@@ -1,4 +1,3 @@
-float32 x
-float32 y
+ekf_mono_slam/ImagePoint point
 uint8[] descriptor
 int32 feature_index
