@@ -134,6 +134,8 @@ void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_me
   const auto map_feature = std::make_shared<MapFeature>(
       feature_state, 6, image_feature_measurement->GetDescriptorData(), MapFeatureType::INVERSE_DEPTH);
 
+  dimension_ += 6;
+
   Add(map_feature);
 }
 

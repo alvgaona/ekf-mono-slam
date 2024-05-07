@@ -39,7 +39,7 @@ FileSequenceImageProvider::FileSequenceImageProvider(const std::string& director
 cv::Mat FileSequenceImageProvider::GetNextImage() {
   if (image_counter_ > end_index_ - start_index_) {
     spdlog::warn("No more images in directory");
-    return cv::Mat();
+    return {};
   }
 
   std::stringstream image_number;

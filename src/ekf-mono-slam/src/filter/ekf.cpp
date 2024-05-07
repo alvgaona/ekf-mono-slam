@@ -14,29 +14,6 @@ EKF::EKF() {
   this->step_ = 0;
 }
 
-/**
- * @brief Initializes the EKF with features extracted from an input image.
- *
- * This method performs the initial setup of the EKF by extracting features from a provided image and adding them to the
- * internal state.
- *
- * @param image The input image from which features will be extracted.
- *
- * This method plays a crucial role in starting the EKF operation by establishing the initial set of features used for
- * tracking and state estimation.
- */
-void EKF::Init(const cv::Mat& image) {
-  spdlog::info("Initializing Extender Kalman Filter");
-
-  feature_detector_ = std::make_unique<FeatureDetector>(
-      FeatureDetector::BuildDetector(DetectorType::AKAZE),
-      FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE), cv::Size(image.rows, image.cols));
-
-  feature_detector_->DetectFeatures(image);
-
-  AddFeatures(feature_detector_->GetImageFeatures());
-}
-
 void EKF::Predict() {
   covariance_matrix_->Predict(state_, delta_t_);
   state_->Predict(delta_t_);
@@ -61,9 +38,9 @@ void EKF::PredictMeasurementCovariance() {}
  * for proper integration.
  */
 void EKF::AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const {
-  std::for_each(features.begin(), features.end(),
+  std::ranges::for_each(features.begin(), features.end(),
                 [this](const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
-                  this->state_->Add(image_feature_measurement);
                   this->covariance_matrix_->Add(image_feature_measurement, this->state_);
+                  this->state_->Add(image_feature_measurement);
                 });
 }

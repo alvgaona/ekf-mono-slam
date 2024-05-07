@@ -119,11 +119,13 @@ TEST(ExtendedKalmanFilter, CovarianceAddImageFeature) {
 
   CovarianceMatrix covariance_matrix;
 
-  const auto image_feature_measurement =
-      std::make_shared<ImageFeatureMeasurement>(cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
+  const auto image_feature_measurement = std::make_shared<ImageFeatureMeasurement>(
+      cv::Point2f(50.556, 130.353), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
   covariance_matrix.Add(image_feature_measurement, state);
 
-  // TODO: update assertions with the correct expected value
+  ASSERT_EQ(covariance_matrix.GetMatrix().rows(), 19);
+  ASSERT_EQ(covariance_matrix.GetMatrix().cols(), 19);
+  // FIXME: update assertions with the correct expected value
   ASSERT_EQ(covariance_matrix.GetMatrix(), Eigen::MatrixXd::Zero(19, 19));
 }
 

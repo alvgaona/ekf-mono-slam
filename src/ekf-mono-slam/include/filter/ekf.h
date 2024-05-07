@@ -21,16 +21,15 @@ class EKF final {
 
   std::shared_ptr<State> GetState() const { return state_; }
 
+  std::shared_ptr<CovarianceMatrix> GetCovarianceMatrix() const { return covariance_matrix_; }
+
   std::shared_ptr<FeatureDetector> GetFeatureDetector() const { return feature_detector_; }
 
   bool isInitilized() const {
     return state_->GetDepthFeatures().size() != 0 || state_->GetInverseDepthFeatures().size() != 0;
   }
 
-  void Init(const cv::Mat& image);
-
   void Predict();
-
   void PredictMeasurementState();
   void PredictMeasurementCovariance();
 

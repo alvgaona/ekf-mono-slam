@@ -14,9 +14,7 @@ EKFNode::EKFNode() : Node("ekf_node") {
 }
 
 void EKFNode::init_callback(rclcpp::Client<ekf_mono_slam::srv::FeatureDetect>::SharedFuture future) {
-  auto status = future.wait_for(std::chrono::milliseconds(1000));
-
-  if (status == std::future_status::ready) {
+  if (auto status = future.wait_for(std::chrono::milliseconds(1000)); status == std::future_status::ready) {
     auto response = future.get();
 
     std::vector<std::shared_ptr<ImageFeatureMeasurement>> features;
@@ -29,8 +27,6 @@ void EKFNode::init_callback(rclcpp::Client<ekf_mono_slam::srv::FeatureDetect>::S
       features.push_back(
           std::make_shared<ImageFeatureMeasurement>(cv::Point2f(im_feat.point.x, im_feat.point.y), descriptor));
     }
-
-    std::cout << features.at(0) << std::endl;
 
     ekf_.AddFeatures(features);
   }
@@ -64,7 +60,7 @@ void EKFNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
   }
 }
 
-int main(int argc, char* argv[]) {
+int main(const int argc, char* argv[]) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<EKFNode>());
   rclcpp::shutdown();
