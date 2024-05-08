@@ -1,11 +1,11 @@
 #include "file_sequence_image_node.h"
 
-#include <chrono>
 #include <functional>
 #include <memory>
 #include <string>
 
 #include "cv_bridge/cv_bridge.h"
+#include "sensor_msgs/msg/image.hpp"
 
 using namespace std::chrono_literals;
 
@@ -19,8 +19,8 @@ FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image") {
   timer_ = this->create_wall_timer(40ms, std::bind(&FileSequenceImageNode::timer_callback, this));
 }
 
-void FileSequenceImageNode::timer_callback() {
-  cv::Mat image = image_provider_->GetNextImage();
+void FileSequenceImageNode::timer_callback() const {
+  const cv::Mat image = image_provider_->GetNextImage();
 
   cv_bridge::CvImage cv_bridge_image;
   cv_bridge_image.encoding = sensor_msgs::image_encodings::BGR8;
@@ -32,7 +32,7 @@ void FileSequenceImageNode::timer_callback() {
   image_publisher_->publish(*image_msg);
 }
 
-int main(int argc, char *argv[]) {
+int main(const int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<FileSequenceImageNode>());
   rclcpp::shutdown();

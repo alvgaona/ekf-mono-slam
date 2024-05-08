@@ -3,16 +3,15 @@
 #include "ekf_mono_slam/msg/image_feature_measurement_array.hpp"
 #include "ekf_mono_slam/msg/state.hpp"
 #include "ekf_mono_slam/srv/feature_detect.hpp"
-#include "feature/image_feature_prediction.h"
 #include "filter/ekf.h"
 #include "image_transport/image_transport.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
-class EKFNode : public rclcpp::Node {
+class EKFNode final : public rclcpp::Node {
  public:
   EKFNode();
-  ~EKFNode() = default;
+  ~EKFNode() override = default;
 
  private:
   EKF ekf_;
