@@ -81,7 +81,7 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
   // FIXME: looks like the covariance matrix is larger when features are added.
   // Therefore, this method should onnly run the prediction step on the 13 by 13 block only.
   // The camera measurement predictions come at a later step.
-  matrix_.block(0, 0, 12, 12) = F * matrix_.block(0, 0, 12, 12) * F.transpose() + G * Q * G.transpose();
+  matrix_.block(0, 0, 13, 13) = F * matrix_.block(0, 0, 13, 13) * F.transpose() + G * Q * G.transpose();
 }
 
 /**
