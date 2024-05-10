@@ -5,6 +5,33 @@
 
 using namespace CameraParameters;
 
+Eigen::Vector2d EkfMath::distortImageFeature(const UndistortedImageFeature& image_feature) {
+  const auto feature_coordinates = image_feature.GetCoordinates();
+  const auto xu = (feature_coordinates[0] - cx) * dx;
+  const auto yu = (feature_coordinates[1] - cy) * dy;
+
+  const auto ru = sqrt(xu * xu + yu * yu);
+  auto rd = ru / (1L + k1 * ru * ru + k2 * ru * ru * ru * ru);
+
+  for (auto i = 0u; i < 10; i++) {
+    const auto rd2 = rd * rd;
+    const auto rd3 = rd2 * rd;
+    const auto rd4 = rd3 * rd;
+    const auto rd5 = rd4 * rd;
+
+    const auto f = rd + k1 * rd3 + k2 * rd5 - ru;
+    const auto fp = 1 + 3 * k1 * rd2 + 5 * k2 * rd4;
+    rd -= f / fp;
+  }
+
+  const auto rd2 = rd * rd;
+  const auto rd4 = rd2 * rd2;
+
+  const auto d = 1L + k1 * rd2 + k2 * rd4;
+
+  return {cx + (xu / d) / dx, cy + (yu / d) / dy};
+}
+
 /**
  * @brief Computes the Jacobian matrix of a directional vector with respect to a quaternion.
  *

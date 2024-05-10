@@ -11,7 +11,7 @@ class State;
 
 class MapFeature final {
  public:
-  MapFeature(const Eigen::VectorXd& position, int position_dimension, const cv::Mat& descriptor_data,
+  MapFeature(const Eigen::VectorXd& state, int position_dimension, const cv::Mat& descriptor_data,
              MapFeatureType type);
 
   ~MapFeature() = default;
@@ -29,12 +29,15 @@ class MapFeature final {
     return os;
   }
 
-  [[nodiscard]] const MapFeatureType& GetType() const { return type_; };
+  [[nodiscard]] const MapFeatureType& GetType() const { return type_; }
 
+  [[nodiscard]] const Eigen::VectorXd& GetState() const { return state; }
+
+  bool isInFrontOfCamera() const;
   void ComputeJacobian(const State& state, std::vector<double>& image_feature_pos);
 
  private:
-  Eigen::VectorXd position_;
+  Eigen::VectorXd state;
   int position_dimension_;
   cv::Mat descriptor_data_;
   MapFeatureType type_;

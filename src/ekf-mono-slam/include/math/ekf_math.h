@@ -1,14 +1,15 @@
-#ifndef EKF_MONO_SLAM_EKF_MATH_H_
-#define EKF_MONO_SLAM_EKF_MATH_H_
+#pragma once
 
-#include <Eigen/Dense>
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
+#include "feature/undistorted_image_feature.h"
 
 namespace EkfMath {
 static constexpr double CHISQ_95_2 = 5.9915L;
 static constexpr double PI = 3.14159265L;
 
 inline double Rad2Deg(const double rads) { return rads * 180.0 / PI; }
+
+Eigen::Vector2d distortImageFeature(const UndistortedImageFeature& image_feature);
 
 Eigen::Matrix3d rotationMatrixDerivativesByq0(const Eigen::Quaterniond& q);
 
@@ -28,5 +29,3 @@ Eigen::MatrixXd jacobianDirectionalVector(const Eigen::Quaterniond& q, const Eig
 
 Eigen::Matrix2d jacobianUndistortion(const cv::Point& coordinates);
 }  // namespace EkfMath
-
-#endif /* EKF_MONO_SLAM_EKF_MATH_H_ */
