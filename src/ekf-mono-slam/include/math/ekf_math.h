@@ -9,7 +9,11 @@ static constexpr double PI = 3.14159265L;
 
 inline double Rad2Deg(const double rads) { return rads * 180.0 / PI; }
 
-Eigen::Vector2d distortImageFeature(const UndistortedImageFeature& image_feature);
+bool isFeatureInFrontOfCamera(const Eigen::Vector3d& directionalVector);
+
+bool isFeatureVisibleInFrame(const cv::Point2d& coordinates);
+
+cv::Point2d distortImageFeature(const UndistortedImageFeature& image_feature);
 
 Eigen::Matrix3d rotationMatrixDerivativesByq0(const Eigen::Quaterniond& q);
 

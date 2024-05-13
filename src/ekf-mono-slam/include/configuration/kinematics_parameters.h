@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_KINEMATICS_PARAMETERS_H
-#define EKF_MONO_SLAM_KINEMATICS_PARAMETERS_H
+#pragma once
 
 /**
  * @defgroup kinematics_parameters Kinematics Parameters
@@ -35,5 +34,3 @@ static constexpr double inv_depth_sd = 1.0L;
 static constexpr double epsilon = 2.22e-16L;
 
 }  // namespace KinematicsParameters
-
-#endif  // EKF_MONO_SLAM_KINEMATICS_PARAMETERS_H

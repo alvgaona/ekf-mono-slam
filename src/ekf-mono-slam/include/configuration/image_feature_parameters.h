@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_CONFIGURATION_H_
-#define EKF_MONO_SLAM_CONFIGURATION_H_
+#pragma once
 
 /**
  * @defgroup image_feature_config Image Feature Configuration
@@ -39,5 +38,3 @@ static constexpr int features_per_image = 20;
  */
 static constexpr double init_inv_depth = 1.0L;
 };  // namespace ImageFeatureParameters
-
-#endif /* EKF_MONO_SLAM_CONFIGURATION_H_ */

@@ -5,7 +5,20 @@
 
 using namespace CameraParameters;
 
-Eigen::Vector2d EkfMath::distortImageFeature(const UndistortedImageFeature& image_feature) {
+bool EkfMath::isFeatureInFrontOfCamera(const Eigen::Vector3d& directionalVector) {
+  const auto atanxz = Rad2Deg(atan2(directionalVector[0], directionalVector[2]));
+  const auto atanyz = Rad2Deg(atan2(directionalVector[1], directionalVector[2]));
+  return atanxz > -angular_vision_x && atanxz < angular_vision_x && atanyz > -angular_vision_y && atanyz < angular_vision_y;
+}
+
+bool EkfMath::isFeatureVisibleInFrame(const cv::Point2d& coordinates) {
+  const auto u = coordinates.x;
+  const auto v = coordinates.y;
+
+  return u > 0 && u < 1920 && v > 0 && v < 1080;
+}
+
+cv::Point2d EkfMath::distortImageFeature(const UndistortedImageFeature& image_feature) {
   const auto feature_coordinates = image_feature.GetCoordinates();
   const auto xu = (feature_coordinates[0] - cx) * dx;
   const auto yu = (feature_coordinates[1] - cy) * dy;
@@ -29,7 +42,7 @@ Eigen::Vector2d EkfMath::distortImageFeature(const UndistortedImageFeature& imag
 
   const auto d = 1L + k1 * rd2 + k2 * rd4;
 
-  return {cx + (xu / d) / dx, cy + (yu / d) / dy};
+  return {cx + xu / d / dx, cy + yu / d / dy};
 }
 
 /**
