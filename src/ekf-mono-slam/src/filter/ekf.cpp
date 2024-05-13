@@ -14,16 +14,10 @@ EKF::EKF() {
   this->step_ = 0;
 }
 
-void EKF::Predict() {
+void EKF::Predict() const {
   covariance_matrix_->Predict(state_, delta_t_);
   state_->Predict(delta_t_);
 }
-
-// TODO: Implement
-void EKF::PredictMeasurementState() {}
-
-// TODO: Implement
-void EKF::PredictMeasurementCovariance() {}
 
 /**
  * @brief Adds a collection of image feature measurements to the EKF's internal state and covariance matrix.

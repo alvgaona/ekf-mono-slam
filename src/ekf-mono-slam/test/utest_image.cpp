@@ -1,20 +1,23 @@
 #include "gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
 #include "image/file_sequence_image_provider.h"
 
-TEST(FileSequenceImageProvider, InitFileSequenceImageProvider) {
-  FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
+using namespace ::testing;
 
-  ASSERT_EQ(image_provider.GetImageCounter(), 0);
+TEST(FileSequenceImageProvider, InitFileSequenceImageProvider) {
+  const FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
+
+  ASSERT_THAT(image_provider.GetImageCounter(), Eq(0));
 }
 
 TEST(FileSequenceImageProvider, GetFirstImage) {
   FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
 
-  cv::Mat image = image_provider.GetNextImage();
+  const cv::Mat image = image_provider.GetNextImage();
 
-  ASSERT_EQ(image_provider.GetImageCounter(), 1);
-  ASSERT_EQ(image.size().width, 640);
-  ASSERT_EQ(image.size().height, 480);
+  ASSERT_THAT(image_provider.GetImageCounter(), Eq(1));
+  ASSERT_THAT(image.size().width, Eq(640));
+  ASSERT_THAT(image.size().height, Eq(480));
 }
 
 TEST(FileSequenceProvider, NoMoreImagesInDirectory) {
@@ -22,12 +25,12 @@ TEST(FileSequenceProvider, NoMoreImagesInDirectory) {
   cv::Mat image = image_provider.GetNextImage();
   auto size = image.size();
 
-  ASSERT_EQ(size.height, 480);
-  ASSERT_EQ(size.width, 640);
+  ASSERT_THAT(size.height, Eq(480));
+  ASSERT_THAT(size.width, Eq(640));
 
   image = image_provider.GetNextImage();
   size = image.size();
 
-  ASSERT_EQ(size.height, 0);
-  ASSERT_EQ(size.width, 0);
+  ASSERT_THAT(size.height, Eq(0));
+  ASSERT_THAT(size.width, Eq(0));
 }

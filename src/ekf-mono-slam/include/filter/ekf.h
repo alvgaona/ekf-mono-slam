@@ -29,10 +29,7 @@ class EKF final {
     return state_->GetDepthFeatures().size() != 0 || state_->GetInverseDepthFeatures().size() != 0;
   }
 
-  void Predict();
-  void PredictMeasurementState();
-  void PredictMeasurementCovariance();
-
+  void Predict() const;
   void AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const;
 
  private:

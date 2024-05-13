@@ -150,13 +150,42 @@ void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_me
 void State::Add(const std::shared_ptr<MapFeature>& feature) {
   switch (feature->GetType()) {
     case MapFeatureType::DEPTH:
-      depth_features_.emplace_back(feature);
+      depth_features_.push_back(feature);
+      features_.push_back(feature);
       break;
     case MapFeatureType::INVERSE_DEPTH:
-      inverse_depth_features_.emplace_back(feature);
+      inverse_depth_features_.push_back(feature);
+      features_.push_back(feature);
       break;
     case MapFeatureType::INVALID:
       spdlog::error("Feature is type INVALID");
       break;
+  }
+}
+
+void State::PredictMeasurementState() {
+  for (const auto& mapFeature : features_) {
+    if (mapFeature->GetType() == MapFeatureType::INVERSE_DEPTH) {
+      const auto Rcw = this->rotation_matrix_.transpose();
+      const auto feature_state = mapFeature->GetState();
+      const auto rwc = this->position_;
+
+      const auto yi = feature_state.segment(0, 3);
+      const auto theta = feature_state[3];
+      const auto phi = feature_state[4];
+      const auto rho = feature_state[5];
+
+      const auto m = Eigen::Vector3d{cos(phi) * sin(theta), -sin(phi), cos(phi) * cos(theta)};
+
+      const Eigen::Vector3d directionalVector = Rcw * (rho * (yi - rwc) + m);
+
+      const auto undistorted_image_feature = UndistortedImageFeature::Project(directionalVector);
+
+      // TODO: continue
+    } else if (mapFeature->GetType() == MapFeatureType::DEPTH) {
+      1 + 1;
+    } else {
+      spdlog::info("Feature prediction failed as it is invalid");
+    }
   }
 }

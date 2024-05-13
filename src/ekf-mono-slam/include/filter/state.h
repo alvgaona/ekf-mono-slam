@@ -50,6 +50,7 @@ class State final {
   };
 
   void Predict(double delta_t);
+  void PredictMeasurementState();
   void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement);
   void Add(const std::shared_ptr<MapFeature>& feature);
   void Remove(const std::shared_ptr<MapFeature>& feature);

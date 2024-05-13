@@ -7,8 +7,6 @@
 
 using namespace ::testing;
 
-using ::testing::NotNull;
-
 TEST(FeatureDetectors, CreateFeatureDetector) {
   const cv::Ptr<cv::FeatureDetector> akaze_detector = FeatureDetector::BuildDetector(DetectorType::AKAZE);
   const cv::Ptr<cv::FeatureDetector> orb_detector = FeatureDetector::BuildDetector(DetectorType::ORB);
