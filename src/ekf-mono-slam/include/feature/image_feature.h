@@ -14,8 +14,9 @@ class ImageFeature {
 
   [[nodiscard]] virtual int GetFeatureIndex() const { return feature_index_; }
 
-  [[nodiscard]] virtual int ComputeZone(int zone_width, int zone_height, int image_width) const;
+  virtual void SetFeatureIndex(const int feature_index) { feature_index_ = feature_index; }
 
+  [[nodiscard]] virtual int ComputeZone(int zone_width, int zone_height, int image_width) const;
  protected:
   cv::Point2f coordinates_;
   int feature_index_;

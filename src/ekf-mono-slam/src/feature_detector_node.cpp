@@ -38,12 +38,14 @@ void FeatureDetectorNode::detect_features(const std::shared_ptr<ekf_mono_slam::s
   ekf_mono_slam::msg::ImageFeatureMeasurementArray image_feature_measurements;
   std::vector<ekf_mono_slam::msg::ImageFeatureMeasurement> response_features;
 
-  for (const auto& m : feature_detector.GetImageFeatures()) {
+  const auto image_features = feature_detector.GetImageFeatures();
+  for (auto i = 0; i < image_features.size(); i++) {
+    const auto m = image_features[i];
     ekf_mono_slam::msg::ImageFeatureMeasurement feature;
     auto coordinates = m->GetCoordinates();
     auto descriptor = m->GetDescriptorData();
 
-    feature.feature_index = m->GetFeatureIndex();
+    feature.feature_index = i;
     feature.point.x = coordinates.x;
     feature.point.y = coordinates.y;
 
