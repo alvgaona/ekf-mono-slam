@@ -39,7 +39,7 @@ void FeatureDetectorNode::detect_features(const std::shared_ptr<ekf_mono_slam::s
   std::vector<ekf_mono_slam::msg::ImageFeatureMeasurement> response_features;
 
   const auto image_features = feature_detector.GetImageFeatures();
-  for (auto i = 0; i < image_features.size(); i++) {
+  for (auto i = 0u; i < image_features.size(); i++) {
     const auto m = image_features[i];
     ekf_mono_slam::msg::ImageFeatureMeasurement feature;
     auto coordinates = m->GetCoordinates();

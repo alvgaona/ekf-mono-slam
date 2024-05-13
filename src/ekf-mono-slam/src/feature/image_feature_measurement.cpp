@@ -10,13 +10,14 @@ using namespace CameraParameters;
  *
  * @param coordinates The pixel coordinates of the feature in the image.
  * @param descriptor_data The feature descriptor data extracted by the OpenCV descriptor extractor.
+ * @param feature_index The index of the feature to identify its position in the state and covariance matrix of the EKF
  *
  * This constructor builds upon the base `ImageFeature` class and adds the ability to store and access the feature
  * descriptor data. This information is crucial for matching and identifying features across different images.
  *
  */
-ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat& descriptor_data)
-    : ImageFeature(coordinates) {
+ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat& descriptor_data, const int feature_index)
+    : ImageFeature(coordinates, feature_index) {
   this->descriptor_data_ = descriptor_data;
 }
 

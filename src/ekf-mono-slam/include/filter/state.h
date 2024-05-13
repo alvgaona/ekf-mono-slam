@@ -1,9 +1,8 @@
 #pragma once
 
-#include <algorithm>
 #include <memory>
 #include <vector>
-
+#include <feature/image_feature_prediction.h>
 #include "feature/image_feature_measurement.h"
 #include "feature/map_feature.h"
 #include "spdlog/spdlog.h"
@@ -43,14 +42,14 @@ class State final {
 
   [[nodiscard]] int GetDimension() const { return dimension_; }
 
-  [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& GetDepthFeatures() const { return depth_features_; };
+  [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& GetDepthFeatures() const { return depth_features_; }
 
   [[nodiscard]] std::vector<std::shared_ptr<MapFeature>> GetInverseDepthFeatures() const {
     return inverse_depth_features_;
-  };
+  }
 
   void Predict(double delta_t);
-  void PredictMeasurementState();
+  std::vector<std::shared_ptr<ImageFeaturePrediction>> PredictMeasurementState();
   void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement);
   void Add(const std::shared_ptr<MapFeature>& feature);
   void Remove(const std::shared_ptr<MapFeature>& feature);

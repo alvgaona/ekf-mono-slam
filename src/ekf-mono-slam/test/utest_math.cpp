@@ -88,6 +88,6 @@ TEST(FeatureDistortion, DistortFeature) {
 
   const auto distorted_feature = distortImageFeature(feature);
 
-  ASSERT_THAT(distorted_feature[0], DoubleNear(-1.28542, 1e-5));
-  ASSERT_THAT(distorted_feature[1], DoubleNear(-0.985089, 1e-5));
+  ASSERT_THAT(distorted_feature.x, DoubleNear(-1.28542, 1e-5));
+  ASSERT_THAT(distorted_feature.y, DoubleNear(-0.985089, 1e-5));
 }

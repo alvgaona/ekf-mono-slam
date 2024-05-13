@@ -1,5 +1,7 @@
 #include "filter/state.h"
 
+#include <math/ekf_math.h>
+
 #include "configuration/image_feature_parameters.h"
 
 /**
@@ -163,29 +165,48 @@ void State::Add(const std::shared_ptr<MapFeature>& feature) {
   }
 }
 
-void State::PredictMeasurementState() {
-  for (const auto& mapFeature : features_) {
-    if (mapFeature->GetType() == MapFeatureType::INVERSE_DEPTH) {
-      const auto Rcw = this->rotation_matrix_.transpose();
-      const auto feature_state = mapFeature->GetState();
-      const auto rwc = this->position_;
+std::vector<std::shared_ptr<ImageFeaturePrediction>> State::PredictMeasurementState() {
+  std::vector<std::shared_ptr<ImageFeaturePrediction>> predictions;
 
-      const auto yi = feature_state.segment(0, 3);
+  for (const auto& mapFeature : features_) {
+    const auto Rcw = this->rotation_matrix_.transpose();
+    const auto rwc = this->position_;
+    const auto feature_state = mapFeature->GetState();
+    const auto yi = feature_state.segment(0, 3);
+
+    Eigen::Vector3d directionalVector;
+
+    // TODO: probably need to delegate the responsiblity to compute the directional vector
+    // to the map feature itself. Also, to check if it's in front of the camera or not.
+    if (mapFeature->GetType() == MapFeatureType::INVERSE_DEPTH) {
       const auto theta = feature_state[3];
       const auto phi = feature_state[4];
       const auto rho = feature_state[5];
-
       const auto m = Eigen::Vector3d{cos(phi) * sin(theta), -sin(phi), cos(phi) * cos(theta)};
 
-      const Eigen::Vector3d directionalVector = Rcw * (rho * (yi - rwc) + m);
-
-      const auto undistorted_image_feature = UndistortedImageFeature::Project(directionalVector);
-
-      // TODO: continue
+      directionalVector = Rcw * (rho * (yi - rwc) + m);
     } else if (mapFeature->GetType() == MapFeatureType::DEPTH) {
-      1 + 1;
+      directionalVector = Rcw * (yi - rwc);
     } else {
-      spdlog::info("Feature prediction failed as it is invalid");
+      spdlog::warn("Feature prediction failed as it is invalid");
+      continue;
     }
+
+    if (!EkfMath::isFeatureInFrontOfCamera(directionalVector)) {
+      continue;
+    }
+
+    // TODO: it might be a good idea to also created a class DistortedImageFeature
+    const auto undistorted_image_feature = UndistortedImageFeature::Project(directionalVector);
+    const auto distorted_feature = EkfMath::distortImageFeature(undistorted_image_feature);
+
+    if (!EkfMath::isFeatureVisibleInFrame(distorted_feature)) {
+      continue;
+    }
+
+    // FIXME: check if the covariance matrix at this stage doesn't hurt.
+    predictions.push_back(std::make_shared<ImageFeaturePrediction>(distorted_feature, cv::Mat()));
   }
+
+  return predictions;
 }
