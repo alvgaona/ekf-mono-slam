@@ -2,12 +2,15 @@
 
 #include <memory>
 #include <vector>
-#include <feature/image_feature_prediction.h>
 #include "feature/image_feature_measurement.h"
 #include "feature/map_feature.h"
+#include "feature/inverse_depth_map_feature.h"
+#include "feature/cartesian_map_feature.h"
 #include "spdlog/spdlog.h"
 
 class MapFeature;
+class CartesianMapFeature;
+class InverseDepthMapFeature;
 
 class State final {
  public:
@@ -42,14 +45,14 @@ class State final {
 
   [[nodiscard]] int GetDimension() const { return dimension_; }
 
-  [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& GetDepthFeatures() const { return depth_features_; }
+  [[nodiscard]] const std::vector<std::shared_ptr<CartesianMapFeature>>& GetCartesianFeatures() const { return cartesian_features_; }
 
-  [[nodiscard]] std::vector<std::shared_ptr<MapFeature>> GetInverseDepthFeatures() const {
+  [[nodiscard]] std::vector<std::shared_ptr<InverseDepthMapFeature>> GetInverseDepthFeatures() const {
     return inverse_depth_features_;
   }
 
   void Predict(double delta_t);
-  std::vector<std::shared_ptr<ImageFeaturePrediction>> PredictMeasurementState();
+  void PredictMeasurementState();
   void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement);
   void Add(const std::shared_ptr<MapFeature>& feature);
   void Remove(const std::shared_ptr<MapFeature>& feature);
@@ -62,8 +65,8 @@ class State final {
   Eigen::Matrix3d rotation_matrix_;
 
   std::vector<std::shared_ptr<MapFeature>> features_;
-  std::vector<std::shared_ptr<MapFeature>> inverse_depth_features_;
-  std::vector<std::shared_ptr<MapFeature>> depth_features_;
+  std::vector<std::shared_ptr<InverseDepthMapFeature>> inverse_depth_features_;
+  std::vector<std::shared_ptr<CartesianMapFeature>> cartesian_features_;
 
   int dimension_;
 };

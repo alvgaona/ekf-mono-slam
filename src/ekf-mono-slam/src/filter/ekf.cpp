@@ -32,9 +32,9 @@ void EKF::Predict() const {
  * for proper integration.
  */
 void EKF::AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const {
-  std::ranges::for_each(features.begin(), features.end(),
-                        [this](const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement) {
-                          this->covariance_matrix_->Add(image_feature_measurement, this->state_);
-                          this->state_->Add(image_feature_measurement);
-                        });
+  for (auto i = 0u; features.size(); i++) {
+    const auto& image_feature_measurement= features[i];
+    this->covariance_matrix_->Add(image_feature_measurement, this->state_);
+    this->state_->Add(image_feature_measurement);
+  }
 }

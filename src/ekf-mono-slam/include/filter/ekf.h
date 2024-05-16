@@ -19,14 +19,14 @@ class EKF final {
   EKF& operator=(EKF const& source) = delete;
   EKF& operator=(EKF&& source) noexcept = delete;
 
-  std::shared_ptr<State> GetState() const { return state_; }
+  [[nodiscard]] std::shared_ptr<State> GetState() const { return state_; }
 
-  std::shared_ptr<CovarianceMatrix> GetCovarianceMatrix() const { return covariance_matrix_; }
+  [[nodiscard]] std::shared_ptr<CovarianceMatrix> GetCovarianceMatrix() const { return covariance_matrix_; }
 
-  std::shared_ptr<FeatureDetector> GetFeatureDetector() const { return feature_detector_; }
+  [[nodiscard]] std::shared_ptr<FeatureDetector> GetFeatureDetector() const { return feature_detector_; }
 
-  bool isInitilized() const {
-    return state_->GetDepthFeatures().size() != 0 || state_->GetInverseDepthFeatures().size() != 0;
+  [[nodiscard]] bool isInitilized() const {
+    return !state_->GetCartesianFeatures().empty() || !state_->GetInverseDepthFeatures().empty();
   }
 
   void Predict() const;

@@ -6,7 +6,7 @@
 
 class ImageFeatureMeasurement final : public ImageFeature {
  public:
-  ImageFeatureMeasurement(cv::Point2f coordinates, const cv::Mat& descriptor_data, int feature_index = -1);
+  ImageFeatureMeasurement(cv::Point2f coordinates, const cv::Mat& descriptor_data);
 
   ImageFeatureMeasurement(const ImageFeatureMeasurement& source) = delete;
   ImageFeatureMeasurement(ImageFeatureMeasurement&& source) noexcept = delete;

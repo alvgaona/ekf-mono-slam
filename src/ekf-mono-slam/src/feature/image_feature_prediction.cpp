@@ -1,11 +1,14 @@
 #include "feature/image_feature_prediction.h"
+#include "math/ekf_math.h"
 
-ImageFeaturePrediction::ImageFeaturePrediction(cv::Point coordinates, cv::Mat covariance_matrix)
+ImageFeaturePrediction::ImageFeaturePrediction(const cv::Point& coordinates)
     : ImageFeature(coordinates) {
-  covariance_matrix_ = covariance_matrix;
 }
 
-ImageFeaturePrediction::ImageFeaturePrediction(cv::Point coordinates, cv::Mat covariance_matrix, int feature_index)
-    : ImageFeature(coordinates, feature_index) {
-  covariance_matrix_ = covariance_matrix;
+ImageFeaturePrediction ImageFeaturePrediction::from(const Eigen::Vector3d& directionalVector) {
+  const auto undistorted_image_feature = UndistortedImageFeature::Project(directionalVector);
+  const auto distorted_feature = EkfMath::distortImageFeature(undistorted_image_feature);
+
+  return ImageFeaturePrediction(distorted_feature);
 }
+

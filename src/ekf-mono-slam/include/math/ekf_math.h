@@ -2,6 +2,7 @@
 
 #include "opencv2/opencv.hpp"
 #include "feature/undistorted_image_feature.h"
+#include "filter/state.h"
 
 namespace EkfMath {
 static constexpr double CHISQ_95_2 = 5.9915L;
@@ -9,9 +10,9 @@ static constexpr double PI = 3.14159265L;
 
 inline double Rad2Deg(const double rads) { return rads * 180.0 / PI; }
 
-bool isFeatureInFrontOfCamera(const Eigen::Vector3d& directionalVector);
+Eigen::MatrixXd dynamicModelJacobian(const State& state, double dt);
 
-bool isFeatureVisibleInFrame(const cv::Point2d& coordinates);
+Eigen::MatrixXd dynamicModelNoiseJacobian(const Eigen::MatrixXd& F, double dt);
 
 cv::Point2d distortImageFeature(const UndistortedImageFeature& image_feature);
 

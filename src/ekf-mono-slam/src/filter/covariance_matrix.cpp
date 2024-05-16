@@ -42,18 +42,18 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
   q1 = Eigen::AngleAxisd(angles.norm(), angles.normalized());
 
   Eigen::MatrixXd F = Eigen::MatrixXd::Identity(13, 13);
-  F.block(0, 7, 3, 3).diagonal().setConstant(dt);
+  F.block(0, 7, 3, 3).diagonal().setConstant(dt); // Eq. (A.10)
 
   // This is dq3dq2
   F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(), q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(),
-      q1.y(), q1.z(), q1.y(), -q1.x(), q1.w();
+      q1.y(), q1.z(), q1.y(), -q1.x(), q1.w(); // Eq. (A. 10) and Eq. (A. 12)
 
   Eigen::Quaterniond q2 = state->GetOrientation();
   Eigen::MatrixXd dq3dq1 = Eigen::MatrixXd::Zero(4, 4);
   dq3dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(), q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(),
-      -q2.y(), q2.x(), q2.w();
+      -q2.y(), q2.x(), q2.w(); // Eq. (A. 14)
 
-  // Compute df/dn
+  // Compute df/dn. Eq. (A. 11)
   Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
 
   const auto& comega = state->GetAngularVelocity();
@@ -63,7 +63,7 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
 
   F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
 
-  Eigen::MatrixXd G = Eigen::MatrixXd::Zero(13, 6);
+  Eigen::MatrixXd G = Eigen::MatrixXd::Zero(13, 6); // Eq. (A. 11)
 
   G.block(0, 0, 3, 3) = Eigen::Matrix3d::Identity() * dt;
   G.block(7, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
@@ -78,7 +78,13 @@ void CovarianceMatrix::Predict(const std::shared_ptr<State>& state, const double
   Q.block(0, 0, 3, 3).diagonal().setConstant(linear_accel_sd * linear_accel_sd * dt * dt);
   Q.block(3, 3, 3, 3).diagonal().setConstant(angular_accel_sd * angular_accel_sd * dt * dt);
 
+  // P[0:13, 0:13] = F * P[0:13, 0:13] * F' + G * Q * G'
   matrix_.block(0, 0, 13, 13) = F * matrix_.block(0, 0, 13, 13) * F.transpose() + G * Q * G.transpose();
+
+  // P[12:end, 0:13] = P[12:end, 0:13] * F'
+  matrix_.block(13, 0, matrix_.rows() - 13, 13) *=  F.transpose();
+  // P[12:end, 0:13] = F * P[0:13, 13:end]
+  matrix_.block(0, 13, 13, matrix_.cols() - 13) = F * matrix_.block(0, 13, 13, matrix_.cols() - 13);
 }
 
 /**

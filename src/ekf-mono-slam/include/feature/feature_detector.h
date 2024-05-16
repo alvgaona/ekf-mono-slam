@@ -1,6 +1,6 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
+#include "spdlog/spdlog.h"
 
 #include "descriptor_extractor_type.h"
 #include "detector_type.h"
