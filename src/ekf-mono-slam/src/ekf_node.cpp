@@ -24,7 +24,7 @@ void EKFNode::init_callback(rclcpp::Client<ekf_mono_slam::srv::FeatureDetect>::S
       auto descriptor = cv::Mat(1, descriptor_size, CV_8UC1, im_feat.descriptor.data());
 
       features.push_back(
-          std::make_shared<ImageFeatureMeasurement>(cv::Point2f(im_feat.point.x, im_feat.point.y), descriptor, im_feat.feature_index));
+          std::make_shared<ImageFeatureMeasurement>(cv::Point2f(im_feat.point.x, im_feat.point.y), descriptor));
     }
 
     ekf_.AddFeatures(features);

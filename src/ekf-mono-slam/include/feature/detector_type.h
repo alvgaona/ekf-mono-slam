@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_DETECTOR_TYPE_H
-#define EKF_MONO_SLAM_DETECTOR_TYPE_H
+#pragma once
 
 enum class DetectorType {
   BRISK,
@@ -7,5 +6,3 @@ enum class DetectorType {
   FAST,
   ORB,
 };
-
-#endif  // EKF_MONO_SLAM_DETECTOR_TYPE_H

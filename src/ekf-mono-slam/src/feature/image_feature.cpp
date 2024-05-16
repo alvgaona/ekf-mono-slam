@@ -11,24 +11,6 @@
  */
 ImageFeature::ImageFeature(const cv::Point2f coordinates) {
   this->coordinates_ = coordinates;
-  this->feature_index_ = -1;
-}
-
-/**
- * @brief Constructs an ImageFeature object with specified coordinates and feature index.
- *
- * This constructor initializes a new ImageFeature object with the provided `coordinates` and `feature_index`. The
- * feature index identifies the feature within a specific context, such as a feature list or tracked set.
- *
- * @param coordinates The feature's location as a cv::Point2f in the image coordinate system.
- * @param feature_index The unique identifier for the feature within its designated context.
- *
- * This constructor provides a more complete configuration for the ImageFeature, allowing immediate identification and
- * usage based on the assigned index.
- */
-ImageFeature::ImageFeature(const cv::Point2f coordinates, const int feature_index) {
-  this->coordinates_ = coordinates;
-  this->feature_index_ = feature_index;
 }
 
 /**
@@ -53,3 +35,12 @@ int ImageFeature::ComputeZone(const int zone_width, const int zone_height, const
   const int zone_y = static_cast<int>(coordinates_.y) / zone_height;
   return zone_y * (image_width / zone_width) + zone_x;
 }
+
+bool ImageFeature::isVisibleInFrame() const {
+  const auto u = coordinates_.x;
+  const auto v = coordinates_.y;
+
+  // FIXME: do not hardcode the image size
+  return u > 0 && u < 1920 && v > 0 && v < 1080;
+}
+

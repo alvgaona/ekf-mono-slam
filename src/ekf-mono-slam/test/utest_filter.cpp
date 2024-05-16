@@ -41,17 +41,17 @@ TEST(ExtendedKalmanFilter, StateAddMapFeature) {
   const cv::Mat descriptor_data = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
 
   const auto inverse_depth_map_feature =
-      std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::INVERSE_DEPTH);
-  const auto depth_map_feature = std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::DEPTH);
+      std::make_shared<InverseDepthMapFeature>(feature_state, 6, descriptor_data);
+  const auto cartesian_map_feature = std::make_shared<CartesianMapFeature>(feature_state, 13, descriptor_data);
 
   state.Add(inverse_depth_map_feature);
-  state.Add(depth_map_feature);
+  state.Add(cartesian_map_feature);
 
-  const std::vector<std::shared_ptr<MapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
-  const std::vector<std::shared_ptr<MapFeature>> depth_features = state.GetDepthFeatures();
+  const std::vector<std::shared_ptr<InverseDepthMapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
+  const std::vector<std::shared_ptr<CartesianMapFeature>> cartesian_map_features = state.GetCartesianFeatures();
 
-  ASSERT_THAT(depth_features, SizeIs(1));
-  ASSERT_THAT(depth_features, Contains(depth_map_feature));
+  ASSERT_THAT(cartesian_map_features, SizeIs(1));
+  ASSERT_THAT(cartesian_map_features, Contains(cartesian_map_feature));
   ASSERT_THAT(inverse_depth_features, SizeIs(1));
   ASSERT_THAT(inverse_depth_features, Contains(inverse_depth_map_feature));
 }
@@ -65,20 +65,20 @@ TEST(ExtendedKalmanFilter, RemoveMapFeature) {
   const cv::Mat descriptor_data = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
 
   const auto inverse_map_feature =
-      std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::INVERSE_DEPTH);
-  const auto depth_map_feature = std::make_shared<MapFeature>(feature_state, 6, descriptor_data, MapFeatureType::DEPTH);
+      std::make_shared<InverseDepthMapFeature>(feature_state, 13, descriptor_data);
+  const auto cartesian_map_feature = std::make_shared<CartesianMapFeature>(feature_state, 19, descriptor_data);
 
   state.Add(inverse_map_feature);
-  state.Add(depth_map_feature);
+  state.Add(cartesian_map_feature);
 
   state.Remove(inverse_map_feature);
-  state.Remove(depth_map_feature);
+  state.Remove(cartesian_map_feature);
 
-  const std::vector<std::shared_ptr<MapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
-  const std::vector<std::shared_ptr<MapFeature>> depth_features = state.GetDepthFeatures();
+  const std::vector<std::shared_ptr<InverseDepthMapFeature>> inverse_depth_features = state.GetInverseDepthFeatures();
+  const std::vector<std::shared_ptr<CartesianMapFeature>> cartesian_map_features = state.GetCartesianFeatures();
 
   ASSERT_THAT(inverse_depth_features, SizeIs(0));
-  ASSERT_THAT(depth_features, SizeIs(0));
+  ASSERT_THAT(cartesian_map_features, SizeIs(0));
 }
 
 TEST(ExtendedKalmanFilter, AddImageFeatureMeasurement) {
@@ -89,7 +89,7 @@ TEST(ExtendedKalmanFilter, AddImageFeatureMeasurement) {
   state.Add(image_feature_measurement);
 
   ASSERT_THAT(state.GetInverseDepthFeatures().size(), Eq(1));
-  ASSERT_THAT(state.GetDepthFeatures().size(), Eq(0));
+  ASSERT_THAT(state.GetCartesianFeatures().size(), Eq(0));
 }
 
 TEST(ExtendedKalmanFilter, CovarianceInit) {
@@ -203,7 +203,7 @@ TEST(ExtendedKalmanFilter, AddFeatureAndPredict) {
   const auto image_feature_measurement =
       std::make_shared<ImageFeatureMeasurement>(cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
 
-  const std::shared_ptr<State> state;
+  const auto state = std::make_shared<State>();
   state->Add(image_feature_measurement);
 
   CovarianceMatrix covariance_matrix;

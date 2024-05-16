@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_ZONE_H_
-#define EKF_MONO_SLAM_ZONE_H_
+#pragma once
 
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
@@ -34,5 +33,3 @@ class Zone final {
   int candidates_left_;
   int predictions_features_count_;
 };
-
-#endif /* EKF_MONO_SLAM_ZONE_H_ */

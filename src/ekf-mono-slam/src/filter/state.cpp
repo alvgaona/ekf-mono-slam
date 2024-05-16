@@ -1,3 +1,4 @@
+#include <typeinfo>
 #include "filter/state.h"
 
 #include <math/ekf_math.h>
@@ -64,6 +65,7 @@ State::State(const Eigen::Vector3d& position, const Eigen::Vector3d& velocity, c
  * influences.
  */
 void State::Predict(const double delta_t) {
+  // This prediction assumes constant velocity
   position_ += velocity_ * delta_t;
   const Eigen::Vector3d angles = angular_velocity_ * delta_t;
 
@@ -89,16 +91,12 @@ void State::Predict(const double delta_t) {
  * with the current state of feature tracking.
  */
 void State::Remove(const std::shared_ptr<MapFeature>& feature) {
-  switch (feature->GetType()) {
-    case MapFeatureType::DEPTH:
-      std::erase_if(depth_features_, [&feature](const std::shared_ptr<MapFeature>& f) { return f == feature; });
-      break;
-    case MapFeatureType::INVERSE_DEPTH:
-      std::erase_if(inverse_depth_features_, [&feature](const std::shared_ptr<MapFeature>& f) { return f == feature; });
-      break;
-    default:
-      throw std::runtime_error("Feature to be removed is invalid");
+  if (const auto& cartesian_feature = std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
+    std::erase_if(cartesian_features_, [&cartesian_feature](const std::shared_ptr<MapFeature>& f) { return f == cartesian_feature; });
+  } else if (const auto& inverse_depth_feature = std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
+    std::erase_if(inverse_depth_features_, [&inverse_depth_feature](const std::shared_ptr<MapFeature>& f) { return f == inverse_depth_feature; });
   }
+  std::erase_if(features_, [&feature](const std::shared_ptr<MapFeature>& f) { return f == feature; });
 }
 
 /**
@@ -132,9 +130,8 @@ void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_me
   feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));
   feature_state(5) = ImageFeatureParameters::init_inv_depth;
 
-  // TODO: Check if we really need to store the position in the covariance matrix within the MapFeature object
-  const auto map_feature = std::make_shared<MapFeature>(
-      feature_state, 6, image_feature_measurement->GetDescriptorData(), MapFeatureType::INVERSE_DEPTH);
+  const auto map_feature = std::make_shared<InverseDepthMapFeature>(
+      feature_state, this->dimension_, image_feature_measurement->GetDescriptorData());
 
   dimension_ += 6;
 
@@ -150,63 +147,28 @@ void State::Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_me
  * @param feature The MapFeature object to be added.
  */
 void State::Add(const std::shared_ptr<MapFeature>& feature) {
-  switch (feature->GetType()) {
-    case MapFeatureType::DEPTH:
-      depth_features_.push_back(feature);
-      features_.push_back(feature);
-      break;
-    case MapFeatureType::INVERSE_DEPTH:
-      inverse_depth_features_.push_back(feature);
-      features_.push_back(feature);
-      break;
-    case MapFeatureType::INVALID:
-      spdlog::error("Feature is type INVALID");
-      break;
+  if (const auto& cartesian_feature = std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
+    cartesian_features_.push_back(cartesian_feature);
+    features_.push_back(cartesian_feature);
+  } else if (const auto& inverse_depth_feature = std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
+    inverse_depth_features_.push_back(inverse_depth_feature);
+    features_.push_back(inverse_depth_feature);
   }
 }
 
-std::vector<std::shared_ptr<ImageFeaturePrediction>> State::PredictMeasurementState() {
-  std::vector<std::shared_ptr<ImageFeaturePrediction>> predictions;
-
+void State::PredictMeasurementState() {
   for (const auto& mapFeature : features_) {
-    const auto Rcw = this->rotation_matrix_.transpose();
-    const auto rwc = this->position_;
-    const auto feature_state = mapFeature->GetState();
-    const auto yi = feature_state.segment(0, 3);
-
-    Eigen::Vector3d directionalVector;
-
-    // TODO: probably need to delegate the responsiblity to compute the directional vector
-    // to the map feature itself. Also, to check if it's in front of the camera or not.
-    if (mapFeature->GetType() == MapFeatureType::INVERSE_DEPTH) {
-      const auto theta = feature_state[3];
-      const auto phi = feature_state[4];
-      const auto rho = feature_state[5];
-      const auto m = Eigen::Vector3d{cos(phi) * sin(theta), -sin(phi), cos(phi) * cos(theta)};
-
-      directionalVector = Rcw * (rho * (yi - rwc) + m);
-    } else if (mapFeature->GetType() == MapFeatureType::DEPTH) {
-      directionalVector = Rcw * (yi - rwc);
-    } else {
-      spdlog::warn("Feature prediction failed as it is invalid");
+    Eigen::Vector3d directionalVector = mapFeature->ComputeDirectionalVector(rotation_matrix_.transpose(), position_);
+    // directionalVector = Rcw * (yi - rwc);
+    if (!mapFeature->isInFrontOfCamera(directionalVector)) {
       continue;
     }
 
-    if (!EkfMath::isFeatureInFrontOfCamera(directionalVector)) {
+    const auto image_feature_prediction = ImageFeaturePrediction::from(directionalVector);
+
+    if (!image_feature_prediction.isVisibleInFrame()) {
       continue;
     }
-
-    // TODO: it might be a good idea to also created a class DistortedImageFeature
-    const auto undistorted_image_feature = UndistortedImageFeature::Project(directionalVector);
-    const auto distorted_feature = EkfMath::distortImageFeature(undistorted_image_feature);
-
-    if (!EkfMath::isFeatureVisibleInFrame(distorted_feature)) {
-      continue;
-    }
-
-    // FIXME: check if the covariance matrix at this stage doesn't hurt.
-    predictions.push_back(std::make_shared<ImageFeaturePrediction>(distorted_feature, cv::Mat()));
+    // TODO: add prediction of map feature
   }
-
-  return predictions;
 }
