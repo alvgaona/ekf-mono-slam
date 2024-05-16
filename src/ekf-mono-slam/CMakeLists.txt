@@ -97,16 +97,21 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  file(GLOB_RECURSE test_src test/*.cpp)
+  set(test_src
+    "test/utest_math.cpp"
+    "test/utest_feature.cpp"
+    "test/utest_filter.cpp"
+    "test/utest_image.cpp"
+  )
   file(GLOB_RECURSE src_for_test src/*.cpp)
   list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 
   find_package(ament_cmake_gmock REQUIRED)
 
-  ament_add_gmock(some_test ${test_src} ${src_for_test})
-  ament_target_dependencies(some_test std_msgs OpenCV)
-  target_link_libraries(some_test spdlog::spdlog)
-  target_include_directories(some_test PUBLIC
+  ament_add_gmock(slam_test ${test_src} ${src_for_test})
+  ament_target_dependencies(slam_test std_msgs OpenCV)
+  target_link_libraries(slam_test spdlog::spdlog)
+  target_include_directories(slam_test PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${EIGEN3_INCLUDE_DIRS}

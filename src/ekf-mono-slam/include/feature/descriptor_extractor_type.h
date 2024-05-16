@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_DESCRIPTOR_EXTRACTOR_TYPE_H
-#define EKF_MONO_SLAM_DESCRIPTOR_EXTRACTOR_TYPE_H
+#pragma once
 
 enum class DescriptorExtractorType {
   BRISK,
@@ -7,5 +6,3 @@ enum class DescriptorExtractorType {
   FAST,
   ORB,
 };
-
-#endif  // EKF_MONO_SLAM_DESCRIPTOR_EXTRACTOR_TYPE_H

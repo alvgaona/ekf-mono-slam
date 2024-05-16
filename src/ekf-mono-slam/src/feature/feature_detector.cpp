@@ -101,7 +101,8 @@ void FeatureDetector::BuildImageMask(const cv::Mat& image_mask,
   }
 
   for (auto& prediction : predictions) {
-    Ellipse ellipse(prediction->GetCoordinates(), prediction->GetCovarianceMatrix());
+    // FIXME: pass the right value
+    Ellipse ellipse(prediction->GetCoordinates(), cv::Mat());
     Visual::UncertaintyEllipse2D(image_mask, ellipse, 2 * (image_mask.rows + image_mask.cols), cv::Scalar(0, 0, 0),
                                  true);
   }

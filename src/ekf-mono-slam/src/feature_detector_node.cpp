@@ -21,10 +21,9 @@ void FeatureDetectorNode::detect_features(const std::shared_ptr<ekf_mono_slam::s
 
   for (auto im_pred : request->predictions) {
     // cv::Mat(1, descriptor_size, CV_8UC1, im_pred.covariance_matrix.data());
+    // FIXME: create the image feature prediction from image with all its values
     predictions.push_back(
-        std::make_shared<ImageFeaturePrediction>(cv::Point2f(im_pred.point.x, im_pred.point.y),
-                                                 cv::Mat(),  // TODO: add covariance matrix from message
-                                                 im_pred.feature_index));
+        std::make_shared<ImageFeaturePrediction>(cv::Point2f(im_pred.point.x, im_pred.point.y)));
   }
 
   FeatureDetector feature_detector(FeatureDetector::BuildDetector(DetectorType::AKAZE),
@@ -38,12 +37,13 @@ void FeatureDetectorNode::detect_features(const std::shared_ptr<ekf_mono_slam::s
   ekf_mono_slam::msg::ImageFeatureMeasurementArray image_feature_measurements;
   std::vector<ekf_mono_slam::msg::ImageFeatureMeasurement> response_features;
 
-  for (const auto& m : feature_detector.GetImageFeatures()) {
+  const auto image_features = feature_detector.GetImageFeatures();
+  for (auto i = 0u; i < image_features.size(); i++) {
+    const auto m = image_features[i];
     ekf_mono_slam::msg::ImageFeatureMeasurement feature;
     auto coordinates = m->GetCoordinates();
     auto descriptor = m->GetDescriptorData();
 
-    feature.feature_index = m->GetFeatureIndex();
     feature.point.x = coordinates.x;
     feature.point.y = coordinates.y;
 

@@ -32,3 +32,13 @@ Eigen::Vector3d UndistortedImageFeature::BackProject() const {
 
   return {x, y, z};
 }
+
+UndistortedImageFeature UndistortedImageFeature::Project(Eigen::Vector3d directionalVector) {
+  // This equation can be extracted from
+  // J. I. Civera, A. J. Davison, and J. M. Montiel, Structure from Motion using the Extended Kalman Filter. 2012.
+  // doi: 10.1007/978-3-642-24834-4.
+  // Eq. (3.9)
+  const auto image_coordinates = Eigen::Vector2d{cx - fx * directionalVector[0] / directionalVector[2],
+                                                 cy - fy * directionalVector[1] / directionalVector[2]};
+  return UndistortedImageFeature(image_coordinates);
+}
