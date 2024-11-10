@@ -1,3 +1,6 @@
+# clang
+.cache/clangd
+
 # Other
 resources/
 
