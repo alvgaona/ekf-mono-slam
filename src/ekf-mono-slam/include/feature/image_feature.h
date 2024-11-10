@@ -8,11 +8,16 @@ class ImageFeature {
 
   virtual ~ImageFeature() = default;
 
-  [[nodiscard]] virtual cv::Point2f GetCoordinates() const { return coordinates_; }
+  [[nodiscard]] virtual cv::Point2f GetCoordinates() const {
+    return coordinates_;
+  }
 
-  [[nodiscard]] virtual int ComputeZone(int zone_width, int zone_height, int image_width) const;
+  [[nodiscard]] virtual int ComputeZone(
+      int zone_width, int zone_height, int image_width
+  ) const;
 
   [[nodiscard]] bool isVisibleInFrame() const;
+
  protected:
   cv::Point2f coordinates_;
 };
