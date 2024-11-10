@@ -1,0 +1,11 @@
+CompileFlags:
+  CompilationDatabase: build
+  Compiler: clang++
+Diagnostics:
+  MissingIncludes: Strict
+  UnusedIncludes: None
+  ClangTidy:
+    Add: ["*"]
+    Remove: ["llvmlibc-*", "altera-*", "fuchsia-*", "cppcoreguidelines-prefer-member-initializer"]
+Index:
+  Background: Build
