@@ -8,17 +8,29 @@ class Zone final {
   Zone(int id, cv::Size dimensions);
   ~Zone() = default;
 
-  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetCandidates() { return candidates_; }
-  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetAdded() { return added_; }
-  std::vector<std::shared_ptr<ImageFeaturePrediction>> GetPredictions() { return predictions_; }
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetCandidates() {
+    return candidates_;
+  }
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetAdded() {
+    return added_;
+  }
+  std::vector<std::shared_ptr<ImageFeaturePrediction>> GetPredictions() {
+    return predictions_;
+  }
 
   [[nodiscard]] int GetId() const { return id_; }
   [[nodiscard]] int GetCandidatesLeft() const { return candidates_left_; }
   [[nodiscard]] cv::Size GetDimensions() const { return dimensions_; }
-  [[nodiscard]] int GetPredictionsFeaturesCount() const { return predictions_features_count_; }
+  [[nodiscard]] int GetPredictionsFeaturesCount() const {
+    return predictions_features_count_;
+  }
 
-  void SetCandidatesLeft(const int candidates_left) { this->candidates_left_ = candidates_left; }
-  void SetPredictionsFeaturesCount(const int count) { this->predictions_features_count_ = count; }
+  void SetCandidatesLeft(const int candidates_left) {
+    this->candidates_left_ = candidates_left;
+  }
+  void SetPredictionsFeaturesCount(const int count) {
+    this->predictions_features_count_ = count;
+  }
 
   void AddFeature(std::shared_ptr<ImageFeatureMeasurement> feature);
   void AddCandidate(const std::shared_ptr<ImageFeatureMeasurement>& candidate);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "image_feature.h"
 #include "Eigen/Dense"
+#include "image_feature.h"
 
 class ImageFeaturePrediction final : public ImageFeature {
  public:
@@ -11,7 +11,9 @@ class ImageFeaturePrediction final : public ImageFeature {
 
   [[nodiscard]] const Eigen::MatrixXd& GetJacobian() const { return jacobian_; }
 
-  [[nodiscard]] const Eigen::MatrixXd& GetCovarianceMatrix() const { return covariance_matrix_; }
+  [[nodiscard]] const Eigen::MatrixXd& GetCovarianceMatrix() const {
+    return covariance_matrix_;
+  }
 
   static ImageFeaturePrediction from(const Eigen::Vector3d& directionalVector);
 

@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_IMAGE_PROVIDER_H_
-#define EKF_MONO_SLAM_IMAGE_PROVIDER_H_
+#pragma once
 
 #include <opencv2/opencv.hpp>
 
@@ -11,5 +10,3 @@ class ImageProvider {
  protected:
   cv::Mat image_;
 };
-
-#endif /* EKF_MONO_SLAM_IMAGE_PROVIDER_H_ */

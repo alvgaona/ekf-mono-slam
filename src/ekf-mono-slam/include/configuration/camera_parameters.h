@@ -2,7 +2,8 @@
 
 /**
  * @defgroup camera_parameters Camera Parameters
- * @brief Camera calibration parameters for distortion correction and image analysis.
+ * @brief Camera calibration parameters for distortion correction and image
+ * analysis.
  *
  * @namespace CameraParameters
  * @brief Namespace containing camera calibration parameters.

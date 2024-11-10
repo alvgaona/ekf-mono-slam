@@ -2,7 +2,8 @@
 
 /**
  * @defgroup kinematics_parameters Kinematics Parameters
- * @brief Kinematics-related constants for motion modeling and noise characterization.
+ * @brief Kinematics-related constants for motion modeling and noise
+ * characterization.
  *
  * @namespace KinematicsParameters
  * @brief Namespace containing kinematics-related constants.
@@ -29,7 +30,8 @@ static constexpr double inv_depth_sd = 1.0L;
 
 /**
  * @brief Numerical epsilon for floating-point comparisons.
- * @details Used to account for numerical precision limitations in equality checks.
+ * @details Used to account for numerical precision limitations in equality
+ * checks.
  */
 static constexpr double epsilon = 2.22e-16L;
 

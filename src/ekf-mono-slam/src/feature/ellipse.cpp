@@ -1,8 +1,15 @@
 #include "feature/ellipse.h"
 
+#include <Eigen/Dense>
+#include <algorithm>
+#include <cmath>
+#include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/types.hpp>
+
 #include "math/ekf_math.h"
 
-using namespace EkfMath;
+using EkfMath::CHISQ_95_2;
 
 /**
  * @brief Constructs an Ellipse object from a center point and a covariance matrix.
@@ -40,8 +47,8 @@ Ellipse::Ellipse(const cv::Point2f center, const cv::Mat& matrix) {
  * indicates higher uncertainty, while a smaller ellipse signifies better localization precision.
  */
 cv::Size2f Ellipse::Axes() {
-  const cv::Size2f axes(static_cast<float>(2.0L * sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)),
-                        static_cast<float>(2.0L * sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)));
+  const cv::Size2f axes(static_cast<float>(2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)),
+                        static_cast<float>(2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)));
 
   return axes;
 }
@@ -80,8 +87,8 @@ double Ellipse::Angle() { return std::atan(eigen_vectors_.at<double>(1, 0) / eig
  */
 bool Ellipse::Contains(const cv::Point2f point) {
   const cv::Size2f axes = Axes();
-  const double major_axis = MAX(axes.width, axes.height);
-  const double minor_axis = MIN(axes.width, axes.height);
+  const double major_axis = std::max(axes.width, axes.height);
+  const double minor_axis = std::min(axes.width, axes.height);
 
   const double f = std::sqrt(major_axis * major_axis - minor_axis * minor_axis);
 
@@ -91,11 +98,11 @@ bool Ellipse::Contains(const cv::Point2f point) {
   const double angle = Angle();  // Ellipse orientation
 
   if (axes.height < axes.width) {  // Horizontal ellipse
-    f1 = Eigen::Vector2d(f * cos(angle) + center_.x, f * sin(angle) + center_.y);
-    f2 = Eigen::Vector2d(-f * cos(angle) + center_.x, -f * sin(angle) + center_.y);
+    f1 = Eigen::Vector2d(f * std::cos(angle) + center_.x, f * std::sin(angle) + center_.y);
+    f2 = Eigen::Vector2d(-f * std::cos(angle) + center_.x, -f * std::sin(angle) + center_.y);
   } else {  // Vertical ellipse
-    f1 = Eigen::Vector2d(f * (-sin(angle)) + center_.x, f * cos(angle) + center_.y);
-    f2 = Eigen::Vector2d(-f * (-sin(angle)) + center_.x, -f * cos(angle) + center_.y);
+    f1 = Eigen::Vector2d(f * (-std::sin(angle)) + center_.x, f * std::cos(angle) + center_.y);
+    f2 = Eigen::Vector2d(-f * (-std::sin(angle)) + center_.x, -f * std::cos(angle) + center_.y);
   }
 
   const Eigen::Vector2d p(point.x, point.y);

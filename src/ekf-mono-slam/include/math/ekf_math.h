@@ -1,6 +1,8 @@
 #pragma once
 
-#include "opencv2/opencv.hpp"
+#include <Eigen/Dense>
+#include <opencv2/core/types.hpp>
+
 #include "feature/undistorted_image_feature.h"
 #include "filter/state.h"
 
