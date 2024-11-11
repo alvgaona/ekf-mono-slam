@@ -33,7 +33,7 @@ class MapFeature {
 
   [[nodiscard]] bool isInFrontOfCamera() const;
 
-  virtual void ComputeJacobian(const State& state);
+  // virtual void ComputeJacobian(const State& state) = 0;
 
   virtual Eigen::Vector3d ComputeDirectionalVector(
       const Eigen::Matrix3d& rotationMatrix,

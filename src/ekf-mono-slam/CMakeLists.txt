@@ -2,13 +2,15 @@ cmake_minimum_required(VERSION 3.8)
 project(ekf_mono_slam)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 20)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -45,8 +47,8 @@ set(srv_files
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
-  DEPENDENCIES 
-  sensor_msgs 
+  DEPENDENCIES
+  sensor_msgs
   std_msgs
 )
 
@@ -97,21 +99,21 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  set(test_src
+    set(test_src
     "test/utest_math.cpp"
     "test/utest_feature.cpp"
     "test/utest_filter.cpp"
     "test/utest_image.cpp"
   )
-  file(GLOB_RECURSE src_for_test src/*.cpp)
-  list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
+    file(GLOB_RECURSE src_for_test src/*.cpp)
+    list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 
-  find_package(ament_cmake_gmock REQUIRED)
+    find_package(ament_cmake_gmock REQUIRED)
 
-  ament_add_gmock(slam_test ${test_src} ${src_for_test})
-  ament_target_dependencies(slam_test std_msgs OpenCV)
-  target_link_libraries(slam_test spdlog::spdlog)
-  target_include_directories(slam_test PUBLIC
+    ament_add_gmock(slam_test ${test_src} ${src_for_test})
+    ament_target_dependencies(slam_test std_msgs OpenCV)
+    target_link_libraries(slam_test spdlog::spdlog)
+    target_include_directories(slam_test PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${EIGEN3_INCLUDE_DIRS}

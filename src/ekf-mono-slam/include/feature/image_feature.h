@@ -4,6 +4,8 @@
 
 class ImageFeature {
  public:
+  ImageFeature() = default;
+
   explicit ImageFeature(cv::Point2f coordinates);
 
   virtual ~ImageFeature() = default;
