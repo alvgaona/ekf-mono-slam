@@ -8,9 +8,12 @@
 using namespace ::testing;
 
 TEST(FeatureDetectors, CreateFeatureDetector) {
-  const cv::Ptr<cv::FeatureDetector> akaze_detector = FeatureDetector::BuildDetector(DetectorType::AKAZE);
-  const cv::Ptr<cv::FeatureDetector> orb_detector = FeatureDetector::BuildDetector(DetectorType::ORB);
-  const cv::Ptr<cv::FeatureDetector> brisk_detector = FeatureDetector::BuildDetector(DetectorType::BRISK);
+  const cv::Ptr<cv::FeatureDetector> akaze_detector =
+      FeatureDetector::BuildDetector(DetectorType::AKAZE);
+  const cv::Ptr<cv::FeatureDetector> orb_detector =
+      FeatureDetector::BuildDetector(DetectorType::ORB);
+  const cv::Ptr<cv::FeatureDetector> brisk_detector =
+      FeatureDetector::BuildDetector(DetectorType::BRISK);
 
   ASSERT_NE(akaze_detector, nullptr);
   ASSERT_NE(orb_detector, nullptr);
@@ -18,16 +21,23 @@ TEST(FeatureDetectors, CreateFeatureDetector) {
 }
 
 TEST(FeatureDetectors, NotSupportedDetector) {
-  ASSERT_THROW({ FeatureDetector::BuildDetector(DetectorType::FAST); }, std::runtime_error);
+  ASSERT_THROW(
+      { FeatureDetector::BuildDetector(DetectorType::FAST); },
+      std::runtime_error
+  );
 }
 
 TEST(FeatureDetectors, DetectFeatures) {
-  FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
+  FileSequenceImageProvider image_provider(
+      "./src/ekf-mono-slam/test/resources/desk_translation/"
+  );
   const cv::Mat image = image_provider.GetNextImage();
 
-  FeatureDetector detector(FeatureDetector::BuildDetector(DetectorType::BRISK),
-                           FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::BRISK),
-                           cv::Size(640, 480));
+  FeatureDetector detector(
+      FeatureDetector::BuildDetector(DetectorType::BRISK),
+      FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::BRISK),
+      cv::Size(640, 480)
+  );
 
   detector.DetectFeatures(image);
 
@@ -38,11 +48,16 @@ TEST(FeatureDetectors, DetectFeatures) {
 }
 
 TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {
-  const ImageFeatureMeasurement image_feature_measurement(cv::Point2f(0, 0),
-                                                          cv::Mat::zeros(cv::Size(30, 30), CV_64FC1));
-  const UndistortedImageFeature undistorted_image_feature = image_feature_measurement.Undistort();
+  const ImageFeatureMeasurement image_feature_measurement(
+      cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1)
+  );
+  const UndistortedImageFeature undistorted_image_feature =
+      image_feature_measurement.Undistort();
 
-  ASSERT_EQ(undistorted_image_feature.GetCoordinates(), Eigen::Vector2d(1.4040732757828778, 1.0760232978706483));
+  ASSERT_EQ(
+      undistorted_image_feature.GetCoordinates(),
+      Eigen::Vector2d(1.4040732757828778, 1.0760232978706483)
+  );
 }
 
 TEST(Zones, CreateZone) {

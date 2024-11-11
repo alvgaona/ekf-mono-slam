@@ -1,17 +1,21 @@
-#include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 #include "image/file_sequence_image_provider.h"
 
 using namespace ::testing;
 
 TEST(FileSequenceImageProvider, InitFileSequenceImageProvider) {
-  const FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
+  const FileSequenceImageProvider image_provider(
+      "./src/ekf-mono-slam/test/resources/desk_translation/"
+  );
 
   ASSERT_THAT(image_provider.GetImageCounter(), Eq(0));
 }
 
 TEST(FileSequenceImageProvider, GetFirstImage) {
-  FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/");
+  FileSequenceImageProvider image_provider(
+      "./src/ekf-mono-slam/test/resources/desk_translation/"
+  );
 
   const cv::Mat image = image_provider.GetNextImage();
 
@@ -21,7 +25,9 @@ TEST(FileSequenceImageProvider, GetFirstImage) {
 }
 
 TEST(FileSequenceProvider, NoMoreImagesInDirectory) {
-  FileSequenceImageProvider image_provider("./src/ekf-mono-slam/test/resources/desk_translation/", 2, 2);
+  FileSequenceImageProvider image_provider(
+      "./src/ekf-mono-slam/test/resources/desk_translation/", 2, 2
+  );
   cv::Mat image = image_provider.GetNextImage();
   auto size = image.size();
 

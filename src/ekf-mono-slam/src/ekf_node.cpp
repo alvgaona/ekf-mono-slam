@@ -6,25 +6,41 @@
 #include "feature/image_feature_measurement.h"
 
 EKFNode::EKFNode() : Node("ekf_node") {
-  image_subscriber_ = std::make_shared<image_transport::Subscriber>(image_transport::create_subscription(
-      this, "camera/image", std::bind(&EKFNode::image_callback, this, std::placeholders::_1), "raw"));
-  feature_detect_client_ = this->create_client<ekf_mono_slam::srv::FeatureDetect>("features/detect");
-  state_publisher_ = this->create_publisher<ekf_mono_slam::msg::State>("filter/state", 10);
-  covariance_publisher_ = this->create_publisher<ekf_mono_slam::msg::CovarianceMatrix>("filter/covariance", 10);
+  image_subscriber_ = std::make_shared<image_transport::Subscriber>(
+      image_transport::create_subscription(
+          this,
+          "camera/image",
+          std::bind(&EKFNode::image_callback, this, std::placeholders::_1),
+          "raw"
+      )
+  );
+  feature_detect_client_ =
+      this->create_client<ekf_mono_slam::srv::FeatureDetect>("features/detect");
+  state_publisher_ =
+      this->create_publisher<ekf_mono_slam::msg::State>("filter/state", 10);
+  covariance_publisher_ =
+      this->create_publisher<ekf_mono_slam::msg::CovarianceMatrix>(
+          "filter/covariance", 10
+      );
 }
 
-void EKFNode::init_callback(rclcpp::Client<ekf_mono_slam::srv::FeatureDetect>::SharedFuture future) {
-  if (auto status = future.wait_for(std::chrono::milliseconds(1000)); status == std::future_status::ready) {
+void EKFNode::init_callback(
+    rclcpp::Client<ekf_mono_slam::srv::FeatureDetect>::SharedFuture future
+) {
+  if (auto status = future.wait_for(std::chrono::milliseconds(1000));
+      status == std::future_status::ready) {
     auto response = future.get();
 
     std::vector<std::shared_ptr<ImageFeatureMeasurement>> features;
 
     for (auto im_feat : response->features) {
       const auto descriptor_size = im_feat.descriptor.size();
-      auto descriptor = cv::Mat(1, descriptor_size, CV_8UC1, im_feat.descriptor.data());
+      auto descriptor =
+          cv::Mat(1, descriptor_size, CV_8UC1, im_feat.descriptor.data());
 
-      features.push_back(
-          std::make_shared<ImageFeatureMeasurement>(cv::Point2f(im_feat.point.x, im_feat.point.y), descriptor));
+      features.push_back(std::make_shared<ImageFeatureMeasurement>(
+          cv::Point2f(im_feat.point.x, im_feat.point.y), descriptor
+      ));
     }
 
     ekf_.AddFeatures(features);
@@ -40,13 +56,16 @@ void EKFNode::init_callback(rclcpp::Client<ekf_mono_slam::srv::FeatureDetect>::S
   // TODO: publish covariance matrix
 }
 
-void EKFNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg) {
+void EKFNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg
+) {
   if (!ekf_.isInitilized()) {
-    auto request = std::make_shared<ekf_mono_slam::srv::FeatureDetect::Request>();
+    auto request =
+        std::make_shared<ekf_mono_slam::srv::FeatureDetect::Request>();
     request->image = *msg;
 
-    feature_detect_client_->async_send_request(request,
-                                               std::bind(&EKFNode::init_callback, this, std::placeholders::_1));
+    feature_detect_client_->async_send_request(
+        request, std::bind(&EKFNode::init_callback, this, std::placeholders::_1)
+    );
   } else {
     ekf_.Predict();
 
