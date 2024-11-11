@@ -1,6 +1,7 @@
+#include <gmock/gmock-matchers.h>
+#include <gtest/gtest.h>
+
 #include "filter/state.h"
-#include "gtest/gtest.h"
-#include "gmock/gmock-matchers.h"
 #include "math/ekf_math.h"
 
 using namespace EkfMath;
@@ -11,7 +12,8 @@ TEST(JacobianDirectionalVector, ComputeJacobianDirectionalVector) {
 
   const Eigen::Vector3d directionalVector(0.5, 0.5, 0.5);
 
-  const Eigen::MatrixXd jacobian = jacobianDirectionalVector(q, directionalVector);
+  const Eigen::MatrixXd jacobian =
+      jacobianDirectionalVector(q, directionalVector);
 
   ASSERT_THAT(jacobian.col(0), Eq(Eigen::Vector3d(1, 1, 1)));
   ASSERT_THAT(jacobian.col(1), Eq(Eigen::Vector3d(3, -1, 1)));
@@ -75,8 +77,12 @@ TEST(RotationMatrix, RotationMatrixDerivativeByQuaternion) {
 }
 
 TEST(RotationMatrix, ComputeRotationMatrix) {
-  const auto state = State(Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0), Eigen::Quaterniond(1, 1, 1, 1),
-                           Eigen::Vector3d(0, 0, 1));
+  const auto state = State(
+      Eigen::Vector3d(1, 0, 0),
+      Eigen::Vector3d(0, 1, 0),
+      Eigen::Quaterniond(1, 1, 1, 1),
+      Eigen::Vector3d(0, 0, 1)
+  );
 
   Eigen::Matrix3d expected;
   expected << 0, 0, 1, 1, 0, 0, 0, 1, 0;
