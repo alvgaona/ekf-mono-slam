@@ -7,3 +7,4 @@ BinPackParameters: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowAllArgumentsOnNextLine: true
 AlignAfterOpenBracket: BlockIndent
+NamespaceIndentation: All

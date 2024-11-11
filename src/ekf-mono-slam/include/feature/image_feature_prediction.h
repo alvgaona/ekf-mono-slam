@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Eigen/Dense"
+#include <Eigen/Dense>
+
 #include "image_feature.h"
 
 class ImageFeaturePrediction final : public ImageFeature {
  public:
-  ImageFeaturePrediction();
+  ImageFeaturePrediction() = default;
   explicit ImageFeaturePrediction(const cv::Point& coordinates);
   ~ImageFeaturePrediction() override = default;
 
