@@ -1,45 +1,52 @@
-#ifndef EKF_MONO_SLAM_MAP_FEATURE_H
-#define EKF_MONO_SLAM_MAP_FEATURE_H
+#pragma once
 
-#include <memory>
-#include <opencv2/opencv.hpp>
+#include <Eigen/Dense>
+#include <cstdint>
+#include <ostream>
 
-#include "filter/state.h"
-#include "map_feature_type.h"
+#include "feature/image_feature_prediction.h"
 
 class State;
 
-class MapFeature final {
+class MapFeature {
  public:
-  MapFeature(const Eigen::VectorXd& position, int position_dimension, const cv::Mat& descriptor_data,
-             MapFeatureType type);
+  MapFeature(
+      const Eigen::VectorXd& state, int position, const cv::Mat& descriptor_data
+  );
 
-  ~MapFeature() = default;
+  virtual ~MapFeature() = default;
 
-  MapFeature(MapFeature const& source) = delete;
-
-  MapFeature(MapFeature&& source) = delete;
-
-  MapFeature& operator=(MapFeature const& source) = delete;
-
-  MapFeature& operator=(MapFeature&& source) noexcept = delete;
-
-  friend std::ostream& operator<<(std::ostream& os, const MapFeature& map_feature) {
-    os << "(position_dimension: " << map_feature.position_dimension_ << ")";
+  friend std::ostream& operator<<(
+      std::ostream& os, const MapFeature& map_feature
+  ) {
+    os << "(position: " << map_feature.position_ << ")";
     return os;
   }
 
-  [[nodiscard]] const MapFeatureType& GetType() const { return type_; };
+  [[nodiscard]] const Eigen::VectorXd& GetState() const { return state_; }
 
-  void ComputeJacobian(const State& state, std::vector<double>& image_feature_pos);
+  [[nodiscard]] int64_t GetDimension() const { return state_.size(); }
 
- private:
-  Eigen::VectorXd position_;
-  int position_dimension_;
+  void SetImageFeaturePrediction(const ImageFeaturePrediction& prediction) {
+    prediction_ = prediction;
+  }
+
+  [[nodiscard]] bool isInFrontOfCamera() const;
+
+  // virtual void ComputeJacobian(const State& state) = 0;
+
+  virtual Eigen::Vector3d ComputeDirectionalVector(
+      const Eigen::Matrix3d& rotationMatrix,
+      const Eigen::Vector3d& camera_position
+  ) = 0;
+
+  static bool isInFrontOfCamera(const Eigen::Vector3d& directionalVector);
+
+ protected:
+  Eigen::VectorXd state_;
+  int position_;
   cv::Mat descriptor_data_;
-  MapFeatureType type_;
   int times_predicted_;
   int times_matched_;
+  ImageFeaturePrediction prediction_;
 };
-
-#endif  // EKF_MONO_SLAM_MAP_FEATURE_H

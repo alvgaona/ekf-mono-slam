@@ -1,5 +1,4 @@
-#ifndef EKF_MONO_SLAM_UNDISTORTED_IMAGE_FEATURE_H
-#define EKF_MONO_SLAM_UNDISTORTED_IMAGE_FEATURE_H
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -10,15 +9,18 @@ class UndistortedImageFeature final {
   UndistortedImageFeature(const UndistortedImageFeature& source) = delete;
   UndistortedImageFeature(UndistortedImageFeature&& source) noexcept = delete;
 
-  UndistortedImageFeature& operator=(const UndistortedImageFeature& source) = delete;
+  UndistortedImageFeature& operator=(const UndistortedImageFeature& source
+  ) = delete;
   UndistortedImageFeature& operator=(UndistortedImageFeature&& source) = delete;
 
   [[nodiscard]] Eigen::Vector3d BackProject() const;
+
+  [[nodiscard]] static UndistortedImageFeature Project(
+      Eigen::Vector3d directionalVector
+  );
 
   [[nodiscard]] Eigen::Vector2d GetCoordinates() const { return coordinates_; }
 
  private:
   Eigen::Vector2d coordinates_;
 };
-
-#endif  // EKF_MONO_SLAM_UNDISTORTED_IMAGE_FEATURE_H

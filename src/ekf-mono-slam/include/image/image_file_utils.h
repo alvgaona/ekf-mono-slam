@@ -1,6 +1,6 @@
-#ifndef EKF_MONO_SLAM_IMAGE_FILE_UTILS_H
-#define EKF_MONO_SLAM_IMAGE_FILE_UTILS_H
+#pragma once
 
+#include <stdexcept>
 #include <string>
 
 #include "image_file_format.h"
@@ -21,5 +21,3 @@ class ImageFileUtils final {
     }
   }
 };
-
-#endif  // EKF_MONO_SLAM_IMAGE_FILE_UTILS_H

@@ -1,4 +1,10 @@
 ---
 Language: Cpp
 BasedOnStyle: Google
-ColumnLimit: 120
+ColumnLimit: 80
+BinPackArguments: false
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+AlignAfterOpenBracket: BlockIndent
+NamespaceIndentation: All

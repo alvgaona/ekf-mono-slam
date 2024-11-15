@@ -1,9 +1,9 @@
-#ifndef EKF_MONO_SLAM_CAMERA_PARAMETERS_H
-#define EKF_MONO_SLAM_CAMERA_PARAMETERS_H
+#pragma once
 
 /**
  * @defgroup camera_parameters Camera Parameters
- * @brief Camera calibration parameters for distortion correction and image analysis.
+ * @brief Camera calibration parameters for distortion correction and image
+ * analysis.
  *
  * @namespace CameraParameters
  * @brief Namespace containing camera calibration parameters.
@@ -95,5 +95,3 @@ static constexpr double angular_vision_x = 62.720770890650357;
  */
 static constexpr double angular_vision_y = 49.163954709609868;
 };  // namespace CameraParameters
-
-#endif  // EKF_MONO_SLAM_CAMERA_PARAMETERS_H
