@@ -8,3 +8,5 @@ AllowAllParametersOfDeclarationOnNextLine: true
 AllowAllArgumentsOnNextLine: true
 AlignAfterOpenBracket: BlockIndent
 NamespaceIndentation: All
+ContinuationIndentWidth: 2
+ConstructorInitializerIndentWidth: 2
