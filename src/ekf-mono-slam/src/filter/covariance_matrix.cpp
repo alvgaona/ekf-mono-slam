@@ -33,17 +33,17 @@ using namespace CameraParameters;
 CovarianceMatrix::CovarianceMatrix() {
   matrix_ = Eigen::MatrixXd::Identity(13, 13);
   matrix_.diagonal() << epsilon, epsilon, epsilon, epsilon, epsilon, epsilon,
-      epsilon, linear_accel_sd * linear_accel_sd,
-      linear_accel_sd * linear_accel_sd, linear_accel_sd * linear_accel_sd,
-      angular_accel_sd * angular_accel_sd, angular_accel_sd * angular_accel_sd,
-      angular_accel_sd * angular_accel_sd;
+    epsilon, linear_accel_sd * linear_accel_sd,
+    linear_accel_sd * linear_accel_sd, linear_accel_sd * linear_accel_sd,
+    angular_accel_sd * angular_accel_sd, angular_accel_sd * angular_accel_sd,
+    angular_accel_sd * angular_accel_sd;
 }
 
 void CovarianceMatrix::Predict(
-    const std::shared_ptr<State>& state, const double dt
+  const std::shared_ptr<State>& state, const double dt
 ) {
   // Compute df/dx
-  const Eigen::Vector3d angles = state->GetAngularVelocity() * dt;
+  const Eigen::Vector3d angles = state->angular_velocity() * dt;
   // Compute the orientation and its rotation matrix from angles
   Eigen::Quaterniond q1;
   q1 = Eigen::AngleAxisd(angles.norm(), angles.normalized());
@@ -53,23 +53,23 @@ void CovarianceMatrix::Predict(
 
   // This is dq3dq2
   F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(),
-      q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.y(), q1.z(), q1.y(), -q1.x(),
-      q1.w();  // Eq. (A. 10) and Eq. (A. 12)
+    q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.y(), q1.z(), q1.y(), -q1.x(),
+    q1.w();  // Eq. (A. 10) and Eq. (A. 12)
 
-  Eigen::Quaterniond q2 = state->GetOrientation();
+  Eigen::Quaterniond q2 = state->orientation();
   Eigen::MatrixXd dq3dq1 = Eigen::MatrixXd::Zero(4, 4);
   dq3dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(),
-      q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(), -q2.y(), q2.x(),
-      q2.w();  // Eq. (A. 14)
+    q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(), -q2.y(), q2.x(),
+    q2.w();  // Eq. (A. 14)
 
   // Compute df/dn. Eq. (A. 11)
   Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
 
-  const auto& comega = state->GetAngularVelocity();
-  dq1domega.row(0) = partialDerivativeq0byOmegai(comega, dt);
+  const auto& comega = state->angular_velocity();
+  dq1domega.row(0) = partial_derivative_q0_by_omegai(comega, dt);
   dq1domega.block(1, 0, 3, 3).diagonal() =
-      partialDerivativeqibyOmegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3) += partialDerivativeqibyOmegaj(comega, dt);
+    partial_derivative_qi_by_omegai(comega, dt);
+  dq1domega.block(1, 0, 3, 3) += partial_derivative_qi_by_omegaj(comega, dt);
 
   F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
 
@@ -87,21 +87,21 @@ void CovarianceMatrix::Predict(
   Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(6, 6);
 
   Q.block(0, 0, 3, 3)
-      .diagonal()
-      .setConstant(linear_accel_sd * linear_accel_sd * dt * dt);
+    .diagonal()
+    .setConstant(linear_accel_sd * linear_accel_sd * dt * dt);
   Q.block(3, 3, 3, 3)
-      .diagonal()
-      .setConstant(angular_accel_sd * angular_accel_sd * dt * dt);
+    .diagonal()
+    .setConstant(angular_accel_sd * angular_accel_sd * dt * dt);
 
   // P[0:13, 0:13] = F * P[0:13, 0:13] * F' + G * Q * G'
   matrix_.block(0, 0, 13, 13) =
-      F * matrix_.block(0, 0, 13, 13) * F.transpose() + G * Q * G.transpose();
+    F * matrix_.block(0, 0, 13, 13) * F.transpose() + G * Q * G.transpose();
 
   // P[12:end, 0:13] = P[12:end, 0:13] * F'
   matrix_.block(13, 0, matrix_.rows() - 13, 13) *= F.transpose();
   // P[12:end, 0:13] = F * P[0:13, 13:end]
   matrix_.block(0, 13, 13, matrix_.cols() - 13) =
-      F * matrix_.block(0, 13, 13, matrix_.cols() - 13);
+    F * matrix_.block(0, 13, 13, matrix_.cols() - 13);
 }
 
 /**
@@ -125,20 +125,20 @@ void CovarianceMatrix::Predict(
  * @param state Shared pointer to the current state of the EKF.
  */
 void CovarianceMatrix::Add(
-    const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
-    const std::shared_ptr<State>& state
+  const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
+  const std::shared_ptr<State>& state
 ) {
-  const int n = state->GetDimension();
+  const int n = state->dimension();
   matrix_.conservativeResize(n + 3, n + 3);
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(n + 6, n + 3);
 
   jacobian.block(0, 0, n, n) = Eigen::MatrixXd::Identity(n, n);
 
   const UndistortedImageFeature undistorted_feature =
-      image_feature_measurement->Undistort();
-  const Eigen::Vector3d hc = undistorted_feature.BackProject();
+    image_feature_measurement->undistort();
+  const Eigen::Vector3d hc = undistorted_feature.backproject();
 
-  const Eigen::Vector3d hw = state->GetRotationMatrix() * hc;
+  const Eigen::Vector3d hw = state->rotation_matrix() * hc;
 
   const double hx = hw[0];
   const double hy = hw[1];
@@ -150,11 +150,11 @@ void CovarianceMatrix::Add(
 
   const Eigen::RowVector3d dtheta_dhw(hz / A, 0, -hx / A);  // Eq. (A.71)
   const Eigen::RowVector3d dphi_dhw(
-      hx * hy / (B * C), -C / B, hy * hz / (B * C)
+    hx * hy / (B * C), -C / B, hy * hz / (B * C)
   );  // Eq. (A.72)
 
   const Eigen::MatrixXd dhw_dqwc =
-      jacobianDirectionalVector(state->GetOrientation(), hc);  // Eq. (A.73)
+    jacobian_directional_vector(state->orientation(), hc);  // Eq. (A.73)
 
   const Eigen::MatrixXd dtheta_dqwc = dtheta_dhw * dhw_dqwc;  // Eq. (A.69)
   const Eigen::MatrixXd dphi_dqwc = dphi_dhw * dhw_dqwc;      // Eq. (A.70)
@@ -165,7 +165,7 @@ void CovarianceMatrix::Add(
 
   Eigen::MatrixXd dy_drwc(6, 3);  // Eq. (A. 67)
   dy_drwc << Eigen::Matrix3d::Identity(),
-      Eigen::MatrixXd::Zero(3, 3);  // stack vertically
+    Eigen::MatrixXd::Zero(3, 3);  // stack vertically
 
   // Eq. (A. 65) & Eq. (A. 66)
   jacobian.block(n, 0, 6, 3) = dy_drwc;
@@ -173,8 +173,8 @@ void CovarianceMatrix::Add(
 
   // Eq. (A. 75)
   const Eigen::Matrix2d dhu_dhd =
-      jacobianUndistortion(image_feature_measurement->GetCoordinates()
-      );  // Eq. (A.32)
+    jacobian_undistortion(image_feature_measurement->coordinates()
+    );  // Eq. (A.32)
 
   // Eq. (A.79). It is likely that in the book this equation is wrong, and it
   // must be the transposed version. The equation states this is a 2x3 matrix,
@@ -192,15 +192,15 @@ void CovarianceMatrix::Add(
   dyprime_dhw.block(3, 0, 2, 3) << dtheta_dhw, dphi_dhw;
 
   Eigen::MatrixXd dy_dh(6, 3);  // Eq. (A.75)
-  dy_dh.block(0, 0, 5, 2) = dyprime_dhw * state->GetRotationMatrix() * dhc_dhu *
-                            dhu_dhd;  // Eq. (A.76)
+  dy_dh.block(0, 0, 5, 2) =
+    dyprime_dhw * state->rotation_matrix() * dhc_dhu * dhu_dhd;  // Eq. (A.76)
   dy_dh(5, 2) = 1;
 
   jacobian.block(n, n, 6, 3) = dy_dh;
 
   // Adding image noise covariance. Eq (A.64)
   matrix_.block(n, n, 2, 2).diagonal() = Eigen::Vector2d(
-      pixel_error_x * pixel_error_x, pixel_error_y * pixel_error_y
+    pixel_error_x * pixel_error_x, pixel_error_y * pixel_error_y
   );
   matrix_(n + 2, n + 2) = ImageFeatureParameters::init_inv_depth;
 

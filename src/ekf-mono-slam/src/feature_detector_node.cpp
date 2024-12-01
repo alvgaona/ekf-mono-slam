@@ -39,23 +39,23 @@ void FeatureDetectorNode::detect_features(
   }
 
   FeatureDetector feature_detector(
-    FeatureDetector::BuildDetector(DetectorType::AKAZE),
-    FeatureDetector::BuildDescriptorExtractor(DescriptorExtractorType::AKAZE),
+    FeatureDetector::build_detector(DetectorType::AKAZE),
+    FeatureDetector::build_descriptor_extractor(DescriptorExtractorType::AKAZE),
     cv::Size(image.rows, image.cols)
   );
 
-  feature_detector.DetectFeatures(image, predictions);
+  feature_detector.detect_features(image, predictions);
 
-  auto detected_image_features = feature_detector.GetImageFeatures();
+  auto detected_image_features = feature_detector.image_features();
 
   ekf_mono_slam::msg::ImageFeatureMeasurementArray image_feature_measurements;
   std::vector<ekf_mono_slam::msg::ImageFeatureMeasurement> response_features;
 
-  const auto image_features = feature_detector.GetImageFeatures();
+  const auto image_features = feature_detector.image_features();
   for (const auto& m : image_features) {
     ekf_mono_slam::msg::ImageFeatureMeasurement feature;
-    auto coordinates = m->GetCoordinates();
-    auto descriptor = m->GetDescriptorData();
+    auto coordinates = m->coordinates();
+    auto descriptor = m->descriptor_data();
 
     feature.point.x = coordinates.x;
     feature.point.y = coordinates.y;

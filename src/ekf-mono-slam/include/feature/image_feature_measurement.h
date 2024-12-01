@@ -8,7 +8,7 @@
 class ImageFeatureMeasurement final : public ImageFeature {
  public:
   ImageFeatureMeasurement(
-      cv::Point2f coordinates, const cv::Mat& descriptor_data
+    cv::Point2f coordinates, const cv::Mat& descriptor_data
   );
 
   ImageFeatureMeasurement(const ImageFeatureMeasurement& source) = delete;
@@ -20,9 +20,9 @@ class ImageFeatureMeasurement final : public ImageFeature {
 
   ~ImageFeatureMeasurement() override = default;
 
-  [[nodiscard]] cv::Mat GetDescriptorData() const { return descriptor_data_; }
+  [[nodiscard]] cv::Mat descriptor_data() const { return descriptor_data_; }
 
-  [[nodiscard]] UndistortedImageFeature Undistort() const;
+  [[nodiscard]] UndistortedImageFeature undistort() const;
 
  private:
   cv::Mat descriptor_data_;

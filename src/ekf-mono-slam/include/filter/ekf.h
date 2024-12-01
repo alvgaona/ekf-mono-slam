@@ -19,18 +19,25 @@ class EKF final {
   EKF& operator=(EKF const& source) = delete;
   EKF& operator=(EKF&& source) noexcept = delete;
 
-  [[nodiscard]] std::shared_ptr<State> GetState() const { return state_; }
+  [[nodiscard]] std::shared_ptr<State> state() const { return state_; }
 
-  [[nodiscard]] std::shared_ptr<CovarianceMatrix> GetCovarianceMatrix() const { return covariance_matrix_; }
-
-  [[nodiscard]] std::shared_ptr<FeatureDetector> GetFeatureDetector() const { return feature_detector_; }
-
-  [[nodiscard]] bool isInitilized() const {
-    return !state_->GetCartesianFeatures().empty() || !state_->GetInverseDepthFeatures().empty();
+  [[nodiscard]] std::shared_ptr<CovarianceMatrix> covariance_matrix() const {
+    return covariance_matrix_;
   }
 
-  void Predict() const;
-  void AddFeatures(const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features) const;
+  [[nodiscard]] std::shared_ptr<FeatureDetector> feature_detector() const {
+    return feature_detector_;
+  }
+
+  [[nodiscard]] bool is_initilized() const {
+    return !state_->cartesian_features().empty() ||
+           !state_->inverse_depth_features().empty();
+  }
+
+  void predict() const;
+  void add_features(
+    const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
+  ) const;
 
  private:
   std::shared_ptr<CovarianceMatrix> covariance_matrix_;

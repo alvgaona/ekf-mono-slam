@@ -38,7 +38,7 @@ ImageFeature::ImageFeature(const cv::Point2f coordinates) {
  * This method allows for efficient organization and retrieval of features and
  * predictions associated with specific zones within the image.
  */
-int ImageFeature::ComputeZone(
+int ImageFeature::compute_zone(
   const int zone_width, const int zone_height, const int image_width
 ) const {
   const int zone_x = static_cast<int>(coordinates_.x) / zone_width;
@@ -46,7 +46,7 @@ int ImageFeature::ComputeZone(
   return zone_y * (image_width / zone_width) + zone_x;
 }
 
-bool ImageFeature::isVisibleInFrame() const {
+bool ImageFeature::is_visible_in_frame() const {
   const auto u = coordinates_.x;
   const auto v = coordinates_.y;
 

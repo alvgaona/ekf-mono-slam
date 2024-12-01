@@ -55,7 +55,7 @@ Ellipse::Ellipse(const cv::Point2f center, const cv::Mat& matrix) {
  * feature's location. A larger ellipse indicates higher uncertainty, while a
  * smaller ellipse signifies better localization precision.
  */
-cv::Size2f Ellipse::Axes() {
+cv::Size2f Ellipse::axes() {
   const cv::Size2f axes(
     static_cast<float>(
       2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
@@ -80,7 +80,7 @@ cv::Size2f Ellipse::Axes() {
  * This angle represents the orientation of the ellipse and is used for
  * visualization and analysis tasks.
  */
-double Ellipse::Angle() {
+double Ellipse::angle() {
   return std::atan(
     eigen_vectors_.at<double>(1, 0) / eigen_vectors_.at<double>(0, 0)
   );
@@ -111,8 +111,8 @@ double Ellipse::Angle() {
  * This method provides a way to check if a point belongs to the region of
  * interest represented by the ellipse.
  */
-bool Ellipse::Contains(const cv::Point2f point) {
-  const cv::Size2f axes = Axes();
+bool Ellipse::contains(const cv::Point2f point) {
+  const cv::Size2f axes = this->axes();
   const double major_axis = std::max(axes.width, axes.height);
   const double minor_axis = std::min(axes.width, axes.height);
 
@@ -121,7 +121,7 @@ bool Ellipse::Contains(const cv::Point2f point) {
   Eigen::Vector2d f1;
   Eigen::Vector2d f2;
 
-  const double angle = Angle();  // Ellipse orientation
+  const double angle = this->angle();  // Ellipse orientation
 
   if (axes.height < axes.width) {  // Horizontal ellipse
     f1 = Eigen::Vector2d(

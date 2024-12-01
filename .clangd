@@ -24,6 +24,7 @@ Diagnostics:
       "readability-uppercase-literal-suffix",
       "cppcoreguidelines-pro-bounds-array-to-pointer-decay",
       "hicpp-no-array-decay",
+      "bugprone-easily-swappable-parameters",
     ]
 InlayHints:
   BlockEnd: No

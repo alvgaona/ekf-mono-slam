@@ -5,7 +5,7 @@ InverseDepthMapFeature::InverseDepthMapFeature(
 )
   : MapFeature(state, position, descriptor_data) {}
 
-Eigen::Vector3d InverseDepthMapFeature::ComputeDirectionalVector(
+Eigen::Vector3d InverseDepthMapFeature::compute_directional_vector(
   const Eigen::Matrix3d& rotationMatrix, const Eigen::Vector3d& camera_position
 ) {
   const auto theta = state_[3];

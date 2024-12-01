@@ -4,7 +4,7 @@
 
 class ImageProvider {
  public:
-  virtual cv::Mat GetNextImage() = 0;
+  virtual cv::Mat next() = 0;
   virtual ~ImageProvider() = default;
 
  protected:

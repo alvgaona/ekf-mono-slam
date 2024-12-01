@@ -43,7 +43,7 @@ ImageFeatureMeasurement::ImageFeatureMeasurement(
  * coordinates of the feature.
  *
  */
-UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {
+UndistortedImageFeature ImageFeatureMeasurement::undistort() const {
   const Eigen::Vector2d point(coordinates_.x, coordinates_.y);
   const Eigen::Vector2d principal_point(cx, cy);
 

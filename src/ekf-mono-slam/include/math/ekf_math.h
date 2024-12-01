@@ -10,39 +10,42 @@ namespace EkfMath {
   static constexpr double CHISQ_95_2 = 5.9915L;
   static constexpr double PI = 3.14159265L;
 
-  inline double Rad2Deg(const double rads) { return rads * 180.0 / PI; }
+  inline double rad2deg(const double rads) { return rads * 180.0 / PI; }
 
-  Eigen::MatrixXd dynamicModelJacobian(const State& state, double dt);
+  Eigen::MatrixXd dyn_model_jacobian(const State& state, double dt);
 
-  Eigen::MatrixXd dynamicModelNoiseJacobian(
-    const Eigen::MatrixXd& F, double dt
+  Eigen::MatrixXd dyn_model_noise_jacobian(const Eigen::MatrixXd& F, double dt);
+
+  cv::Point2d distort_image_feature(const UndistortedImageFeature& image_feature
   );
 
-  cv::Point2d distortImageFeature(const UndistortedImageFeature& image_feature);
+  Eigen::Matrix3d rotation_matrix_derivatives_by_q0(const Eigen::Quaterniond& q
+  );
 
-  Eigen::Matrix3d rotationMatrixDerivativesByq0(const Eigen::Quaterniond& q);
+  Eigen::Matrix3d rotation_matrix_derivatives_by_q1(const Eigen::Quaterniond& q
+  );
 
-  Eigen::Matrix3d rotationMatrixDerivativesByq1(const Eigen::Quaterniond& q);
+  Eigen::Matrix3d rotation_matrix_derivatives_by_q2(const Eigen::Quaterniond& q
+  );
 
-  Eigen::Matrix3d rotationMatrixDerivativesByq2(const Eigen::Quaterniond& q);
+  Eigen::Matrix3d rotation_matrix_derivatives_by_q3(const Eigen::Quaterniond& q
+  );
 
-  Eigen::Matrix3d rotationMatrixDerivativesByq3(const Eigen::Quaterniond& q);
-
-  Eigen::Vector3d partialDerivativeq0byOmegai(
+  Eigen::Vector3d partial_derivative_q0_by_omegai(
     const Eigen::Vector3d& omega, double dt
   );
 
-  Eigen::Vector3d partialDerivativeqibyOmegai(
+  Eigen::Vector3d partial_derivative_qi_by_omegai(
     const Eigen::Vector3d& omega, double dt
   );
 
-  Eigen::Matrix3d partialDerivativeqibyOmegaj(
+  Eigen::Matrix3d partial_derivative_qi_by_omegaj(
     const Eigen::Vector3d& omega, double dt
   );
 
-  Eigen::MatrixXd jacobianDirectionalVector(
+  Eigen::MatrixXd jacobian_directional_vector(
     const Eigen::Quaterniond& q, const Eigen::Vector3d& directionalVector
   );
 
-  Eigen::Matrix2d jacobianUndistortion(const cv::Point& coordinates);
+  Eigen::Matrix2d jacobian_undistortion(const cv::Point& coordinates);
 }  // namespace EkfMath

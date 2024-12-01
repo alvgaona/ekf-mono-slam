@@ -30,11 +30,12 @@ MapFeature::MapFeature(
     times_predicted_(0),
     times_matched_(0) {}
 
-bool MapFeature::isInFrontOfCamera(const Eigen::Vector3d& directionalVector) {
+bool MapFeature::is_in_front_of_camera(const Eigen::Vector3d& directionalVector
+) {
   const auto atanxz =
-    Rad2Deg(atan2(directionalVector[0], directionalVector[2]));
+    rad2deg(atan2(directionalVector[0], directionalVector[2]));
   const auto atanyz =
-    Rad2Deg(atan2(directionalVector[1], directionalVector[2]));
+    rad2deg(atan2(directionalVector[1], directionalVector[2]));
   return atanxz > -angular_vision_x && atanxz < angular_vision_x &&
          atanyz > -angular_vision_y && atanyz < angular_vision_y;
 }

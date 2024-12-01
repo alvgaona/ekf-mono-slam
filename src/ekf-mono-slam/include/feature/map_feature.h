@@ -23,24 +23,24 @@ class MapFeature {
     return os;
   }
 
-  [[nodiscard]] const Eigen::VectorXd& GetState() const { return state_; }
+  [[nodiscard]] const Eigen::VectorXd& state() const { return state_; }
 
-  [[nodiscard]] int64_t GetDimension() const { return state_.size(); }
+  [[nodiscard]] int64_t dimension() const { return state_.size(); }
 
-  void SetImageFeaturePrediction(const ImageFeaturePrediction& prediction) {
+  void set_image_feature_prediction(const ImageFeaturePrediction& prediction) {
     prediction_ = prediction;
   }
 
-  [[nodiscard]] bool isInFrontOfCamera() const;
+  [[nodiscard]] bool is_in_front_of_camera() const;
 
   // virtual void ComputeJacobian(const State& state) = 0;
 
-  virtual Eigen::Vector3d ComputeDirectionalVector(
+  virtual Eigen::Vector3d compute_directional_vector(
     const Eigen::Matrix3d& rotationMatrix,
     const Eigen::Vector3d& camera_position
   ) = 0;
 
-  static bool isInFrontOfCamera(const Eigen::Vector3d& directionalVector);
+  static bool is_in_front_of_camera(const Eigen::Vector3d& directionalVector);
 
  protected:
   Eigen::VectorXd state_;
