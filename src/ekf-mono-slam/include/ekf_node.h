@@ -24,7 +24,6 @@ class EKFNode final : public rclcpp::Node {
 
   void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
 
-  void init_callback(
-    const rclcpp::Client<ekf_mono_slam::srv::FeatureDetect>::SharedFuture&
-      future);
+  void init_callback(const rclcpp::Client<
+                     ekf_mono_slam::srv::FeatureDetect>::SharedFuture& future);
 };

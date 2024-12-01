@@ -6,7 +6,7 @@ BinPackArguments: false
 BinPackParameters: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowAllArgumentsOnNextLine: true
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: BlockIndent
 NamespaceIndentation: All
 ContinuationIndentWidth: 2
 ConstructorInitializerIndentWidth: 2
