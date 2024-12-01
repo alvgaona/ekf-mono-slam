@@ -65,7 +65,6 @@ link_libraries(
   ${Eigen3_LIBRARIES}
 )
 
-
 # Create the file sequence target
 add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src} ${image_src})
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
@@ -91,12 +90,7 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  set(test_src
-    "test/utest_math.cpp"
-    "test/utest_feature.cpp"
-    "test/utest_filter.cpp"
-    "test/utest_image.cpp"
-  )
+  file(GLOB_RECURSE test_src test/utest_*.cpp)
   file(GLOB_RECURSE src_for_test src/*.cpp)
   list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 
@@ -104,12 +98,6 @@ if(BUILD_TESTING)
 
   ament_add_gmock(slam_test ${test_src} ${src_for_test})
   ament_target_dependencies(slam_test std_msgs OpenCV)
-  target_link_libraries(slam_test spdlog::spdlog)
-  target_include_directories(slam_test PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-    ${EIGEN3_INCLUDE_DIRS}
-  )
 endif()
 
 ament_package()

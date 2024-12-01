@@ -13,10 +13,10 @@ class FeatureDetectorNode : public rclcpp::Node {
   rclcpp::Service<ekf_mono_slam::srv::FeatureDetect>::SharedPtr detect_service_;
 
   rclcpp::Publisher<ekf_mono_slam::msg::ImageFeatureMeasurementArray>::SharedPtr
-      image_measurements_publisher_;
+    image_measurements_publisher_;
 
   void detect_features(
-      std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Request> request,
-      std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Response> response
+    const std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Request>& request,
+    const std::shared_ptr<ekf_mono_slam::srv::FeatureDetect::Response>& response
   );
 };
