@@ -10,7 +10,9 @@ EKFNode::EKFNode() : Node("ekf_node") {
     image_transport::create_subscription(
       this,
       "camera/image",
-      std::bind(&EKFNode::image_callback, this, std::placeholders::_1),
+      [this](const sensor_msgs::msg::Image::ConstSharedPtr& msg) {
+        this->image_callback(msg);
+      },
       "raw"
     )
   );

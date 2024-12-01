@@ -18,9 +18,7 @@ FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image") {
   image_publisher_ = std::make_shared<image_transport::Publisher>(
     image_transport::create_publisher(this, "camera/image")
   );
-  timer_ = this->create_wall_timer(
-    40ms, std::bind(&FileSequenceImageNode::timer_callback, this)
-  );
+  timer_ = this->create_wall_timer(40ms, [this]() { timer_callback(); });
 }
 
 void FileSequenceImageNode::timer_callback() const {
