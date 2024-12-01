@@ -9,9 +9,9 @@ ImageFeaturePrediction ImageFeaturePrediction::from(
   const Eigen::Vector3d& directionalVector
 ) {
   const auto undistorted_image_feature =
-    UndistortedImageFeature::Project(directionalVector);
+    UndistortedImageFeature::project(directionalVector);
   const auto distorted_feature =
-    EkfMath::distortImageFeature(undistorted_image_feature);
+    EkfMath::distort_image_feature(undistorted_image_feature);
 
   return ImageFeaturePrediction(distorted_feature);
 }

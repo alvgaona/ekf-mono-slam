@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
 project(ekf_mono_slam)
 
 if(NOT CMAKE_CXX_STANDARD)

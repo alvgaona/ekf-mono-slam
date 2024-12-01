@@ -33,10 +33,10 @@ State::State() {
 }
 
 State::State(
-    const Eigen::Vector3d& position,
-    const Eigen::Vector3d& velocity,
-    const Eigen::Quaterniond& orientation,
-    const Eigen::Vector3d& angular_velocity
+  const Eigen::Vector3d& position,
+  const Eigen::Vector3d& velocity,
+  const Eigen::Quaterniond& orientation,
+  const Eigen::Vector3d& angular_velocity
 ) {
   position_ = position;
   velocity_ = velocity;
@@ -81,7 +81,7 @@ State::State(
  * Note that this is a simplified prediction and might not be accurate for more
  * complex motion models or external influences.
  */
-void State::Predict(const double delta_t) {
+void State::predict(const double delta_t) {
   // This prediction assumes constant velocity
   position_ += velocity_ * delta_t;
   const Eigen::Vector3d angles = angular_velocity_ * delta_t;
@@ -109,21 +109,22 @@ void State::Predict(const double delta_t) {
  * State and keeping the lists consistent with the current state of feature
  * tracking.
  */
-void State::Remove(const std::shared_ptr<MapFeature>& feature) {
+void State::remove(const std::shared_ptr<MapFeature>& feature) {
   if (const auto& cartesian_feature =
-          std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
+        std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
     std::erase_if(
-        cartesian_features_,
-        [&cartesian_feature](const std::shared_ptr<MapFeature>& f) {
-          return f == cartesian_feature;
-        }
+      cartesian_features_,
+      [&cartesian_feature](const std::shared_ptr<MapFeature>& f) {
+        return f == cartesian_feature;
+      }
     );
-  } else if (const auto& inverse_depth_feature = std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
+  } else if (const auto& inverse_depth_feature =
+               std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
     std::erase_if(
-        inverse_depth_features_,
-        [&inverse_depth_feature](const std::shared_ptr<MapFeature>& f) {
-          return f == inverse_depth_feature;
-        }
+      inverse_depth_features_,
+      [&inverse_depth_feature](const std::shared_ptr<MapFeature>& f) {
+        return f == inverse_depth_feature;
+      }
     );
   }
   std::erase_if(features_, [&feature](const std::shared_ptr<MapFeature>& f) {
@@ -146,14 +147,14 @@ void State::Remove(const std::shared_ptr<MapFeature>& feature) {
  * localization and mapping.
  *
  */
-void State::Add(
-    const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
+void State::add(
+  const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
 ) {
   Eigen::VectorXd feature_state(6);
 
   const UndistortedImageFeature undistorted_feature =
-      image_feature_measurement->Undistort();
-  Eigen::Vector3d back_projected_point = undistorted_feature.BackProject();
+    image_feature_measurement->undistort();
+  Eigen::Vector3d back_projected_point = undistorted_feature.backproject();
 
   // Orientation of the camera respect to the world axis
   back_projected_point = orientation_.toRotationMatrix() * back_projected_point;
@@ -169,14 +170,14 @@ void State::Add(
   feature_state(5) = ImageFeatureParameters::init_inv_depth;
 
   const auto map_feature = std::make_shared<InverseDepthMapFeature>(
-      feature_state,
-      this->dimension_,
-      image_feature_measurement->GetDescriptorData()
+    feature_state,
+    this->dimension_,
+    image_feature_measurement->get_descriptor_data()
   );
 
   dimension_ += 6;
 
-  Add(map_feature);
+  add(map_feature);
 }
 
 /**
@@ -188,31 +189,32 @@ void State::Add(
  *
  * @param feature The MapFeature object to be added.
  */
-void State::Add(const std::shared_ptr<MapFeature>& feature) {
+void State::add(const std::shared_ptr<MapFeature>& feature) {
   if (const auto& cartesian_feature =
-          std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
+        std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
     cartesian_features_.push_back(cartesian_feature);
     features_.push_back(cartesian_feature);
-  } else if (const auto& inverse_depth_feature = std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
+  } else if (const auto& inverse_depth_feature =
+               std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
     inverse_depth_features_.push_back(inverse_depth_feature);
     features_.push_back(inverse_depth_feature);
   }
 }
 
-void State::PredictMeasurementState() {
+void State::predict_measurement_state() {
   for (const auto& mapFeature : features_) {
-    Eigen::Vector3d directionalVector = mapFeature->ComputeDirectionalVector(
-        rotation_matrix_.transpose(), position_
+    Eigen::Vector3d directionalVector = mapFeature->compute_directional_vector(
+      rotation_matrix_.transpose(), position_
     );
     // directionalVector = Rcw * (yi - rwc);
-    if (!mapFeature->isInFrontOfCamera(directionalVector)) {
+    if (!mapFeature->is_in_front_of_camera(directionalVector)) {
       continue;
     }
 
     const auto image_feature_prediction =
-        ImageFeaturePrediction::from(directionalVector);
+      ImageFeaturePrediction::from(directionalVector);
 
-    if (!image_feature_prediction.isVisibleInFrame()) {
+    if (!image_feature_prediction.is_visible_in_frame()) {
       continue;
     }
     // TODO: add prediction of map feature

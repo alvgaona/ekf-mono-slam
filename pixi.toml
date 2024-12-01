@@ -25,6 +25,8 @@ test = { cmd = [
   "ekf_mono_slam",
   "&&",
   "./build/ekf_mono_slam/slam_test",
+], depends-on = [
+  "build",
 ] }
 
 [dependencies]

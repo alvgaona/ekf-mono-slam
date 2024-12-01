@@ -15,17 +15,21 @@ class CovarianceMatrix final {
 
   ~CovarianceMatrix() = default;
 
-  friend std::ostream& operator<<(std::ostream& os, const CovarianceMatrix& covariance_matrix) {
+  friend std::ostream& operator<<(
+    std::ostream& os, const CovarianceMatrix& covariance_matrix
+  ) {
     os << covariance_matrix.matrix_;
     return os;
   }
 
   void Predict(const std::shared_ptr<State>& state, double dt);
 
-  void Add(const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
-           const std::shared_ptr<State>& state);
+  void Add(
+    const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
+    const std::shared_ptr<State>& state
+  );
 
-  [[nodiscard]] const Eigen::MatrixXd& GetMatrix() const { return matrix_; }
+  [[nodiscard]] const Eigen::MatrixXd& matrix() const { return matrix_; }
 
  private:
   Eigen::MatrixXd matrix_;

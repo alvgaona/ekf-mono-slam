@@ -8,33 +8,34 @@ class Zone final {
   Zone(int id, cv::Size dimensions);
   ~Zone() = default;
 
-  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetCandidates() {
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& get_candidates() {
     return candidates_;
   }
-  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetAdded() {
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& get_added() {
     return added_;
   }
-  std::vector<std::shared_ptr<ImageFeaturePrediction>> GetPredictions() {
+  std::vector<std::shared_ptr<ImageFeaturePrediction>> get_predictions() {
     return predictions_;
   }
 
-  [[nodiscard]] int GetId() const { return id_; }
-  [[nodiscard]] int GetCandidatesLeft() const { return candidates_left_; }
-  [[nodiscard]] cv::Size GetDimensions() const { return dimensions_; }
-  [[nodiscard]] int GetPredictionsFeaturesCount() const {
+  [[nodiscard]] int get_id() const { return id_; }
+  [[nodiscard]] int get_candidates_left() const { return candidates_left_; }
+  [[nodiscard]] cv::Size get_dimensions() const { return dimensions_; }
+  [[nodiscard]] int get_predictions_features_count() const {
     return predictions_features_count_;
   }
 
-  void SetCandidatesLeft(const int candidates_left) {
+  void set_candiates_left(const int candidates_left) {
     this->candidates_left_ = candidates_left;
   }
-  void SetPredictionsFeaturesCount(const int count) {
+  void set_predictions_features_count(const int count) {
     this->predictions_features_count_ = count;
   }
 
-  void AddFeature(std::shared_ptr<ImageFeatureMeasurement> feature);
-  void AddCandidate(const std::shared_ptr<ImageFeatureMeasurement>& candidate);
-  void AddPrediction(const std::shared_ptr<ImageFeaturePrediction>& prediction);
+  void add_feature(std::shared_ptr<ImageFeatureMeasurement> feature);
+  void add_candidate(const std::shared_ptr<ImageFeatureMeasurement>& candidate);
+  void add_prediction(const std::shared_ptr<ImageFeaturePrediction>& prediction
+  );
 
  private:
   std::vector<std::shared_ptr<ImageFeatureMeasurement>> candidates_;

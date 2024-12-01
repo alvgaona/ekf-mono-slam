@@ -21,7 +21,7 @@
  * based on their indices.
  */
 FileSequenceImageProvider::FileSequenceImageProvider(
-    const std::string& directory, const int start_index, const int end_index
+  const std::string& directory, const int start_index, const int end_index
 ) {
   this->directory = std::filesystem::path(directory);
   this->image_counter_ = 0;
@@ -42,9 +42,9 @@ FileSequenceImageProvider::FileSequenceImageProvider(
  * This method facilitates iterating through a sequence of images stored in a
  * specific directory with consistent naming.
  */
-cv::Mat FileSequenceImageProvider::GetNextImage() {
+cv::Mat FileSequenceImageProvider::next() {
   if (image_counter_ > end_index_ - start_index_) {
-    spdlog::warn("No more images in directory");
+    spdlog::debug("No more images in directory");
     return {};
   }
 
@@ -53,7 +53,7 @@ cv::Mat FileSequenceImageProvider::GetNextImage() {
                << start_index_ + image_counter_;
   std::stringstream image_full_filename;
   image_full_filename << directory.c_str() << image_number.str() << "."
-                      << ImageFileUtils::ToString(image_type_);
+                      << ImageFileUtils::to_string(image_type_);
 
   spdlog::debug("Loading image: {}", image_full_filename.str());
   cv::Mat image = cv::imread(image_full_filename.str());

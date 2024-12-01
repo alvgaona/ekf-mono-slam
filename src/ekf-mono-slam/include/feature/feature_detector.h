@@ -12,9 +12,9 @@
 class FeatureDetector final {
  public:
   FeatureDetector(
-      const cv::Ptr<cv::FeatureDetector>& detector,
-      const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor,
-      cv::Size img_size
+    const cv::Ptr<cv::FeatureDetector>& detector,
+    const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor,
+    cv::Size img_size
   );
   ~FeatureDetector() = default;
   FeatureDetector(const FeatureDetector& source) = delete;
@@ -22,27 +22,27 @@ class FeatureDetector final {
   FeatureDetector& operator=(const FeatureDetector& source) = delete;
   FeatureDetector& operator=(FeatureDetector&& source) noexcept = delete;
 
-  static cv::Ptr<cv::FeatureDetector> BuildDetector(DetectorType type);
-  static cv::Ptr<cv::DescriptorExtractor> BuildDescriptorExtractor(
-      DescriptorExtractorType type
+  static cv::Ptr<cv::FeatureDetector> build_detector(DetectorType type);
+  static cv::Ptr<cv::DescriptorExtractor> build_descriptor_extractor(
+    DescriptorExtractorType type
   );
 
-  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& GetImageFeatures(
-  ) {
+  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>&
+  get_image_features() {
     return image_features_;
   }
 
-  [[nodiscard]] int GetZonesInRow() const { return zones_in_row_; }
+  [[nodiscard]] int get_zones_in_row() const { return zones_in_row_; }
 
-  [[nodiscard]] cv::Size GetZoneSize() const { return zone_size_; }
+  [[nodiscard]] cv::Size get_zone_size() const { return zone_size_; }
 
-  [[nodiscard]] cv::Size GetImageSize() const { return img_size_; }
+  [[nodiscard]] cv::Size get_image_size() const { return img_size_; }
 
-  void DetectFeatures(const cv::Mat& image);
+  void detect_features(const cv::Mat& image);
 
-  void DetectFeatures(
-      const cv::Mat& image,
-      const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
+  void detect_features(
+    const cv::Mat& image,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
  private:
@@ -54,35 +54,35 @@ class FeatureDetector final {
   cv::Size zone_size_;
   int zones_in_row_;
 
-  static void BuildImageMask(
-      const cv::Mat& image_mask,
-      const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
+  static void build_image_mask(
+    const cv::Mat& image_mask,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
-  void SearchFeaturesByZone(
-      const cv::Mat& image_mask,
-      const std::vector<cv::KeyPoint>& keypoints,
-      const cv::Mat& descriptors,
-      const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
+  void search_features_by_zone(
+    const cv::Mat& image_mask,
+    const std::vector<cv::KeyPoint>& keypoints,
+    const cv::Mat& descriptors,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
-  std::vector<std::shared_ptr<Zone>> CreateZones();
+  std::vector<std::shared_ptr<Zone>> create_zones();
 
-  void GroupFeaturesAndPredictionsByZone(
-      std::vector<std::shared_ptr<Zone>>& zones,
-      const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-      const std::vector<cv::KeyPoint>& keypoints,
-      const cv::Mat& descriptors
+  void group_features_and_prediction_by_zone(
+    std::vector<std::shared_ptr<Zone>>& zones,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+    const std::vector<cv::KeyPoint>& keypoints,
+    const cv::Mat& descriptors
   ) const;
 
-  void ComputeImageFeatureMeasurements(
-      const cv::Mat& image_mask,
-      const cv::Mat& descriptors,
-      const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-      const std::vector<cv::KeyPoint>& image_keypoints
+  void compute_image_feature_measurements(
+    const cv::Mat& image_mask,
+    const cv::Mat& descriptors,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+    const std::vector<cv::KeyPoint>& image_keypoints
   );
 
-  void SelectImageMeasurementsFromZones(
-      std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
+  void select_image_measurements_from_zones(
+    std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
   );
 };

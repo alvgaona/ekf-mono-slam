@@ -41,41 +41,41 @@ class State final {
     return os;
   }
 
-  [[nodiscard]] const Eigen::Vector3d& GetPosition() const { return position_; }
+  [[nodiscard]] const Eigen::Vector3d& position() const { return position_; }
 
-  [[nodiscard]] const Eigen::Quaterniond& GetOrientation() const {
+  [[nodiscard]] const Eigen::Quaterniond& orientation() const {
     return orientation_;
   }
 
-  [[nodiscard]] const Eigen::Vector3d& GetVelocity() const { return velocity_; }
+  [[nodiscard]] const Eigen::Vector3d& velocity() const { return velocity_; }
 
-  [[nodiscard]] const Eigen::Vector3d& GetAngularVelocity() const {
+  [[nodiscard]] const Eigen::Vector3d& angular_velocity() const {
     return angular_velocity_;
   }
 
-  [[nodiscard]] const Eigen::Matrix3d& GetRotationMatrix() const {
+  [[nodiscard]] const Eigen::Matrix3d& rotation_matrix() const {
     return rotation_matrix_;
   }
 
-  [[nodiscard]] int GetDimension() const { return dimension_; }
+  [[nodiscard]] int dimension() const { return dimension_; }
 
   [[nodiscard]] const std::vector<std::shared_ptr<CartesianMapFeature>>&
-  GetCartesianFeatures() const {
+  cartesian_features() const {
     return cartesian_features_;
   }
 
   [[nodiscard]] std::vector<std::shared_ptr<InverseDepthMapFeature>>
-  GetInverseDepthFeatures() const {
+  inverse_depth_features() const {
     return inverse_depth_features_;
   }
 
-  void Predict(double delta_t);
-  void PredictMeasurementState();
-  void Add(
+  void predict(double delta_t);
+  void predict_measurement_state();
+  void add(
     const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
   );
-  void Add(const std::shared_ptr<MapFeature>& feature);
-  void Remove(const std::shared_ptr<MapFeature>& feature);
+  void add(const std::shared_ptr<MapFeature>& feature);
+  void remove(const std::shared_ptr<MapFeature>& feature);
 
  private:
   Eigen::Vector3d position_;

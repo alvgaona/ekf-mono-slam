@@ -7,12 +7,12 @@ class Ellipse final {
   Ellipse(cv::Point2f center, const cv::Mat& matrix);
   ~Ellipse() = default;
 
-  [[nodiscard]] cv::Point2f GetCenter() const { return center_; }
+  [[nodiscard]] cv::Point2f get_center() const { return center_; }
 
-  cv::Size2f Axes();
-  double Angle();
+  cv::Size2f axes();
+  double angle();
 
-  bool Contains(cv::Point2f point);
+  bool contains(cv::Point2f point);
 
  private:
   cv::Point2f center_;

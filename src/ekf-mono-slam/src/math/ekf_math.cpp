@@ -7,10 +7,10 @@
 
 using namespace CameraParameters;
 
-Eigen::MatrixXd EkfMath::dynamicModelJacobian(
+Eigen::MatrixXd EkfMath::dyn_model_jacobian(
   const State &state, const double dt
 ) {
-  const Eigen::Vector3d angles = state.GetAngularVelocity() * dt;
+  const Eigen::Vector3d angles = state.angular_velocity() * dt;
   // Compute the orientation and its rotation matrix from angles
   Eigen::Quaterniond q1;
   q1 = Eigen::AngleAxisd(angles.norm(), angles.normalized());
@@ -23,7 +23,7 @@ Eigen::MatrixXd EkfMath::dynamicModelJacobian(
     q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.y(), q1.z(), q1.y(), -q1.x(),
     q1.w();  // Eq. (A. 10) and Eq. (A. 12)
 
-  Eigen::Quaterniond q2 = state.GetOrientation();
+  Eigen::Quaterniond q2 = state.orientation();
   Eigen::MatrixXd dq3dq1 = Eigen::MatrixXd::Zero(4, 4);
   dq3dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(),
     q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(), -q2.y(), q2.x(),
@@ -32,18 +32,18 @@ Eigen::MatrixXd EkfMath::dynamicModelJacobian(
   // Compute df/dn. Eq. (A. 11)
   Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
 
-  const auto &comega = state.GetAngularVelocity();
-  dq1domega.row(0) = partialDerivativeq0byOmegai(comega, dt);
+  const auto &comega = state.angular_velocity();
+  dq1domega.row(0) = partial_derivative_q0_by_omegai(comega, dt);
   dq1domega.block(1, 0, 3, 3).diagonal() =
-    partialDerivativeqibyOmegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3) += partialDerivativeqibyOmegaj(comega, dt);
+    partial_derivative_qi_by_omegai(comega, dt);
+  dq1domega.block(1, 0, 3, 3) += partial_derivative_qi_by_omegaj(comega, dt);
 
   F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
 
   return F;
 }
 
-Eigen::MatrixXd EkfMath::dynamicModelNoiseJacobian(
+Eigen::MatrixXd EkfMath::dyn_model_noise_jacobian(
   const Eigen::MatrixXd &F, const double dt
 ) {
   Eigen::MatrixXd G = Eigen::MatrixXd::Zero(13, 6);  // Eq. (A. 11)
@@ -60,10 +60,10 @@ Eigen::MatrixXd EkfMath::dynamicModelNoiseJacobian(
   return G;
 }
 
-cv::Point2d EkfMath::distortImageFeature(
+cv::Point2d EkfMath::distort_image_feature(
   const UndistortedImageFeature &image_feature
 ) {
-  const auto feature_coordinates = image_feature.GetCoordinates();
+  const auto feature_coordinates = image_feature.get_coordinates();
   const auto xu = (feature_coordinates[0] - cx) * dx;
   const auto yu = (feature_coordinates[1] - cy) * dy;
 
@@ -107,7 +107,7 @@ cv::Point2d EkfMath::distortImageFeature(
  * This Jacobian matrix is useful for applying the chain rule in various
  * calculations involving rotations and directional vectors.
  */
-Eigen::MatrixXd EkfMath::jacobianDirectionalVector(
+Eigen::MatrixXd EkfMath::jacobian_directional_vector(
   const Eigen::Quaterniond &q, const Eigen::Vector3d &directionalVector
 ) {
   Eigen::MatrixXd jacobian(3, 4);
@@ -117,18 +117,18 @@ Eigen::MatrixXd EkfMath::jacobianDirectionalVector(
   // directional vector on the right of the jacobian of the rotation matrix
   // w.r.t the ith quaternion.
   jacobian.block(0, 0, 3, 1) =
-    rotationMatrixDerivativesByq0(q) * directionalVector;
+    rotation_matrix_derivatives_by_q0(q) * directionalVector;
   jacobian.block(0, 1, 3, 1) =
-    rotationMatrixDerivativesByq1(q) * directionalVector;
+    rotation_matrix_derivatives_by_q1(q) * directionalVector;
   jacobian.block(0, 2, 3, 1) =
-    rotationMatrixDerivativesByq2(q) * directionalVector;
+    rotation_matrix_derivatives_by_q2(q) * directionalVector;
   jacobian.block(0, 3, 3, 1) =
-    rotationMatrixDerivativesByq3(q) * directionalVector;
+    rotation_matrix_derivatives_by_q3(q) * directionalVector;
 
   return jacobian;
 }
 
-Eigen::Vector3d EkfMath::partialDerivativeq0byOmegai(
+Eigen::Vector3d EkfMath::partial_derivative_q0_by_omegai(
   const Eigen::Vector3d &omega, const double dt
 ) {
   const double theta = omega.norm();
@@ -140,7 +140,7 @@ Eigen::Vector3d EkfMath::partialDerivativeq0byOmegai(
   return -dt / 2 * omega / theta * sin(theta * dt / 2);
 }
 
-Eigen::Vector3d EkfMath::partialDerivativeqibyOmegai(
+Eigen::Vector3d EkfMath::partial_derivative_qi_by_omegai(
   const Eigen::Vector3d &omega, const double dt
 ) {
   const double theta = omega.norm();
@@ -154,7 +154,7 @@ Eigen::Vector3d EkfMath::partialDerivativeqibyOmegai(
            sin(theta * dt / 2);
 }
 
-Eigen::Matrix3d EkfMath::partialDerivativeqibyOmegaj(
+Eigen::Matrix3d EkfMath::partial_derivative_qi_by_omegaj(
   const Eigen::Vector3d &omega, const double dt
 ) {
   const double theta = omega.norm();
@@ -184,7 +184,7 @@ Eigen::Matrix3d EkfMath::partialDerivativeqibyOmegaj(
   return out;
 }
 
-Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq0(
+Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q0(
   const Eigen::Quaterniond &q
 ) {
   Eigen::Matrix3d out;
@@ -193,7 +193,7 @@ Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq0(
   return out;
 }
 
-Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq1(
+Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q1(
   const Eigen::Quaterniond &q
 ) {
   Eigen::Matrix3d out;
@@ -202,7 +202,7 @@ Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq1(
   return out;
 }
 
-Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq2(
+Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q2(
   const Eigen::Quaterniond &q
 ) {
   Eigen::Matrix3d out;
@@ -211,7 +211,7 @@ Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq2(
   return out;
 }
 
-Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq3(
+Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q3(
   const Eigen::Quaterniond &q
 ) {
   Eigen::Matrix3d out;
@@ -220,7 +220,7 @@ Eigen::Matrix3d EkfMath::rotationMatrixDerivativesByq3(
   return out;
 }
 
-Eigen::Matrix2d EkfMath::jacobianUndistortion(const cv::Point &coordinates) {
+Eigen::Matrix2d EkfMath::jacobian_undistortion(const cv::Point &coordinates) {
   const Eigen::Vector2d point(coordinates.x, coordinates.y);
   const Eigen::Vector2d principal_point(cx, cy);
 

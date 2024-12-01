@@ -69,7 +69,7 @@ FeatureDetector::FeatureDetector(
  * The detected keypoints and their descriptions are stored internally in the
  * `FeatureDetector` object and can be accessed later.
  */
-void FeatureDetector::DetectFeatures(
+void FeatureDetector::detect_features(
   const cv::Mat& image,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
 ) {
@@ -77,7 +77,7 @@ void FeatureDetector::DetectFeatures(
     cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255
   );
 
-  BuildImageMask(image_mask, predictions);
+  build_image_mask(image_mask, predictions);
 
   std::vector<cv::KeyPoint> image_keypoints;
   detector_->detect(image, image_keypoints, image_mask);
@@ -86,7 +86,7 @@ void FeatureDetector::DetectFeatures(
   cv::Mat descriptors;
   extractor_->compute(image, image_keypoints, descriptors);
 
-  ComputeImageFeatureMeasurements(
+  compute_image_feature_measurements(
     image_mask, descriptors, predictions, image_keypoints
   );
 }
@@ -105,9 +105,9 @@ void FeatureDetector::DetectFeatures(
  * function offers the option to visualize the detected keypoints on the image
  * for debugging purposes.
  */
-void FeatureDetector::DetectFeatures(const cv::Mat& image) {
+void FeatureDetector::detect_features(const cv::Mat& image) {
   const std::vector<std::shared_ptr<ImageFeaturePrediction>> empty_predictions;
-  DetectFeatures(image, empty_predictions);
+  detect_features(image, empty_predictions);
 }
 
 /**
@@ -124,7 +124,7 @@ void FeatureDetector::DetectFeatures(const cv::Mat& image) {
  * If the predictions vector is empty, the function does nothing and returns
  * immediately.
  */
-void FeatureDetector::BuildImageMask(
+void FeatureDetector::build_image_mask(
   const cv::Mat& image_mask,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
 ) {
@@ -134,7 +134,7 @@ void FeatureDetector::BuildImageMask(
 
   for (const auto& prediction : predictions) {
     // FIXME: pass the right value
-    Ellipse ellipse(prediction->GetCoordinates(), cv::Mat());
+    Ellipse ellipse(prediction->get_coordinates(), cv::Mat());
     Visual::UncertaintyEllipse2D(
       image_mask,
       ellipse,
@@ -154,20 +154,22 @@ void FeatureDetector::BuildImageMask(
  * @param descriptors The extracted feature descriptors for the keypoints.
  * @param predictions The prior predictions about potential feature locations.
  */
-void FeatureDetector::SearchFeaturesByZone(
+void FeatureDetector::search_features_by_zone(
   const cv::Mat& image_mask,
   const std::vector<cv::KeyPoint>& keypoints,
   const cv::Mat& descriptors,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
 ) {
-  std::vector<std::shared_ptr<Zone>> zones = CreateZones();
-  GroupFeaturesAndPredictionsByZone(zones, predictions, keypoints, descriptors);
+  std::vector<std::shared_ptr<Zone>> zones = create_zones();
+  group_features_and_prediction_by_zone(
+    zones, predictions, keypoints, descriptors
+  );
 
   std::list zones_list(
     std::make_move_iterator(zones.begin()), std::make_move_iterator(zones.end())
   );
 
-  SelectImageMeasurementsFromZones(zones_list, image_mask);
+  select_image_measurements_from_zones(zones_list, image_mask);
 }
 
 /**
@@ -176,7 +178,7 @@ void FeatureDetector::SearchFeaturesByZone(
  * @return A vector of `std::shared_ptr<Zone>` objects, each representing a zone
  * in the image.
  */
-std::vector<std::shared_ptr<Zone>> FeatureDetector::CreateZones() {
+std::vector<std::shared_ptr<Zone>> FeatureDetector::create_zones() {
   const int zones_count = static_cast<int>(std::pow(zones_in_row_, 2));
   std::vector<std::shared_ptr<Zone>> zones;
 
@@ -215,7 +217,7 @@ std::vector<std::shared_ptr<Zone>> FeatureDetector::CreateZones() {
  * This ensures that zones with more confirmed features are prioritized for
  * further processing.
  */
-void FeatureDetector::GroupFeaturesAndPredictionsByZone(
+void FeatureDetector::group_features_and_prediction_by_zone(
   std::vector<std::shared_ptr<Zone>>& zones,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
   const std::vector<cv::KeyPoint>& keypoints,
@@ -231,34 +233,35 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
         keypoint.pt, descriptors.row(i)
       );
 
-    const int zone_id = image_feature_measurement->ComputeZone(
+    const int zone_id = image_feature_measurement->compute_zone(
       zone_size_.width, zone_size_.height, img_size_.width
     );
 
-    zones[zone_id]->AddCandidate(image_feature_measurement);
-    int candidates_left = zones[zone_id]->GetCandidatesLeft();
-    zones[zone_id]->SetCandidatesLeft(++candidates_left);
+    zones[zone_id]->add_candidate(image_feature_measurement);
+    int candidates_left = zones[zone_id]->get_candidates_left();
+    zones[zone_id]->set_candiates_left(++candidates_left);
   }
 
   const auto predictions_size = predictions.size();
 
   for (auto i = 0U; i < predictions_size; i++) {
-    const int zone_id = predictions[i]->ComputeZone(
+    const int zone_id = predictions[i]->compute_zone(
       zone_size_.width, zone_size_.height, img_size_.width
     );
 
-    zones[zone_id]->AddPrediction(predictions[i]);
+    zones[zone_id]->add_prediction(predictions[i]);
     int predictions_features_count =
-      zones[zone_id]->GetPredictionsFeaturesCount();
-    zones[zone_id]->SetPredictionsFeaturesCount(++predictions_features_count);
+      zones[zone_id]->get_predictions_features_count();
+    zones[zone_id]->set_predictions_features_count(++predictions_features_count
+    );
   }
 
   std::ranges::sort(
     zones.begin(),
     zones.end(),
     [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
-      return a->GetPredictionsFeaturesCount() >
-             b->GetPredictionsFeaturesCount();
+      return a->get_predictions_features_count() >
+             b->get_predictions_features_count();
     }
   );
 }
@@ -269,7 +272,7 @@ void FeatureDetector::GroupFeaturesAndPredictionsByZone(
  * @return A pointer to a cv::Ptr<cv::FeatureDetector> object representing the
  * created feature detector.
  */
-cv::Ptr<cv::FeatureDetector> FeatureDetector::BuildDetector(
+cv::Ptr<cv::FeatureDetector> FeatureDetector::build_detector(
   const DetectorType type
 ) {
   switch (type) {
@@ -296,7 +299,7 @@ cv::Ptr<cv::FeatureDetector> FeatureDetector::BuildDetector(
  * @return A pointer to a cv::Ptr<cv::DescriptorExtractor> object representing
  * the created descriptor extractor.
  */
-cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(
+cv::Ptr<cv::DescriptorExtractor> FeatureDetector::build_descriptor_extractor(
   const DescriptorExtractorType type
 ) {
   switch (type) {
@@ -337,7 +340,7 @@ cv::Ptr<cv::DescriptorExtractor> FeatureDetector::BuildDescriptorExtractor(
  * 4. In both scenarios, the created `ImageFeatureMeasurement` objects are added
  * to the `image_features_` list.
  */
-void FeatureDetector::ComputeImageFeatureMeasurements(
+void FeatureDetector::compute_image_feature_measurements(
   const cv::Mat& image_mask,
   const cv::Mat& descriptors,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
@@ -352,7 +355,9 @@ void FeatureDetector::ComputeImageFeatureMeasurements(
       ));
     }
   } else {
-    SearchFeaturesByZone(image_mask, image_keypoints, descriptors, predictions);
+    search_features_by_zone(
+      image_mask, image_keypoints, descriptors, predictions
+    );
   }
 }
 
@@ -384,7 +389,7 @@ void FeatureDetector::ComputeImageFeatureMeasurements(
  * \pre The `measurementEllipseMatrix` member variable should be initialized
  * with appropriate dimensions and values.
  */
-void FeatureDetector::SelectImageMeasurementsFromZones(
+void FeatureDetector::select_image_measurements_from_zones(
   std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
 ) {
   const cv::Mat1d measurementEllipseMatrix(2, 2);
@@ -397,8 +402,9 @@ void FeatureDetector::SelectImageMeasurementsFromZones(
   int features_needed = ImageFeatureParameters::features_per_image;
   while (zones_left > 0 && features_needed > 0) {
     const std::shared_ptr<Zone> curr_zone = zones.front();
-    int curr_zone_candidates_left = curr_zone->GetCandidatesLeft();
-    int curr_zone_predictions_count = curr_zone->GetPredictionsFeaturesCount();
+    int curr_zone_candidates_left = curr_zone->get_candidates_left();
+    int curr_zone_predictions_count =
+      curr_zone->get_predictions_features_count();
 
     if (curr_zone_candidates_left == 0) {
       zones.pop_front();
@@ -409,24 +415,25 @@ void FeatureDetector::SelectImageMeasurementsFromZones(
       std::uniform_real_distribution<> dist(0, curr_zone_candidates_left - 1);
       int candidate_idx = static_cast<int>(dist(mt));
 
-      auto& curr_candidates = curr_zone->GetCandidates();
+      auto& curr_candidates = curr_zone->get_candidates();
       std::shared_ptr<ImageFeatureMeasurement> candidate =
         curr_candidates.at(candidate_idx);
 
-      if (const cv::Point2f candidate_coordinates = candidate->GetCoordinates();
+      if (const cv::Point2f candidate_coordinates =
+            candidate->get_coordinates();
           image_mask.at<int>(
             static_cast<int>(candidate_coordinates.y),
             static_cast<int>(candidate_coordinates.x)
           )) {
         image_features_.emplace_back(candidate);
         curr_zone_predictions_count++;
-        curr_zone->SetPredictionsFeaturesCount(curr_zone_predictions_count);
+        curr_zone->set_predictions_features_count(curr_zone_predictions_count);
 
         // Reorder zones based on predictions feature count
         zones.sort(
           [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
-            return a->GetPredictionsFeaturesCount() >=
-                   b->GetPredictionsFeaturesCount();
+            return a->get_predictions_features_count() >=
+                   b->get_predictions_features_count();
           }
         );
 
@@ -442,7 +449,7 @@ void FeatureDetector::SelectImageMeasurementsFromZones(
         features_needed--;
       }
 
-      curr_zone->SetCandidatesLeft(--curr_zone_candidates_left);
+      curr_zone->set_candiates_left(--curr_zone_candidates_left);
       curr_candidates.erase(curr_candidates.begin() + candidate_idx);
     }
   }

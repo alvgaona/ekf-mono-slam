@@ -15,9 +15,9 @@ EKF::EKF() {
   this->step_ = 0;
 }
 
-void EKF::Predict() const {
+void EKF::predict() const {
   covariance_matrix_->Predict(state_, delta_t_);
-  state_->Predict(delta_t_);
+  state_->predict(delta_t_);
 }
 
 /**
@@ -36,11 +36,11 @@ void EKF::Predict() const {
  * covariance matrix update. Ensure the provided measurements hold the required
  * data for proper integration.
  */
-void EKF::AddFeatures(
-    const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
+void EKF::add_features(
+  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
 ) const {
   for (const auto& image_feature_measurement : features) {
     this->covariance_matrix_->Add(image_feature_measurement, this->state_);
-    this->state_->Add(image_feature_measurement);
+    this->state_->add(image_feature_measurement);
   }
 }

@@ -10,7 +10,7 @@ class ImageFileUtils final {
   ImageFileUtils() = delete;
   ~ImageFileUtils() = delete;
 
-  static std::string ToString(const ImageFileFormat format) {
+  static std::string to_string(const ImageFileFormat format) {
     switch (format) {
       case ImageFileFormat::JPG:
         return "jpg";
