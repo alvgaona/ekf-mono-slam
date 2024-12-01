@@ -1,8 +1,8 @@
 #include "feature/ellipse.h"
 
-#include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>
+#include <eigen3/Eigen/Dense>
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>

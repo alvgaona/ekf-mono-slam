@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <opencv2/core/types.hpp>
 
 #include "feature/undistorted_image_feature.h"
