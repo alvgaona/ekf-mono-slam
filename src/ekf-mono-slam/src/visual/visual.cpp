@@ -56,9 +56,9 @@ void Visual::UncertaintyEllipse2D(
   const double angle = EkfMath::rad2deg(ellipse.angle());
 
   if (fill) {
-    cv::ellipse(image, ellipse.get_center(), axes, angle, 0, 360, color, -1);
+    cv::ellipse(image, ellipse.center(), axes, angle, 0, 360, color, -1);
   } else {
-    cv::ellipse(image, ellipse.get_center(), axes, angle, 0, 360, color);
+    cv::ellipse(image, ellipse.center(), axes, angle, 0, 360, color);
   }
 }
 

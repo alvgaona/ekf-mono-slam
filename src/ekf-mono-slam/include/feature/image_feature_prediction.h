@@ -10,11 +10,9 @@ class ImageFeaturePrediction final : public ImageFeature {
   explicit ImageFeaturePrediction(const cv::Point& coordinates);
   ~ImageFeaturePrediction() override = default;
 
-  [[nodiscard]] const Eigen::MatrixXd& get_jacobian() const {
-    return jacobian_;
-  }
+  [[nodiscard]] const Eigen::MatrixXd& jacobian() const { return jacobian_; }
 
-  [[nodiscard]] const Eigen::MatrixXd& get_covariance_matrix() const {
+  [[nodiscard]] const Eigen::MatrixXd& covariance_matrix() const {
     return covariance_matrix_;
   }
 

@@ -173,7 +173,7 @@ void CovarianceMatrix::Add(
 
   // Eq. (A. 75)
   const Eigen::Matrix2d dhu_dhd =
-    jacobian_undistortion(image_feature_measurement->get_coordinates()
+    jacobian_undistortion(image_feature_measurement->coordinates()
     );  // Eq. (A.32)
 
   // Eq. (A.79). It is likely that in the book this equation is wrong, and it

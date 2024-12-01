@@ -41,10 +41,10 @@ TEST(FeatureDetectors, DetectFeatures) {
 
   detector.detect_features(image);
 
-  ASSERT_EQ(detector.get_image_features().size(), 20);
-  ASSERT_EQ(detector.get_zone_size(), cv::Size(160, 120));
-  ASSERT_EQ(detector.get_image_size(), cv::Size(640, 480));
-  ASSERT_EQ(detector.get_zones_in_row(), 4);
+  ASSERT_EQ(detector.image_features().size(), 20);
+  ASSERT_EQ(detector.zone_size(), cv::Size(160, 120));
+  ASSERT_EQ(detector.image_size(), cv::Size(640, 480));
+  ASSERT_EQ(detector.zones_in_row(), 4);
 }
 
 TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {
@@ -55,21 +55,21 @@ TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {
     image_feature_measurement.undistort();
 
   ASSERT_EQ(
-    undistorted_image_feature.get_coordinates(),
+    undistorted_image_feature.coordinates(),
     Eigen::Vector2d(1.4040732757828778, 1.0760232978706483)
   );
 }
 
 TEST(Zones, CreateZone) {
   const Zone zone(0, cv::Size(100, 100));
-  ASSERT_EQ(zone.get_id(), 0);
-  ASSERT_EQ(zone.get_dimensions(), cv::Size(100, 100));
+  ASSERT_EQ(zone.id(), 0);
+  ASSERT_EQ(zone.dimensions(), cv::Size(100, 100));
 }
 
 TEST(Zones, AddFeature) {
   const Zone zone(0, cv::Size(100, 100));
-  ASSERT_EQ(zone.get_id(), 0);
-  ASSERT_EQ(zone.get_dimensions(), cv::Size(100, 100));
+  ASSERT_EQ(zone.id(), 0);
+  ASSERT_EQ(zone.dimensions(), cv::Size(100, 100));
 }
 
 TEST(Zones, ComputeZone) {

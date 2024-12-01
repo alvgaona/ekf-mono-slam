@@ -63,7 +63,7 @@ Eigen::MatrixXd EkfMath::dyn_model_noise_jacobian(
 cv::Point2d EkfMath::distort_image_feature(
   const UndistortedImageFeature &image_feature
 ) {
-  const auto feature_coordinates = image_feature.get_coordinates();
+  const auto feature_coordinates = image_feature.coordinates();
   const auto xu = (feature_coordinates[0] - cx) * dx;
   const auto yu = (feature_coordinates[1] - cy) * dy;
 

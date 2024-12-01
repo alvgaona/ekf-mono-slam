@@ -27,16 +27,16 @@ class FeatureDetector final {
     DescriptorExtractorType type
   );
 
-  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>&
-  get_image_features() {
+  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& image_features(
+  ) {
     return image_features_;
   }
 
-  [[nodiscard]] int get_zones_in_row() const { return zones_in_row_; }
+  [[nodiscard]] int zones_in_row() const { return zones_in_row_; }
 
-  [[nodiscard]] cv::Size get_zone_size() const { return zone_size_; }
+  [[nodiscard]] cv::Size zone_size() const { return zone_size_; }
 
-  [[nodiscard]] cv::Size get_image_size() const { return img_size_; }
+  [[nodiscard]] cv::Size image_size() const { return img_size_; }
 
   void detect_features(const cv::Mat& image);
 

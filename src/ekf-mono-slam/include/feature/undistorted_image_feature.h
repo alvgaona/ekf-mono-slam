@@ -19,7 +19,7 @@ class UndistortedImageFeature final {
     Eigen::Vector3d directionalVector
   );
 
-  [[nodiscard]] Eigen::Vector2d get_coordinates() const { return coordinates_; }
+  [[nodiscard]] Eigen::Vector2d coordinates() const { return coordinates_; }
 
  private:
   Eigen::Vector2d coordinates_;

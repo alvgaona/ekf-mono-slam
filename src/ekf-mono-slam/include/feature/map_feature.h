@@ -23,9 +23,9 @@ class MapFeature {
     return os;
   }
 
-  [[nodiscard]] const Eigen::VectorXd& get_state() const { return state_; }
+  [[nodiscard]] const Eigen::VectorXd& state() const { return state_; }
 
-  [[nodiscard]] int64_t get_dimension() const { return state_.size(); }
+  [[nodiscard]] int64_t dimension() const { return state_.size(); }
 
   void set_image_feature_prediction(const ImageFeaturePrediction& prediction) {
     prediction_ = prediction;

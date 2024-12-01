@@ -20,7 +20,7 @@ class ImageFeatureMeasurement final : public ImageFeature {
 
   ~ImageFeatureMeasurement() override = default;
 
-  [[nodiscard]] cv::Mat get_descriptor_data() const { return descriptor_data_; }
+  [[nodiscard]] cv::Mat descriptor_data() const { return descriptor_data_; }
 
   [[nodiscard]] UndistortedImageFeature undistort() const;
 

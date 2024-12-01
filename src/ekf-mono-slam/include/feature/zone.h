@@ -8,20 +8,20 @@ class Zone final {
   Zone(int id, cv::Size dimensions);
   ~Zone() = default;
 
-  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& get_candidates() {
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& candidates() {
     return candidates_;
   }
-  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& get_added() {
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>>& added() {
     return added_;
   }
-  std::vector<std::shared_ptr<ImageFeaturePrediction>> get_predictions() {
+  std::vector<std::shared_ptr<ImageFeaturePrediction>> predictions() {
     return predictions_;
   }
 
-  [[nodiscard]] int get_id() const { return id_; }
-  [[nodiscard]] int get_candidates_left() const { return candidates_left_; }
-  [[nodiscard]] cv::Size get_dimensions() const { return dimensions_; }
-  [[nodiscard]] int get_predictions_features_count() const {
+  [[nodiscard]] int id() const { return id_; }
+  [[nodiscard]] int candidates_left() const { return candidates_left_; }
+  [[nodiscard]] cv::Size dimensions() const { return dimensions_; }
+  [[nodiscard]] int predictions_features_count() const {
     return predictions_features_count_;
   }
 

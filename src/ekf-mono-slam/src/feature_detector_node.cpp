@@ -46,16 +46,16 @@ void FeatureDetectorNode::detect_features(
 
   feature_detector.detect_features(image, predictions);
 
-  auto detected_image_features = feature_detector.get_image_features();
+  auto detected_image_features = feature_detector.image_features();
 
   ekf_mono_slam::msg::ImageFeatureMeasurementArray image_feature_measurements;
   std::vector<ekf_mono_slam::msg::ImageFeatureMeasurement> response_features;
 
-  const auto image_features = feature_detector.get_image_features();
+  const auto image_features = feature_detector.image_features();
   for (const auto& m : image_features) {
     ekf_mono_slam::msg::ImageFeatureMeasurement feature;
-    auto coordinates = m->get_coordinates();
-    auto descriptor = m->get_descriptor_data();
+    auto coordinates = m->coordinates();
+    auto descriptor = m->descriptor_data();
 
     feature.point.x = coordinates.x;
     feature.point.y = coordinates.y;

@@ -134,7 +134,7 @@ void FeatureDetector::build_image_mask(
 
   for (const auto& prediction : predictions) {
     // FIXME: pass the right value
-    Ellipse ellipse(prediction->get_coordinates(), cv::Mat());
+    Ellipse ellipse(prediction->coordinates(), cv::Mat());
     Visual::UncertaintyEllipse2D(
       image_mask,
       ellipse,
@@ -238,7 +238,7 @@ void FeatureDetector::group_features_and_prediction_by_zone(
     );
 
     zones[zone_id]->add_candidate(image_feature_measurement);
-    int candidates_left = zones[zone_id]->get_candidates_left();
+    int candidates_left = zones[zone_id]->candidates_left();
     zones[zone_id]->set_candiates_left(++candidates_left);
   }
 
@@ -251,7 +251,7 @@ void FeatureDetector::group_features_and_prediction_by_zone(
 
     zones[zone_id]->add_prediction(predictions[i]);
     int predictions_features_count =
-      zones[zone_id]->get_predictions_features_count();
+      zones[zone_id]->predictions_features_count();
     zones[zone_id]->set_predictions_features_count(++predictions_features_count
     );
   }
@@ -260,8 +260,7 @@ void FeatureDetector::group_features_and_prediction_by_zone(
     zones.begin(),
     zones.end(),
     [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
-      return a->get_predictions_features_count() >
-             b->get_predictions_features_count();
+      return a->predictions_features_count() > b->predictions_features_count();
     }
   );
 }
@@ -402,9 +401,8 @@ void FeatureDetector::select_image_measurements_from_zones(
   int features_needed = ImageFeatureParameters::features_per_image;
   while (zones_left > 0 && features_needed > 0) {
     const std::shared_ptr<Zone> curr_zone = zones.front();
-    int curr_zone_candidates_left = curr_zone->get_candidates_left();
-    int curr_zone_predictions_count =
-      curr_zone->get_predictions_features_count();
+    int curr_zone_candidates_left = curr_zone->candidates_left();
+    int curr_zone_predictions_count = curr_zone->predictions_features_count();
 
     if (curr_zone_candidates_left == 0) {
       zones.pop_front();
@@ -415,12 +413,11 @@ void FeatureDetector::select_image_measurements_from_zones(
       std::uniform_real_distribution<> dist(0, curr_zone_candidates_left - 1);
       int candidate_idx = static_cast<int>(dist(mt));
 
-      auto& curr_candidates = curr_zone->get_candidates();
+      auto& curr_candidates = curr_zone->candidates();
       std::shared_ptr<ImageFeatureMeasurement> candidate =
         curr_candidates.at(candidate_idx);
 
-      if (const cv::Point2f candidate_coordinates =
-            candidate->get_coordinates();
+      if (const cv::Point2f candidate_coordinates = candidate->coordinates();
           image_mask.at<int>(
             static_cast<int>(candidate_coordinates.y),
             static_cast<int>(candidate_coordinates.x)
@@ -432,8 +429,8 @@ void FeatureDetector::select_image_measurements_from_zones(
         // Reorder zones based on predictions feature count
         zones.sort(
           [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
-            return a->get_predictions_features_count() >=
-                   b->get_predictions_features_count();
+            return a->predictions_features_count() >=
+                   b->predictions_features_count();
           }
         );
 
