@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.8)
 project(ekf_mono_slam)
 
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -24,6 +24,7 @@ find_package(OpenCV 4.9.0 REQUIRED)
 find_package(spdlog 1.12.0 REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
+# Set the src file variables
 file(GLOB_RECURSE config_src src/configuration/*.cpp)
 file(GLOB_RECURSE math_src src/math/*.cpp)
 file(GLOB_RECURSE filter_src src/filter/*.cpp)
@@ -31,19 +32,9 @@ file(GLOB_RECURSE image_src src/image/*.cpp)
 file(GLOB_RECURSE feature_src src/feature/*.cpp)
 file(GLOB_RECURSE visual_src src/visual/*.cpp)
 
-set(msg_files
-  "msg/State.msg"
-  "msg/ImagePoint.msg"
-  "msg/CovarianceMatrix.msg"
-  "msg/ImageFeatureMeasurement.msg"
-  "msg/ImageFeatureMeasurementArray.msg"
-  "msg/ImageFeaturePrediction.msg"
-)
-
-set(srv_files
-  "srv/FeatureDetect.srv"
-)
-
+# Fetch and set the msg and srv files
+file(GLOB msg_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*.msg)
+file(GLOB srv_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} srv/*.srv)
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
@@ -51,9 +42,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   sensor_msgs
   std_msgs
 )
-
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 
+# Create the file sequence target
 add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src} ${image_src})
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 target_link_libraries(file_sequence_image PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
@@ -64,6 +55,7 @@ target_include_directories(file_sequence_image
   ${OpenCV_INCLUDE_DIRS}
 )
 
+# Create the feature detector target
 add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src})
 ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 target_link_libraries(feature_detector PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
@@ -75,6 +67,7 @@ target_include_directories(feature_detector
   ${EIGEN3_INCLUDE_DIRS}
 )
 
+# Create the EKF target
 add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src} ${feature_src} ${visual_src})
 ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs geometry_msgs cv_bridge image_transport)
 target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
@@ -99,21 +92,21 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-    set(test_src
+  set(test_src
     "test/utest_math.cpp"
     "test/utest_feature.cpp"
     "test/utest_filter.cpp"
     "test/utest_image.cpp"
   )
-    file(GLOB_RECURSE src_for_test src/*.cpp)
-    list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
+  file(GLOB_RECURSE src_for_test src/*.cpp)
+  list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 
-    find_package(ament_cmake_gmock REQUIRED)
+  find_package(ament_cmake_gmock REQUIRED)
 
-    ament_add_gmock(slam_test ${test_src} ${src_for_test})
-    ament_target_dependencies(slam_test std_msgs OpenCV)
-    target_link_libraries(slam_test spdlog::spdlog)
-    target_include_directories(slam_test PUBLIC
+  ament_add_gmock(slam_test ${test_src} ${src_for_test})
+  ament_target_dependencies(slam_test std_msgs OpenCV)
+  target_link_libraries(slam_test spdlog::spdlog)
+  target_include_directories(slam_test PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${EIGEN3_INCLUDE_DIRS}
