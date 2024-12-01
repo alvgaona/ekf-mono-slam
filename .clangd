@@ -19,7 +19,7 @@ Diagnostics:
       "misc-non-private-member-variables-in-classes",
       "cppcoreguidelines-non-private-member-variables-in-classes",
       "cppcoreguidelines-prefer-member-initializer",
-      "altera-unroll-loops",
+      "altera-unroll-loops"
     ]
 InlayHints:
   BlockEnd: No
