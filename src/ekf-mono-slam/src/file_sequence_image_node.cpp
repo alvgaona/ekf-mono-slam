@@ -13,10 +13,14 @@ FileSequenceImageNode::FileSequenceImageNode() : Node("file_sequence_image") {
   this->declare_parameter("image_dir", "");
   auto image_dir = this->get_parameter("image_dir").get_value<std::string>();
 
-  image_provider_ = std::make_unique<FileSequenceImageProvider>(image_dir, 1, 359);
-  image_publisher_ =
-      std::make_shared<image_transport::Publisher>(image_transport::create_publisher(this, "camera/image"));
-  timer_ = this->create_wall_timer(40ms, std::bind(&FileSequenceImageNode::timer_callback, this));
+  image_provider_ =
+      std::make_unique<FileSequenceImageProvider>(image_dir, 1, 359);
+  image_publisher_ = std::make_shared<image_transport::Publisher>(
+      image_transport::create_publisher(this, "camera/image")
+  );
+  timer_ = this->create_wall_timer(
+      40ms, std::bind(&FileSequenceImageNode::timer_callback, this)
+  );
 }
 
 void FileSequenceImageNode::timer_callback() const {

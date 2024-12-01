@@ -1,31 +1,46 @@
 #include "feature/image_feature_measurement.h"
 
+#include <Eigen/Core>
+
 #include "configuration/camera_parameters.h"
 #include "feature/image_feature.h"
+#include "feature/undistorted_image_feature.h"
 
-using namespace CameraParameters;
+using CameraParameters::cx;
+using CameraParameters::cy;
+using CameraParameters::dx;
+using CameraParameters::dy;
+using CameraParameters::k1;
+using CameraParameters::k2;
 
 /**
- * @brief Constructs an ImageFeatureMeasurement object with the provided coordinates and descriptor data.
+ * @brief Constructs an ImageFeatureMeasurement object with the provided
+ * coordinates and descriptor data.
  *
  * @param coordinates The pixel coordinates of the feature in the image.
- * @param descriptor_data The feature descriptor data extracted by the OpenCV descriptor extractor.
+ * @param descriptor_data The feature descriptor data extracted by the OpenCV
+ * descriptor extractor.
  *
- * This constructor builds upon the base `ImageFeature` class and adds the ability to store and access the feature
- * descriptor data. This information is crucial for matching and identifying features across different images.
+ * This constructor builds upon the base `ImageFeature` class and adds the
+ * ability to store and access the feature descriptor data. This information is
+ * crucial for matching and identifying features across different images.
  *
  */
-ImageFeatureMeasurement::ImageFeatureMeasurement(const cv::Point2f coordinates, const cv::Mat& descriptor_data)
-    : ImageFeature(coordinates) {
+ImageFeatureMeasurement::ImageFeatureMeasurement(
+  const cv::Point2f coordinates, const cv::Mat& descriptor_data
+)
+  : ImageFeature(coordinates) {
   this->descriptor_data_ = descriptor_data;
 }
 
 /**
- * @brief Undistorts the image feature coordinates to compensate for camera lens distortion. This method applies the
- * camera's intrinsic distortion model to transform the feature's pixel coordinates from the distorted image plane to
+ * @brief Undistorts the image feature coordinates to compensate for camera lens
+ * distortion. This method applies the camera's intrinsic distortion model to
+ * transform the feature's pixel coordinates from the distorted image plane to
  * the ideal normalized plane.
  *
- * @return An `UndistortedImageFeature` object containing the undistorted coordinates of the feature.
+ * @return An `UndistortedImageFeature` object containing the undistorted
+ * coordinates of the feature.
  *
  */
 UndistortedImageFeature ImageFeatureMeasurement::Undistort() const {

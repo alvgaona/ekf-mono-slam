@@ -9,7 +9,9 @@
 
 class FileSequenceImageProvider final : public ImageProvider {
  public:
-  explicit FileSequenceImageProvider(const std::string& directory, int start_index = 1, int end_index = 10);
+  explicit FileSequenceImageProvider(
+      const std::string& directory, int start_index = 1, int end_index = 10
+  );
   ~FileSequenceImageProvider() override = default;
 
   [[nodiscard]] int GetImageCounter() const { return this->image_counter_; }
