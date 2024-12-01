@@ -1,6 +1,6 @@
 #include "feature/image_feature_measurement.h"
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include "configuration/camera_parameters.h"
 #include "feature/image_feature.h"

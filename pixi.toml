@@ -37,6 +37,7 @@ compilers = ">=1.7.0,<1.8"
 ros-humble-ament-cmake-auto = ">=1.3.7,<1.4"
 spdlog = ">=1.12.0,<1.13"
 clang-format = ">=18.1.3,<18.2"
+librerun-sdk = ">=0.20.1,<0.21"
 
 [activation]
 scripts = ["install/setup.sh"]

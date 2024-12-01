@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Eigen/Dense>
 #include <cstdint>
+#include <eigen3/Eigen/Dense>
 #include <ostream>
 
 #include "feature/image_feature_prediction.h"

@@ -23,6 +23,7 @@ find_package(Eigen3 3.4.0 REQUIRED)
 find_package(OpenCV 4.9.0 REQUIRED)
 find_package(spdlog 1.12.0 REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(rerun_sdk REQUIRED)
 
 # Set the src file variables
 file(GLOB_RECURSE config_src src/configuration/*.cpp)
@@ -44,40 +45,38 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 
+include_directories(
+  include
+  ${rclcpp_INCLUDE_DIRS}
+  ${std_msgs_INCLUDE_DIRS}
+  ${std_srvs_INCLUDE_DIRS}
+  ${geometry_msgs_INCLUDE_DIRS}
+  ${sensor_msgs_INCLUDE_DIRS}
+  ${rerun_sdk_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
+)
+
+link_libraries(
+  "${cpp_typesupport_target}"
+  rerun_sdk
+  spdlog::spdlog
+  ${OpenCV_LIBRARIES}
+  ${Eigen3_LIBRARIES}
+)
+
+
 # Create the file sequence target
 add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src} ${image_src})
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
-target_link_libraries(file_sequence_image PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog)
-target_include_directories(file_sequence_image
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
-  ${OpenCV_INCLUDE_DIRS}
-)
 
 # Create the feature detector target
 add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src})
 ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
-target_link_libraries(feature_detector PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
-target_include_directories(feature_detector
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
-  ${OpenCV_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-)
 
 # Create the EKF target
 add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src} ${feature_src} ${visual_src})
 ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs geometry_msgs cv_bridge image_transport)
-target_link_libraries(ekf PUBLIC ${OpenCV_LIBRARIES} spdlog::spdlog ${cpp_typesupport_target})
-target_include_directories(ekf
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
-  ${OpenCV_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-)
 
 install(TARGETS
   file_sequence_image
