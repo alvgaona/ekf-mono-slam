@@ -11,13 +11,13 @@ class State;
 class MapFeature {
  public:
   MapFeature(
-      const Eigen::VectorXd& state, int position, const cv::Mat& descriptor_data
+    const Eigen::VectorXd& state, int position, const cv::Mat& descriptor_data
   );
 
   virtual ~MapFeature() = default;
 
   friend std::ostream& operator<<(
-      std::ostream& os, const MapFeature& map_feature
+    std::ostream& os, const MapFeature& map_feature
   ) {
     os << "(position: " << map_feature.position_ << ")";
     return os;
@@ -36,8 +36,8 @@ class MapFeature {
   // virtual void ComputeJacobian(const State& state) = 0;
 
   virtual Eigen::Vector3d ComputeDirectionalVector(
-      const Eigen::Matrix3d& rotationMatrix,
-      const Eigen::Vector3d& camera_position
+    const Eigen::Matrix3d& rotationMatrix,
+    const Eigen::Vector3d& camera_position
   ) = 0;
 
   static bool isInFrontOfCamera(const Eigen::Vector3d& directionalVector);

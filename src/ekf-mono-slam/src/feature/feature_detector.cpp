@@ -132,7 +132,7 @@ void FeatureDetector::BuildImageMask(
     return;
   }
 
-  for (auto& prediction : predictions) {
+  for (const auto& prediction : predictions) {
     // FIXME: pass the right value
     Ellipse ellipse(prediction->GetCoordinates(), cv::Mat());
     Visual::UncertaintyEllipse2D(

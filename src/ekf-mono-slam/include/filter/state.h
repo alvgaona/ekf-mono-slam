@@ -27,10 +27,10 @@ class State final {
   State& operator=(State&& source) = delete;
 
   State(
-      const Eigen::Vector3d& position,
-      const Eigen::Vector3d& velocity,
-      const Eigen::Quaterniond& orientation,
-      const Eigen::Vector3d& angular_velocity
+    const Eigen::Vector3d& position,
+    const Eigen::Vector3d& velocity,
+    const Eigen::Quaterniond& orientation,
+    const Eigen::Vector3d& angular_velocity
   );
 
   friend std::ostream& operator<<(std::ostream& os, const State& state) {
@@ -72,7 +72,7 @@ class State final {
   void Predict(double delta_t);
   void PredictMeasurementState();
   void Add(
-      const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
+    const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
   );
   void Add(const std::shared_ptr<MapFeature>& feature);
   void Remove(const std::shared_ptr<MapFeature>& feature);
