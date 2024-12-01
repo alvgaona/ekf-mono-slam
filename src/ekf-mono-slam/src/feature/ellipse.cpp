@@ -57,12 +57,12 @@ Ellipse::Ellipse(const cv::Point2f center, const cv::Mat& matrix) {
  */
 cv::Size2f Ellipse::Axes() {
   const cv::Size2f axes(
-      static_cast<float>(
-          2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
-      ),
-      static_cast<float>(
-          2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
-      )
+    static_cast<float>(
+      2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
+    ),
+    static_cast<float>(
+      2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
+    )
   );
 
   return axes;
@@ -82,7 +82,7 @@ cv::Size2f Ellipse::Axes() {
  */
 double Ellipse::Angle() {
   return std::atan(
-      eigen_vectors_.at<double>(1, 0) / eigen_vectors_.at<double>(0, 0)
+    eigen_vectors_.at<double>(1, 0) / eigen_vectors_.at<double>(0, 0)
   );
 }
 
@@ -125,17 +125,17 @@ bool Ellipse::Contains(const cv::Point2f point) {
 
   if (axes.height < axes.width) {  // Horizontal ellipse
     f1 = Eigen::Vector2d(
-        f * std::cos(angle) + center_.x, f * std::sin(angle) + center_.y
+      f * std::cos(angle) + center_.x, f * std::sin(angle) + center_.y
     );
     f2 = Eigen::Vector2d(
-        -f * std::cos(angle) + center_.x, -f * std::sin(angle) + center_.y
+      -f * std::cos(angle) + center_.x, -f * std::sin(angle) + center_.y
     );
   } else {  // Vertical ellipse
     f1 = Eigen::Vector2d(
-        f * (-std::sin(angle)) + center_.x, f * std::cos(angle) + center_.y
+      f * (-std::sin(angle)) + center_.x, f * std::cos(angle) + center_.y
     );
     f2 = Eigen::Vector2d(
-        -f * (-std::sin(angle)) + center_.x, -f * std::cos(angle) + center_.y
+      -f * (-std::sin(angle)) + center_.x, -f * std::cos(angle) + center_.y
     );
   }
 

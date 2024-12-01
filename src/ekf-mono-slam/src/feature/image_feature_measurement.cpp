@@ -27,9 +27,9 @@ using CameraParameters::k2;
  *
  */
 ImageFeatureMeasurement::ImageFeatureMeasurement(
-    const cv::Point2f coordinates, const cv::Mat& descriptor_data
+  const cv::Point2f coordinates, const cv::Mat& descriptor_data
 )
-    : ImageFeature(coordinates) {
+  : ImageFeature(coordinates) {
   this->descriptor_data_ = descriptor_data;
 }
 

@@ -20,21 +20,21 @@ using namespace CameraParameters;
  * typically represented as a cv::Mat.
  **/
 MapFeature::MapFeature(
-    const Eigen::VectorXd& state,
-    const int position,
-    const cv::Mat& descriptor_data
+  const Eigen::VectorXd& state,
+  const int position,
+  const cv::Mat& descriptor_data
 )
-    : state_(state),
-      position_(position),
-      descriptor_data_(descriptor_data),
-      times_predicted_(0),
-      times_matched_(0) {}
+  : state_(state),
+    position_(position),
+    descriptor_data_(descriptor_data),
+    times_predicted_(0),
+    times_matched_(0) {}
 
 bool MapFeature::isInFrontOfCamera(const Eigen::Vector3d& directionalVector) {
   const auto atanxz =
-      Rad2Deg(atan2(directionalVector[0], directionalVector[2]));
+    Rad2Deg(atan2(directionalVector[0], directionalVector[2]));
   const auto atanyz =
-      Rad2Deg(atan2(directionalVector[1], directionalVector[2]));
+    Rad2Deg(atan2(directionalVector[1], directionalVector[2]));
   return atanxz > -angular_vision_x && atanxz < angular_vision_x &&
          atanyz > -angular_vision_y && atanyz < angular_vision_y;
 }
