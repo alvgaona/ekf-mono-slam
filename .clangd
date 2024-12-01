@@ -1,32 +1,32 @@
 CompileFlags:
-  CompilationDatabase: build
-  Compiler: clang++
+    CompilationDatabase: build
+    Compiler: clang++
 Diagnostics:
   MissingIncludes: None
   UnusedIncludes: None
   ClangTidy:
-    Add: ["*"]
-    Remove: [
-      "llvmlibc-*",
-      "fuchsia-*",
-      "google-build-*",
-      "modernize-use-trailing-return-type",
-      "readability-identifier-length",
-      "readability-magic-numbers",
-      "cppcoreguidelines-avoid-magic-numbers",
-      "cppcoreguidelines-special-member-functions",
-      "hicpp-special-member-functions",
-      "misc-non-private-member-variables-in-classes",
-      "cppcoreguidelines-non-private-member-variables-in-classes",
-      "cppcoreguidelines-prefer-member-initializer",
-      "altera-unroll-loops"
-    ]
+      Add: ["*"]
+      Remove: [
+          "llvmlibc-*",
+          "fuchsia-*",
+          "google-build-*",
+          "modernize-use-trailing-return-type",
+          "readability-identifier-length",
+          "readability-magic-numbers",
+          "cppcoreguidelines-avoid-magic-numbers",
+          "cppcoreguidelines-special-member-functions",
+          "hicpp-special-member-functions",
+          "misc-non-private-member-variables-in-classes",
+          "cppcoreguidelines-non-private-member-variables-in-classes",
+          "cppcoreguidelines-prefer-member-initializer",
+          "altera-unroll-loops"
+      ]
 InlayHints:
-  BlockEnd: No
-  Designators: Yes
-  Enabled: Yes
-  ParameterNames: Yes
-  DeducedTypes: Yes
-  TypeNameLimit: 0
+    BlockEnd: No
+    Designators: Yes
+    Enabled: Yes
+    ParameterNames: Yes
+    DeducedTypes: Yes
+    TypeNameLimit: 0
 Index:
-  Background: Build
+    Background: Build
