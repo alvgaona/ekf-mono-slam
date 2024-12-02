@@ -70,7 +70,7 @@ add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 
 # Create the feature detector target
-add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src})
+add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src} ${math_src})
 ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 
 # Create the EKF target
