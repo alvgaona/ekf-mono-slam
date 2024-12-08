@@ -36,6 +36,7 @@ file(GLOB_RECURSE visual_src src/visual/*.cpp)
 # Fetch and set the msg and srv files
 file(GLOB msg_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*.msg)
 file(GLOB srv_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} srv/*.srv)
+
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
@@ -43,6 +44,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   sensor_msgs
   std_msgs
 )
+
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 include_directories(
@@ -58,12 +60,13 @@ include_directories(
 )
 
 link_libraries(
-  "${cpp_typesupport_target}"
+  ${cpp_typesupport_target}
   rerun_sdk
   spdlog::spdlog
   ${OpenCV_LIBRARIES}
   ${Eigen3_LIBRARIES}
 )
+
 
 # Create the file sequence target
 add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src} ${image_src})
