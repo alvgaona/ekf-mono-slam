@@ -2,11 +2,18 @@
 name = "ekf_mono_slam"
 version = "0.1.0"
 description = "Visual Mono SLAM with 1-Point RANSAC EKF"
-authors = ["Alvaro <agaona@asapp.com>"]
+authors = ["Alvaro J. Gaona <alvgaona@gmail.com>"]
 channels = ["conda-forge", "robostack-staging"]
 platforms = ["linux-64"]
 
 [tasks]
+app = { cmd = [
+  "ros2",
+  "launch",
+  "ekf_mono_slam",
+  "vslam.launch.py",
+], env = { LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" } }
+
 build = { cmd = [
   "colcon",
   "build",
@@ -28,7 +35,6 @@ test = { cmd = [
 ], depends-on = [
   "build",
 ] }
-
 [dependencies]
 ros-humble-desktop = ">=0.10.0,<0.11"
 colcon-common-extensions = ">=0.3.0,<0.4"
