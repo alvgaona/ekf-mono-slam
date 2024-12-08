@@ -8,7 +8,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument(
-                "image_dir", default_value="./datasets/AGZ_subset/MAV Images/"
+                "image_dir", default_value="./datasets/desk_translation/"
             ),
             Node(
                 package="ekf_mono_slam",
