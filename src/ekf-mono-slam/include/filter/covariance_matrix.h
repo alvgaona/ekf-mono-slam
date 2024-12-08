@@ -22,9 +22,9 @@ class CovarianceMatrix final {
     return os;
   }
 
-  void Predict(const std::shared_ptr<State>& state, double dt);
+  void predict(const std::shared_ptr<State>& state, double dt);
 
-  void Add(
+  void add(
     const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
     const std::shared_ptr<State>& state
   );

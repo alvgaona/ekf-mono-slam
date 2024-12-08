@@ -1,5 +1,6 @@
 #include "feature_detector_node.h"
 
+#include <filesystem>
 #include <rerun.hpp>
 #include <rerun/archetypes/points2d.hpp>
 #include <rerun/recording_stream.hpp>
@@ -25,6 +26,8 @@ FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
 
   rec_ = std::make_shared<rerun::RecordingStream>("my_app", "default");
   rec_->spawn().exit_on_failure();
+
+  rec_->log_file_from_path(std::filesystem::path("rerun/my_app.rbl"));
 }
 
 void FeatureDetectorNode::detect_features(
@@ -54,6 +57,14 @@ void FeatureDetectorNode::detect_features(
   feature_detector.detect_features(image, predictions);
 
   auto detected_image_features = feature_detector.image_features();
+
+  rec_->log(
+    "/",
+    rerun::TextLog(
+      "Detected " + std::to_string(detected_image_features.size()) + " features"
+    )
+      .with_level(rerun::TextLogLevel::Debug)
+  );
 
   std::vector<rerun::Position2D> points;
   for (auto& feature : detected_image_features) {
