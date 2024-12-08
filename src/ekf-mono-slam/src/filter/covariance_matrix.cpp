@@ -39,7 +39,7 @@ CovarianceMatrix::CovarianceMatrix() {
     angular_accel_sd * angular_accel_sd;
 }
 
-void CovarianceMatrix::Predict(
+void CovarianceMatrix::predict(
   const std::shared_ptr<State>& state, const double dt
 ) {
   // Compute df/dx
@@ -124,7 +124,7 @@ void CovarianceMatrix::Predict(
  * measurement.
  * @param state Shared pointer to the current state of the EKF.
  */
-void CovarianceMatrix::Add(
+void CovarianceMatrix::add(
   const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
   const std::shared_ptr<State>& state
 ) {

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
+
 #include "image/file_sequence_image_provider.h"
 #include "image_transport/image_transport.hpp"
-#include "rclcpp/rclcpp.hpp"
 
 class FileSequenceImageNode : public rclcpp::Node {
  public:

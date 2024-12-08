@@ -1,8 +1,13 @@
 #include "feature_detector_node.h"
 
+#include <filesystem>
+#include <rerun.hpp>
+#include <rerun/archetypes/points2d.hpp>
+#include <rerun/recording_stream.hpp>
+
+#include "collection_adapters.h"
 #include "cv_bridge/cv_bridge.h"
 #include "feature/feature_detector.h"
-#include "spdlog/spdlog.h"
 
 FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
   detect_service_ = this->create_service<ekf_mono_slam::srv::FeatureDetect>(
@@ -18,6 +23,11 @@ FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
     this->create_publisher<ekf_mono_slam::msg::ImageFeatureMeasurementArray>(
       "features/image/measurements", 10
     );
+
+  rec_ = std::make_shared<rerun::RecordingStream>("my_app", "default");
+  rec_->spawn().exit_on_failure();
+
+  rec_->log_file_from_path(std::filesystem::path("rerun/my_app.rbl"));
 }
 
 void FeatureDetectorNode::detect_features(
@@ -47,6 +57,26 @@ void FeatureDetectorNode::detect_features(
   feature_detector.detect_features(image, predictions);
 
   auto detected_image_features = feature_detector.image_features();
+
+  rec_->log(
+    "/",
+    rerun::TextLog(
+      "Detected " + std::to_string(detected_image_features.size()) + " features"
+    )
+      .with_level(rerun::TextLogLevel::Debug)
+  );
+
+  std::vector<rerun::Position2D> points;
+  for (auto& feature : detected_image_features) {
+    auto coordinates = feature->coordinates();
+    points.emplace_back(coordinates.x, coordinates.y);
+  }
+
+  const uint32_t width = image.cols;
+  const uint32_t height = image.rows;
+
+  rec_->log("image", rerun::Image::from_rgb24(image, {width, height}));
+  rec_->log("image/keypoints", rerun::Points2D(points));
 
   ekf_mono_slam::msg::ImageFeatureMeasurementArray image_feature_measurements;
   std::vector<ekf_mono_slam::msg::ImageFeatureMeasurement> response_features;

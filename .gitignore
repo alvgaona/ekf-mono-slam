@@ -2,7 +2,7 @@
 .cache/clangd
 
 # Other
-resources/
+datasets/
 
 # ROS
 install/

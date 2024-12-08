@@ -138,7 +138,7 @@ TEST(ExtendedKalmanFilter, CovarianceAddImageFeature) {
     std::make_shared<ImageFeatureMeasurement>(
       cv::Point2f(50.556, 130.353), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1)
     );
-  covariance_matrix.Add(image_feature_measurement, state);
+  covariance_matrix.add(image_feature_measurement, state);
 
   ASSERT_THAT(covariance_matrix.matrix().rows(), Eq(19));
   ASSERT_THAT(covariance_matrix.matrix().cols(), Eq(19));
@@ -156,7 +156,7 @@ TEST(ExtendedKalmanFilter, CovariancePredict) {
 
   CovarianceMatrix covariance_matrix;
 
-  covariance_matrix.Predict(state, 1.0L);
+  covariance_matrix.predict(state, 1.0L);
 
   const auto matrix = covariance_matrix.matrix();
 
@@ -232,12 +232,12 @@ TEST(ExtendedKalmanFilter, AddFeatureAndPredict) {
   state->add(image_feature_measurement);
 
   CovarianceMatrix covariance_matrix;
-  covariance_matrix.Add(image_feature_measurement, state);
+  covariance_matrix.add(image_feature_measurement, state);
 
   ASSERT_THAT(state->dimension(), Eq(19));
   ASSERT_THAT(covariance_matrix.matrix().cols(), Eq(19));
   ASSERT_THAT(covariance_matrix.matrix().rows(), Eq(19));
 
   state->predict(1L);
-  covariance_matrix.Predict(state, 1L);
+  covariance_matrix.predict(state, 1L);
 }

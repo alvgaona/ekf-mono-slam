@@ -15,9 +15,21 @@ EKF::EKF() {
   this->step_ = 0;
 }
 
+/**
+ * @brief Predicts the next state of the EKF using the current state and time
+ * delta.
+ *
+ * This method performs the prediction step of the Extended Kalman Filter by:
+ * 1. Predicting the covariance matrix using the current state and time delta
+ * 2. Predicting the state using the time delta
+ *
+ * The camera measurements/features prediction is currently not implemented.
+ */
 void EKF::predict() const {
-  covariance_matrix_->Predict(state_, delta_t_);
+  covariance_matrix_->predict(state_, delta_t_);
   state_->predict(delta_t_);
+
+  // TODO: predict camera measurements (or features)
 }
 
 /**
@@ -40,7 +52,7 @@ void EKF::add_features(
   const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
 ) const {
   for (const auto& image_feature_measurement : features) {
-    this->covariance_matrix_->Add(image_feature_measurement, this->state_);
+    this->covariance_matrix_->add(image_feature_measurement, this->state_);
     this->state_->add(image_feature_measurement);
   }
 }

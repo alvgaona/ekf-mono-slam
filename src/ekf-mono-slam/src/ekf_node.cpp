@@ -1,6 +1,10 @@
 #include "ekf_node.h"
 
+#include <filesystem>
 #include <memory>
+#include <rerun.hpp>
+#include <rerun/archetypes/text_log.hpp>
+#include <rerun/recording_stream.hpp>
 
 #include "cv_bridge/cv_bridge.h"
 #include "feature/image_feature_measurement.h"
@@ -24,6 +28,11 @@ EKFNode::EKFNode() : Node("ekf_node") {
     this->create_publisher<ekf_mono_slam::msg::CovarianceMatrix>(
       "filter/covariance", 10
     );
+
+  rec_ = std::make_shared<rerun::RecordingStream>("my_app", "default");
+  rec_->spawn().exit_on_failure();
+
+  rec_->log_file_from_path(std::filesystem::path("rerun/my_app.rbl"));
 }
 
 void EKFNode::init_callback(
@@ -47,20 +56,17 @@ void EKFNode::init_callback(
 
     ekf_.add_features(features);
   }
-
-  ekf_mono_slam::msg::State state_msg;
-  state_msg.header.frame_id = "base_link";
-  state_msg.header.stamp = this->get_clock()->now();
-  state_msg.dimension = ekf_.state()->dimension();
-
-  state_publisher_->publish(state_msg);
-
-  // TODO: publish covariance matrix
 }
 
 void EKFNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg
 ) {
   if (!ekf_.is_initilized()) {
+    rec_->log(
+      "/",
+      rerun::TextLog("EKF is not initialized. Initializing...")
+        .with_level(rerun::TextLogLevel::Info)
+    );
+
     auto request =
       std::make_shared<ekf_mono_slam::srv::FeatureDetect::Request>();
     request->image = *msg;
@@ -72,14 +78,13 @@ void EKFNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg
       ) { this->init_callback(future); }
     );
   } else {
+    rec_->log("camera/state/x", rerun::Scalar(ekf_.state()->position()[0]));
+    rec_->log("camera/state/y", rerun::Scalar(ekf_.state()->position()[1]));
+    rec_->log("camera/state/z", rerun::Scalar(ekf_.state()->position()[2]));
+
     ekf_.predict();
 
-    ekf_mono_slam::msg::State state_msg;
-    state_msg.header.frame_id = "base_link";
-    state_msg.header.stamp = this->get_clock()->now();
-    state_msg.pose.position.x = ekf_.state()->position()[0];
-
-    state_publisher_->publish(state_msg);
+    // TODO: continue implementing
   }
 }
 
