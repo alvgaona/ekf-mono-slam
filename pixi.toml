@@ -35,6 +35,10 @@ test = { cmd = [
 ], depends-on = [
   "build",
 ] }
+clean = "rm -rf build install log"
+clean-build = { depends_on = ["clean", "build"] }
+
+
 [dependencies]
 ros-humble-desktop = ">=0.10.0,<0.11"
 colcon-common-extensions = ">=0.3.0,<0.4"
