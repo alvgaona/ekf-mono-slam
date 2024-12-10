@@ -8,7 +8,6 @@ platforms = ["linux-64"]
 
 [tasks]
 app = { cmd = ["ros2", "launch", "ekf_mono_slam", "vslam.launch.py"] }
-
 build = { cmd = [
   "colcon",
   "build",
@@ -33,7 +32,6 @@ test = { cmd = [
 clean = "rm -rf build install log"
 clean-build = { depends_on = ["clean", "build"] }
 
-
 [dependencies]
 ros-humble-desktop = ">=0.10.0,<0.11"
 colcon-common-extensions = ">=0.3.0,<0.4"
@@ -41,7 +39,6 @@ ninja = ">=1.12.0,<1.13"
 cmake = ">=3.28.3,<3.29"
 pkg-config = ">=0.29.2,<0.30"
 ros-humble-ament-cmake-auto = ">=1.3.7,<1.4"
-spdlog = ">=1.12.0,<1.13"
 clang-format = ">=18.1.3,<18.2"
 librerun-sdk = ">=0.20.1,<0.21"
 gtest = ">=1.14.0,<2"

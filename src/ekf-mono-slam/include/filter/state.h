@@ -10,7 +10,6 @@
 #include "feature/image_feature_measurement.h"
 #include "feature/inverse_depth_map_feature.h"
 #include "feature/map_feature.h"
-#include "spdlog/spdlog.h"
 
 class MapFeature;
 class CartesianMapFeature;

@@ -44,7 +44,6 @@ FileSequenceImageProvider::FileSequenceImageProvider(
  */
 cv::Mat FileSequenceImageProvider::next() {
   if (image_counter_ > end_index_ - start_index_) {
-    spdlog::debug("No more images in directory");
     return {};
   }
 
@@ -55,9 +54,7 @@ cv::Mat FileSequenceImageProvider::next() {
   image_full_filename << directory.c_str() << image_number.str() << "."
                       << ImageFileUtils::to_string(image_type_);
 
-  spdlog::debug("Loading image: {}", image_full_filename.str());
   cv::Mat image = cv::imread(image_full_filename.str());
-  spdlog::debug("Image size is {}x{}", image.rows, image.cols);
 
   image_counter_++;
 
