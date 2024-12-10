@@ -7,12 +7,7 @@ channels = ["conda-forge", "robostack-staging"]
 platforms = ["linux-64"]
 
 [tasks]
-app = { cmd = [
-  "ros2",
-  "launch",
-  "ekf_mono_slam",
-  "vslam.launch.py",
-], env = { LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" } }
+app = { cmd = ["ros2", "launch", "ekf_mono_slam", "vslam.launch.py"] }
 
 build = { cmd = [
   "colcon",
@@ -53,7 +48,7 @@ gtest = ">=1.14.0,<2"
 gmock = ">=1.14.0,<2"
 eigen = ">=3.4.0,<4"
 opencv = ">=4.9.0,<5"
-clangxx = ">=18.1.7,<19"
+cxx-compiler = ">=1.8.0,<2"
 
 [activation]
 scripts = ["install/setup.sh"]
