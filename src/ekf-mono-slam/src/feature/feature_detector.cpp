@@ -180,11 +180,9 @@ void FeatureDetector::search_features_by_zone(
 std::vector<std::shared_ptr<Zone>> FeatureDetector::create_zones() {
   const int zones_count = static_cast<int>(std::pow(zones_in_row_, 2));
   std::vector<std::shared_ptr<Zone>> zones;
+  zones.reserve(zones_count);
 
   for (auto i = 0; i < zones_count; i++) {
-    spdlog::debug(
-      "Creating Zone {} with size {}x{}", i, zone_size_.width, zone_size_.height
-    );
     zones.emplace_back(
       std::make_shared<Zone>(i, cv::Size(zone_size_.width, zone_size_.height))
     );

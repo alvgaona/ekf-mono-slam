@@ -21,7 +21,6 @@ find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED)
 find_package(OpenCV 4.9.0 REQUIRED)
-find_package(spdlog 1.12.0 REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(rerun_sdk REQUIRED)
 
@@ -62,7 +61,6 @@ include_directories(
 link_libraries(
   ${cpp_typesupport_target}
   rerun_sdk
-  spdlog::spdlog
   ${OpenCV_LIBRARIES}
   ${Eigen3_LIBRARIES}
 )

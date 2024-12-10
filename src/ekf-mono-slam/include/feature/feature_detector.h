@@ -6,7 +6,6 @@
 #include "image_feature_prediction.h"
 #include "opencv2/core/types.hpp"
 #include "opencv2/features2d.hpp"
-#include "spdlog/spdlog.h"
 #include "zone.h"
 
 class FeatureDetector final {
