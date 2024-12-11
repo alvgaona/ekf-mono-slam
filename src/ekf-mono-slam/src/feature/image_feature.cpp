@@ -12,8 +12,9 @@
  * coordinate system.
  *
  */
-ImageFeature::ImageFeature(const cv::Point2f coordinates) {
+ImageFeature::ImageFeature(const cv::Point2f coordinates, int index) {
   this->coordinates_ = coordinates;
+  this->index_ = index;
 }
 
 /**

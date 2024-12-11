@@ -5,6 +5,8 @@
 #include <typeinfo>
 
 #include "configuration/image_feature_parameters.h"
+#include "feature/image_feature_prediction.h"
+#include "feature/map_feature.h"
 
 /**
  * @brief Constructs a State object with default initial values.
@@ -172,7 +174,8 @@ void State::add(
   const auto map_feature = std::make_shared<InverseDepthMapFeature>(
     feature_state,
     this->dimension_,
-    image_feature_measurement->descriptor_data()
+    image_feature_measurement->descriptor_data(),
+    image_feature_measurement->index()
   );
 
   dimension_ += 6;
@@ -202,21 +205,24 @@ void State::add(const std::shared_ptr<MapFeature>& feature) {
 }
 
 void State::predict_measurement_state() {
-  for (const auto& mapFeature : features_) {
-    Eigen::Vector3d directionalVector = mapFeature->compute_directional_vector(
-      rotation_matrix_.transpose(), position_
-    );
+  for (const auto& map_feature : features_) {
+    Eigen::Vector3d directional_vector =
+      map_feature->compute_directional_vector(
+        rotation_matrix_.transpose(), position_
+      );
     // directionalVector = Rcw * (yi - rwc);
-    if (!mapFeature->is_in_front_of_camera(directionalVector)) {
+    if (!map_feature->is_in_front_of_camera(directional_vector)) {
       continue;
     }
 
-    const auto image_feature_prediction =
-      ImageFeaturePrediction::from(directionalVector);
-
-    if (!image_feature_prediction.is_visible_in_frame()) {
+    if (const auto image_feature_prediction = ImageFeaturePrediction::from(
+          directional_vector, map_feature->index()
+        );
+        image_feature_prediction.is_visible_in_frame()) {
+      predictions_.push_back(image_feature_prediction);
       continue;
     }
-    // TODO: add prediction of map feature
+
+    not_predicted_.push_back(map_feature);
   }
 }

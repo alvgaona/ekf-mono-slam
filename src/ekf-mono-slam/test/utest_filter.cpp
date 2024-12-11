@@ -42,9 +42,12 @@ TEST(ExtendedKalmanFilter, StateAddMapFeature) {
   const cv::Mat descriptor_data = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
 
   const auto inverse_depth_map_feature =
-    std::make_shared<InverseDepthMapFeature>(feature_state, 6, descriptor_data);
-  const auto cartesian_map_feature =
-    std::make_shared<CartesianMapFeature>(feature_state, 13, descriptor_data);
+    std::make_shared<InverseDepthMapFeature>(
+      feature_state, 6, descriptor_data, 0
+    );
+  const auto cartesian_map_feature = std::make_shared<CartesianMapFeature>(
+    feature_state, 13, descriptor_data, 1
+  );
 
   state.add(inverse_depth_map_feature);
   state.add(cartesian_map_feature);
@@ -69,10 +72,11 @@ TEST(ExtendedKalmanFilter, RemoveMapFeature) {
   const cv::Mat descriptor_data = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
 
   const auto inverse_map_feature = std::make_shared<InverseDepthMapFeature>(
-    feature_state, 13, descriptor_data
+    feature_state, 13, descriptor_data, 0
   );
-  const auto cartesian_map_feature =
-    std::make_shared<CartesianMapFeature>(feature_state, 19, descriptor_data);
+  const auto cartesian_map_feature = std::make_shared<CartesianMapFeature>(
+    feature_state, 19, descriptor_data, 1
+  );
 
   state.add(inverse_map_feature);
   state.add(cartesian_map_feature);
@@ -93,7 +97,7 @@ TEST(ExtendedKalmanFilter, AddImageFeatureMeasurement) {
   State state;
   const auto image_feature_measurement =
     std::make_shared<ImageFeatureMeasurement>(
-      cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1)
+      cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1), 0
     );
 
   state.add(image_feature_measurement);
@@ -136,7 +140,9 @@ TEST(ExtendedKalmanFilter, CovarianceAddImageFeature) {
 
   const auto image_feature_measurement =
     std::make_shared<ImageFeatureMeasurement>(
-      cv::Point2f(50.556, 130.353), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1)
+      cv::Point2f(50.556, 130.353),
+      cv::Mat::zeros(cv::Size(30, 30), CV_64FC1),
+      0
     );
   covariance_matrix.add(image_feature_measurement, state);
 
@@ -225,7 +231,7 @@ TEST(ExtendedKalmanFilter, CovariancePredict) {
 TEST(ExtendedKalmanFilter, AddFeatureAndPredict) {
   const auto image_feature_measurement =
     std::make_shared<ImageFeatureMeasurement>(
-      cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1)
+      cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1), 0
     );
 
   const auto state = std::make_shared<State>();

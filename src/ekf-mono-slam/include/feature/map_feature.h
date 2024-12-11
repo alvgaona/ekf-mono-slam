@@ -11,7 +11,10 @@ class State;
 class MapFeature {
  public:
   MapFeature(
-    const Eigen::VectorXd& state, int position, const cv::Mat& descriptor_data
+    const Eigen::VectorXd& state,
+    int position,
+    const cv::Mat& descriptor_data,
+    int index
   );
 
   virtual ~MapFeature() = default;
@@ -27,6 +30,8 @@ class MapFeature {
 
   [[nodiscard]] int64_t dimension() const { return state_.size(); }
 
+  [[nodiscard]] int index() const { return index_; }
+
   void set_image_feature_prediction(const ImageFeaturePrediction& prediction) {
     prediction_ = prediction;
   }
@@ -40,9 +45,10 @@ class MapFeature {
     const Eigen::Vector3d& camera_position
   ) = 0;
 
-  static bool is_in_front_of_camera(const Eigen::Vector3d& directionalVector);
+  static bool is_in_front_of_camera(const Eigen::Vector3d& directional_vector);
 
  protected:
+  int index_ = 1;
   Eigen::VectorXd state_;
   int position_;
   cv::Mat descriptor_data_;

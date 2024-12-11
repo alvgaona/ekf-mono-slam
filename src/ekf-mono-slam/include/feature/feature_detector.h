@@ -65,7 +65,7 @@ class FeatureDetector final {
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
-  std::vector<std::shared_ptr<Zone>> create_zones();
+  [[nodiscard]] std::vector<std::shared_ptr<Zone>> create_zones() const;
 
   void group_features_and_prediction_by_zone(
     std::vector<std::shared_ptr<Zone>>& zones,

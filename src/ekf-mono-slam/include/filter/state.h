@@ -86,6 +86,8 @@ class State final {
   std::vector<std::shared_ptr<MapFeature>> features_;
   std::vector<std::shared_ptr<InverseDepthMapFeature>> inverse_depth_features_;
   std::vector<std::shared_ptr<CartesianMapFeature>> cartesian_features_;
+  std::vector<ImageFeaturePrediction> predictions_;
+  std::vector<std::shared_ptr<MapFeature>> not_predicted_;
 
   int dimension_;
 };
