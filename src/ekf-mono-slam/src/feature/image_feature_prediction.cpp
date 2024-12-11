@@ -2,16 +2,18 @@
 
 #include "math/ekf_math.h"
 
-ImageFeaturePrediction::ImageFeaturePrediction(const cv::Point& coordinates)
-  : ImageFeature(coordinates) {}
+ImageFeaturePrediction::ImageFeaturePrediction(
+  const cv::Point& coordinates, int index
+)
+  : ImageFeature(coordinates, index) {}
 
 ImageFeaturePrediction ImageFeaturePrediction::from(
-  const Eigen::Vector3d& directionalVector
+  const Eigen::Vector3d& directional_vector, int index
 ) {
   const auto undistorted_image_feature =
-    UndistortedImageFeature::project(directionalVector);
+    UndistortedImageFeature::project(directional_vector);
   const auto distorted_feature =
     EkfMath::distort_image_feature(undistorted_image_feature);
 
-  return ImageFeaturePrediction(distorted_feature);
+  return ImageFeaturePrediction(distorted_feature, index);
 }

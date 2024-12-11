@@ -1,9 +1,12 @@
 #include "feature/inverse_depth_map_feature.h"
 
 InverseDepthMapFeature::InverseDepthMapFeature(
-  const Eigen::VectorXd& state, int position, const cv::Mat& descriptor_data
+  const Eigen::VectorXd& state,
+  int position,
+  const cv::Mat& descriptor_data,
+  int index
 )
-  : MapFeature(state, position, descriptor_data) {}
+  : MapFeature(state, position, descriptor_data, index) {}
 
 Eigen::Vector3d InverseDepthMapFeature::compute_directional_vector(
   const Eigen::Matrix3d& rotationMatrix, const Eigen::Vector3d& camera_position

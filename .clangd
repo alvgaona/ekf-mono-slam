@@ -7,24 +7,25 @@ Diagnostics:
   ClangTidy:
     Add: ["*"]
     Remove: [
-      "llvmlibc-*",
       "fuchsia-*",
       "google-build-*",
+      "llvmlibc-*",
+      "altera-unroll-loops",
+      "bugprone-easily-swappable-parameters",
+      "cppcoreguidelines-avoid-magic-numbers",
+      "cppcoreguidelines-non-private-member-variables-in-classes",
+      "cppcoreguidelines-prefer-member-initializer",
+      "cppcoreguidelines-pro-bounds-array-to-pointer-decay",
+      "cppcoreguidelines-special-member-functions",
+      "google-readability-todo",
+      "hicpp-no-array-decay",
+      "hicpp-special-member-functions",
+      "hicpp-uppercase-literal-suffix",
+      "misc-non-private-member-variables-in-classes",
       "modernize-use-trailing-return-type",
       "readability-identifier-length",
       "readability-magic-numbers",
-      "cppcoreguidelines-avoid-magic-numbers",
-      "cppcoreguidelines-special-member-functions",
-      "hicpp-special-member-functions",
-      "misc-non-private-member-variables-in-classes",
-      "cppcoreguidelines-non-private-member-variables-in-classes",
-      "cppcoreguidelines-prefer-member-initializer",
-      "altera-unroll-loops",
-      "hicpp-uppercase-literal-suffix",
-      "readability-uppercase-literal-suffix",
-      "cppcoreguidelines-pro-bounds-array-to-pointer-decay",
-      "hicpp-no-array-decay",
-      "bugprone-easily-swappable-parameters",
+      "readability-uppercase-literal-suffix"
     ]
 InlayHints:
   BlockEnd: No

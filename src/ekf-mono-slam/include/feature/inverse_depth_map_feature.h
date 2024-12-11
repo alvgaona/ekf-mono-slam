@@ -5,7 +5,10 @@
 class InverseDepthMapFeature final : public MapFeature {
  public:
   InverseDepthMapFeature(
-    const Eigen::VectorXd& state, int position, const cv::Mat& descriptor_data
+    const Eigen::VectorXd& state,
+    int position,
+    const cv::Mat& descriptor_data,
+    int index
   );
   Eigen::Vector3d compute_directional_vector(
     const Eigen::Matrix3d& rotationMatrix,

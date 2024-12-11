@@ -49,7 +49,7 @@ TEST(FeatureDetectors, DetectFeatures) {
 
 TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {
   const ImageFeatureMeasurement image_feature_measurement(
-    cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1)
+    cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1), 0
   );
   const UndistortedImageFeature undistorted_image_feature =
     image_feature_measurement.undistort();
@@ -74,12 +74,14 @@ TEST(Zones, AddFeature) {
 
 TEST(Zones, ComputeZone) {
   const cv::Mat descriptor = cv::Mat::zeros(cv::Size(30, 30), CV_64FC1);
-  const ImageFeatureMeasurement feature1(cv::Point2f(0, 0), descriptor);
+  const ImageFeatureMeasurement feature1(cv::Point2f(0, 0), descriptor, 0);
   ASSERT_EQ(feature1.compute_zone(480, 270, 1920), 0);
 
-  const ImageFeatureMeasurement feature2(cv::Point2f(1900, 1000), descriptor);
+  const ImageFeatureMeasurement feature2(
+    cv::Point2f(1900, 1000), descriptor, 1
+  );
   ASSERT_EQ(feature2.compute_zone(480, 270, 1920), 15);
 
-  const ImageFeatureMeasurement feature3(cv::Point2f(959, 271), descriptor);
+  const ImageFeatureMeasurement feature3(cv::Point2f(959, 271), descriptor, 2);
   ASSERT_EQ(feature3.compute_zone(480, 270, 1920), 5);
 }

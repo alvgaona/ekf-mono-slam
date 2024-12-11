@@ -1,12 +1,13 @@
 #include "feature_detector_node.h"
 
+#include <cv_bridge/cv_bridge.h>
+
 #include <filesystem>
 #include <rerun.hpp>
 #include <rerun/archetypes/points2d.hpp>
 #include <rerun/recording_stream.hpp>
 
 #include "collection_adapters.h"
-#include "cv_bridge/cv_bridge.h"
 #include "feature/feature_detector.h"
 
 FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
@@ -40,11 +41,18 @@ void FeatureDetectorNode::detect_features(
 
   std::vector<std::shared_ptr<ImageFeaturePrediction>> predictions;
 
-  for (const auto& im_pred : request->predictions) {
-    // cv::Mat(1, descriptor_size, CV_8UC1, im_pred.covariance_matrix.data());
-    // FIXME: create the image feature prediction from image with all its values
+  // TODO(alvgaona): make sure this loop is completed when passing predictions
+  // to the feature detector
+  for (size_t i = 0; i < request->predictions.size(); i++) {
+    // cv::Mat(1, descriptor_size, CV_8UC1,
+    // request->predictions[i].covariance_matrix.data());
+    // TODO(alvgaona): create the image feature prediction from image with all
+    // its values
     predictions.push_back(std::make_shared<ImageFeaturePrediction>(
-      cv::Point2f(im_pred.point.x, im_pred.point.y)
+      cv::Point2f(
+        request->predictions[i].point.x, request->predictions[i].point.y
+      ),
+      i
     ));
   }
 
