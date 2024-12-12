@@ -112,7 +112,7 @@ Eigen::MatrixXd EkfMath::jacobian_directional_vector(
 ) {
   Eigen::MatrixXd jacobian(3, 4);
 
-  // Looks like in eq. (A.74) there multiplication is wrong.
+  // Looks like in eq. (A.74) the multiplication is wrong.
   // In order to comply with the eq. (A.73) this is how it should be multiplied,
   // directional vector on the right of the jacobian of the rotation matrix
   // w.r.t the ith quaternion.

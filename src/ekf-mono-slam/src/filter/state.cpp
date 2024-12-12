@@ -158,7 +158,7 @@ void State::add(
     image_feature_measurement->undistort();
   Eigen::Vector3d back_projected_point = undistorted_feature.backproject();
 
-  // Orientation of the camera respect to the world axis
+  // Orientation of the camera respect to the world axis. Eq (A. 59)
   back_projected_point = orientation_.toRotationMatrix() * back_projected_point;
 
   feature_state.segment(0, 3) = position_;
@@ -167,8 +167,8 @@ void State::add(
   const double hy = back_projected_point.y();
   const double hz = back_projected_point.z();
 
-  feature_state(3) = atan2(hx, hz);
-  feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));
+  feature_state(3) = atan2(hx, hz);                        // Eq. (A. 60)
+  feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));  // Eq. (A. 61)
   feature_state(5) = ImageFeatureParameters::init_inv_depth;
 
   const auto map_feature = std::make_shared<InverseDepthMapFeature>(
@@ -204,6 +204,11 @@ void State::add(const std::shared_ptr<MapFeature>& feature) {
   }
 }
 
+void State::predict_measurement() {
+  predict_measurement_state();
+  predict_measurement_covariance();
+}
+
 void State::predict_measurement_state() {
   for (const auto& map_feature : features_) {
     Eigen::Vector3d directional_vector =
@@ -226,3 +231,5 @@ void State::predict_measurement_state() {
     not_predicted_.push_back(map_feature);
   }
 }
+
+void State::predict_measurement_covariance() {}

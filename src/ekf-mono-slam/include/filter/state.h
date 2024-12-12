@@ -69,7 +69,8 @@ class State final {
   }
 
   void predict(double delta_t);
-  void predict_measurement_state();
+  void predict_measurement();
+
   void add(
     const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
   );
@@ -90,4 +91,7 @@ class State final {
   std::vector<std::shared_ptr<MapFeature>> not_predicted_;
 
   int dimension_;
+
+  void predict_measurement_state();
+  void predict_measurement_covariance();
 };
