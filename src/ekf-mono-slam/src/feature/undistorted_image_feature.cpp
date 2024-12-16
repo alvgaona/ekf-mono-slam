@@ -31,11 +31,14 @@ UndistortedImageFeature::UndistortedImageFeature(
  *
  */
 Eigen::Vector3d UndistortedImageFeature::backproject() const {
-  const double x = -(coordinates_.x() - cx) * dx / fx;
-  const double y = -(coordinates_.y() - cy) * dy / fy;
-  constexpr double z = 1L;
+  const auto u = coordinates_.x();
+  const auto v = coordinates_.y();
 
-  return {x, y, z};
+  const double hx = -(u - cx) / fx;
+  const double hy = -(v - cy) / fy;
+  constexpr double hz = 1L;
+
+  return {hx, hy, hz};
 }
 
 /**
@@ -53,8 +56,9 @@ Eigen::Vector3d UndistortedImageFeature::backproject() const {
 UndistortedImageFeature UndistortedImageFeature::project(
   Eigen::Vector3d directional_vector
 ) {
-  return UndistortedImageFeature(
-    {cx - fx * directional_vector[0] / directional_vector[2],
-     cy - fy * directional_vector[1] / directional_vector[2]}
-  );
+  const auto hx = directional_vector[0];
+  const auto hy = directional_vector[1];
+  const auto hz = directional_vector[2];
+
+  return UndistortedImageFeature({cx - fx * hx / hz, cy - fy * hy / hz});
 }
