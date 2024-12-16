@@ -1,9 +1,11 @@
 #include "filter/state.h"
 
+#include <eigen3/Eigen/src/Core/Matrix.h>
 #include <math/ekf_math.h>
 
 #include <typeinfo>
 
+#include "configuration/camera_parameters.h"
 #include "configuration/image_feature_parameters.h"
 #include "feature/image_feature_prediction.h"
 #include "feature/map_feature.h"
@@ -212,9 +214,7 @@ void State::predict_measurement() {
 void State::predict_measurement_state() {
   for (const auto& map_feature : features_) {
     Eigen::Vector3d directional_vector =
-      map_feature->compute_directional_vector(
-        rotation_matrix_.transpose(), position_
-      );
+      map_feature->directional_vector(rotation_matrix_.transpose(), position_);
     // directionalVector = Rcw * (yi - rwc);
     if (!map_feature->is_in_front_of_camera(directional_vector)) {
       continue;
@@ -224,12 +224,15 @@ void State::predict_measurement_state() {
           directional_vector, map_feature->index()
         );
         image_feature_prediction.is_visible_in_frame()) {
-      predictions_.push_back(image_feature_prediction);
+      map_feature->add(image_feature_prediction);
       continue;
     }
-
-    not_predicted_.push_back(map_feature);
   }
 }
 
-void State::predict_measurement_covariance() {}
+void State::predict_measurement_covariance() {
+  for (const auto& map_feature : features_) {
+    const auto dhi_dx =
+      map_feature->measurement_jacobian(position_, rotation_matrix_.inverse());
+  }
+}

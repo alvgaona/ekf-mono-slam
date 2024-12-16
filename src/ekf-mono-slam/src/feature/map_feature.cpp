@@ -53,3 +53,9 @@ bool MapFeature::is_in_front_of_camera(const Eigen::Vector3d& directional_vector
   return atanxz > -angular_vision_x && atanxz < angular_vision_x &&
          atanyz > -angular_vision_y && atanyz < angular_vision_y;
 }
+
+Eigen::Vector3d MapFeature::directional_vector(
+  const Eigen::Vector3d& camera_position
+) {
+  return directional_vector(Eigen::Matrix3d::Identity(), camera_position);
+}
