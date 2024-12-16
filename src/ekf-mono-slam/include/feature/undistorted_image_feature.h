@@ -16,7 +16,7 @@ class UndistortedImageFeature final {
   [[nodiscard]] Eigen::Vector3d backproject() const;
 
   [[nodiscard]] static UndistortedImageFeature project(
-    Eigen::Vector3d directionalVector
+    Eigen::Vector3d directional_vector
   );
 
   [[nodiscard]] Eigen::Vector2d coordinates() const { return coordinates_; }

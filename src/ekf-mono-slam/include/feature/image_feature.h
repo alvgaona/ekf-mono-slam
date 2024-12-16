@@ -6,7 +6,7 @@ class ImageFeature {
  public:
   ImageFeature() = default;
 
-  explicit ImageFeature(cv::Point2f coordinates);
+  explicit ImageFeature(cv::Point2f coordinates, int index);
 
   virtual ~ImageFeature() = default;
 
@@ -18,6 +18,9 @@ class ImageFeature {
 
   [[nodiscard]] bool is_visible_in_frame() const;
 
+  [[nodiscard]] int index() const { return index_; }
+
  protected:
   cv::Point2f coordinates_;
+  int index_ = -1;
 };

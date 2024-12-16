@@ -27,9 +27,9 @@ using CameraParameters::k2;
  *
  */
 ImageFeatureMeasurement::ImageFeatureMeasurement(
-  const cv::Point2f coordinates, const cv::Mat& descriptor_data
+  const cv::Point2f coordinates, const cv::Mat& descriptor_data, int index
 )
-  : ImageFeature(coordinates) {
+  : ImageFeature(coordinates, index) {
   this->descriptor_data_ = descriptor_data;
 }
 
@@ -37,7 +37,10 @@ ImageFeatureMeasurement::ImageFeatureMeasurement(
  * @brief Undistorts the image feature coordinates to compensate for camera lens
  * distortion. This method applies the camera's intrinsic distortion model to
  * transform the feature's pixel coordinates from the distorted image plane to
- * the ideal normalized plane.
+ * the ideal normalized plane. The function was implemented based on the
+ * equation provided by J. I. Civera, A. J. Davison, and J. M. Montiel,
+ * Structure from Motion using the Extended Kalman Filter. 2012.
+ * doi: 10.1007/978-3-642-24834-4. Eq. (A. 57)
  *
  * @return An `UndistortedImageFeature` object containing the undistorted
  * coordinates of the feature.

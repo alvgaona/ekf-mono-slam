@@ -1,12 +1,13 @@
 #include "ekf_node.h"
 
+#include <cv_bridge/cv_bridge.h>
+
 #include <filesystem>
 #include <memory>
 #include <rerun.hpp>
 #include <rerun/archetypes/text_log.hpp>
 #include <rerun/recording_stream.hpp>
 
-#include "cv_bridge/cv_bridge.h"
 #include "feature/image_feature_measurement.h"
 
 EKFNode::EKFNode() : Node("ekf_node") {
@@ -44,13 +45,14 @@ void EKFNode::init_callback(
 
     std::vector<std::shared_ptr<ImageFeatureMeasurement>> features;
 
-    for (auto im_feat : response->features) {
+    for (size_t i = 0; i < response->features.size(); i++) {
+      const auto& im_feat = response->features[i];
       const auto descriptor_size = static_cast<int>(im_feat.descriptor.size());
-      auto descriptor =
-        cv::Mat(1, descriptor_size, CV_8UC1, im_feat.descriptor.data());
+      cv::Mat descriptor = cv::Mat(1, descriptor_size, CV_8UC1);
+      std::memcpy(descriptor.data, im_feat.descriptor.data(), descriptor_size);
 
       features.push_back(std::make_shared<ImageFeatureMeasurement>(
-        cv::Point2f(im_feat.point.x, im_feat.point.y), descriptor
+        cv::Point2f(im_feat.point.x, im_feat.point.y), descriptor, i
       ));
     }
 
@@ -78,11 +80,16 @@ void EKFNode::image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg
       ) { this->init_callback(future); }
     );
   } else {
+    const cv_bridge::CvImagePtr cv_ptr =
+      cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    const cv::Mat image = cv_ptr->image;
+
     rec_->log("camera/state/x", rerun::Scalar(ekf_.state()->position()[0]));
     rec_->log("camera/state/y", rerun::Scalar(ekf_.state()->position()[1]));
     rec_->log("camera/state/z", rerun::Scalar(ekf_.state()->position()[2]));
 
     ekf_.predict();
+    ekf_.match_predicted_features(image);
 
     // TODO: continue implementing
   }
