@@ -108,7 +108,7 @@ cv::Point2d EkfMath::distort_image_feature(
  * calculations involving rotations and directional vectors.
  */
 Eigen::MatrixXd EkfMath::jacobian_directional_vector(
-  const Eigen::Quaterniond &q, const Eigen::Vector3d &directionalVector
+  const Eigen::Quaterniond &q, const Eigen::Vector3d &directional_vector
 ) {
   Eigen::MatrixXd jacobian(3, 4);
 
@@ -117,13 +117,13 @@ Eigen::MatrixXd EkfMath::jacobian_directional_vector(
   // directional vector on the right of the jacobian of the rotation matrix
   // w.r.t the ith quaternion.
   jacobian.block(0, 0, 3, 1) =
-    rotation_matrix_derivatives_by_q0(q) * directionalVector;
+    rotation_matrix_derivatives_by_q0(q) * directional_vector;
   jacobian.block(0, 1, 3, 1) =
-    rotation_matrix_derivatives_by_q1(q) * directionalVector;
+    rotation_matrix_derivatives_by_q1(q) * directional_vector;
   jacobian.block(0, 2, 3, 1) =
-    rotation_matrix_derivatives_by_q2(q) * directionalVector;
+    rotation_matrix_derivatives_by_q2(q) * directional_vector;
   jacobian.block(0, 3, 3, 1) =
-    rotation_matrix_derivatives_by_q3(q) * directionalVector;
+    rotation_matrix_derivatives_by_q3(q) * directional_vector;
 
   return jacobian;
 }
@@ -220,6 +220,20 @@ Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q3(
   return out;
 }
 
+/**
+ * @brief Computes the Jacobian matrix for undistorting image coordinates
+ *
+ * This function calculates the Jacobian matrix that represents the
+ * transformation from distorted to undistorted image coordinates. It accounts
+ * for radial distortion parameters k1 and k2, as well as the camera's principal
+ * point and pixel scaling.
+ *
+ * @param feature The distorted image feature measurement containing the
+ * coordinates to undistort
+ *
+ * @return A 2x2 Jacobian matrix representing the partial derivatives of the
+ * undistorted coordinates with respect to the distorted coordinates
+ */
 Eigen::Matrix2d EkfMath::jacobian_undistortion(const cv::Point &coordinates) {
   const Eigen::Vector2d point(coordinates.x, coordinates.y);
   const Eigen::Vector2d principal_point(cx, cy);
@@ -243,4 +257,24 @@ Eigen::Matrix2d EkfMath::jacobian_undistortion(const cv::Point &coordinates) {
     2 * std::pow((dy * (coordinates.y - cy)), 2) * (k1 + 2 * k2 * rd * rd);
 
   return dhu_hd;
+}
+
+/**
+ * @brief Computes the Jacobian matrix for distorting image coordinates
+ *
+ * This function calculates the Jacobian matrix that represents the
+ * transformation from undistorted to distorted image coordinates by taking
+ * the inverse of the undistortion Jacobian. The resulting matrix represents
+ * the partial derivatives of distorted coordinates with respect to undistorted
+ * coordinates.
+ *
+ * @param feature The image feature measurement containing the coordinates to
+ * process
+ *
+ * @return A 2x2 Jacobian matrix representing the partial derivatives of the
+ * distorted coordinates with respect to the undistorted coordinates
+ */
+Eigen::Matrix2d EkfMath::jacobian_distortion(const cv::Point &coordinates) {
+  const Eigen::Matrix2d dhu_hd = jacobian_undistortion(coordinates);
+  return dhu_hd.inverse();
 }

@@ -1,8 +1,11 @@
 #pragma once
 
+#include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <opencv2/core/types.hpp>
 
+#include "feature/image_feature_measurement.h"
+#include "feature/image_feature_prediction.h"
 #include "feature/undistorted_image_feature.h"
 #include "filter/state.h"
 
@@ -44,8 +47,12 @@ namespace EkfMath {
   );
 
   Eigen::MatrixXd jacobian_directional_vector(
-    const Eigen::Quaterniond& q, const Eigen::Vector3d& directionalVector
+    const Eigen::Quaterniond& q, const Eigen::Vector3d& directional_vector
   );
 
   Eigen::Matrix2d jacobian_undistortion(const cv::Point& coordinates);
+
+  Eigen::Matrix2d jacobian_distortion(const cv::Point& coordinates);
+
+  Eigen::MatrixXd jacobian_measurement_i_by_state();
 }  // namespace EkfMath
