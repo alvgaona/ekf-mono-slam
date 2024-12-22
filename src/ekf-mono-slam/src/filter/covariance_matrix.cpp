@@ -39,6 +39,20 @@ CovarianceMatrix::CovarianceMatrix() {
     angular_accel_sd * angular_accel_sd;
 }
 
+Eigen::MatrixXd CovarianceMatrix::feature_covariance_block(
+  const MapFeature& feature
+) const {
+  constexpr int base_state_size =
+    13;  // Index of 13 represents base state variables before features
+  const auto feature_start_idx = base_state_size + feature.index() * 3;
+  const auto feature_dim = feature.dimension();
+
+  // Return the covariance block corresponding to this feature's dimensions
+  return matrix_.block(
+    feature_start_idx, feature_start_idx, feature_dim, feature_dim
+  );
+}
+
 void CovarianceMatrix::predict(
   const std::shared_ptr<State>& state, const double dt
 ) {
