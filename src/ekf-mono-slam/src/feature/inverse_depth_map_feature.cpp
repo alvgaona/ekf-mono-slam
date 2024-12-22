@@ -33,49 +33,54 @@ Eigen::Vector3d InverseDepthMapFeature::directional_vector(
 Eigen::MatrixXd InverseDepthMapFeature::measurement_jacobian(
   const Eigen::Vector3d& camera_position, const Eigen::Matrix3d& rotation_matrix
 ) {
+  const auto theta = state_[3];
+  const auto phi = state_[4];
+  const auto rho = state_[5];
+
+  // Directional vector w.r.t the camera frame
+  const auto hc = directional_vector(rotation_matrix, camera_position);
+  // Directional vector w.r.t to the world frame
+  const auto hw = MapFeature::directional_vector(camera_position);
+  // Quaternion from the rotation matrix from world to camera
+  const auto qcw = Eigen::Quaterniond(rotation_matrix);
+
   const auto dhd_dhu =
     EkfMath::jacobian_distortion(prediction_->coordinates());  // Eq. (A. 32)
 
-  Eigen::Matrix2Xd dhu_dhc = Eigen::Matrix2Xd::Zero(2, 3);
-
-  const auto hc = directional_vector(rotation_matrix, camera_position);
-
-  // Eq. (A. 34)
+  Eigen::Matrix2Xd dhu_dhc = Eigen::Matrix2Xd::Zero(2, 3);  // Eq. (A. 34)
   dhu_dhc(0, 0) = -fx / hc.z();
   dhu_dhc(0, 2) = hc.x() * fx / (hc.z() * hc.z());
   dhu_dhc(1, 1) = -fy / hc.z();
   dhu_dhc(1, 2) = hc.y() * fy / (hc.z() * hc.z());
 
-  const auto rho = state_(6);
   const auto dhi_drwc =
     dhd_dhu * dhu_dhc * rho * rotation_matrix;  // Eq. (A. 31)
 
-  // Compute Eq. (A. 37)
-  auto dqcw_dqwc = Eigen::Matrix4d::Identity();
+  Eigen::Matrix4d dqcw_dqwc = Eigen::Matrix4d::Identity();  // Eq. (A.39)
   dqcw_dqwc.diagonal() = Eigen::Vector4d(1, -1, -1, -1);
 
-  const auto hw = MapFeature::directional_vector(camera_position);
+  auto dhc_dqcw = EkfMath::jacobian_directional_vector(qcw, hw);  // Eq. (A.40)
 
-  const auto qcw = Eigen::Quaterniond(rotation_matrix);
+  const auto dhc_dqwc = dhc_dqcw * dqcw_dqwc;          // Eq. (A.38)
+  const auto dhi_dqwc = dhd_dhu * dhu_dhc * dhc_dqwc;  // Eq. (A.37)
 
-  auto dhc_dqcw = Eigen::MatrixXd(3, 4);
-
-  dhc_dqcw.block(0, 0, 3, 1) =
-    EkfMath::rotation_matrix_derivatives_by_q0(qcw) * hw;
-  dhc_dqcw.block(0, 1, 3, 1) =
-    EkfMath::rotation_matrix_derivatives_by_q1(qcw) * hw;
-  dhc_dqcw.block(0, 2, 3, 1) =
-    EkfMath::rotation_matrix_derivatives_by_q2(qcw) * hw;
-  dhc_dqcw.block(0, 3, 3, 1) =
-    EkfMath::rotation_matrix_derivatives_by_q3(qcw) * hw;
-
-  const auto dhc_dqwc = dhc_dqcw * dqcw_dqwc;
-
-  const auto dhi_dqwc = dhd_dhu * dhu_dhc * dhc_dqwc;
-
-  auto dhi_dxc = Eigen::MatrixXd::Zero(2, 13);
+  Eigen::MatrixXd dhi_dxc = Eigen::MatrixXd::Zero(2, 13);
   dhi_dxc.block(0, 0, 2, 3) = dhi_drwc;
   dhi_dxc.block(0, 2, 2, 4) = dhi_dqwc;
 
-  // TOOD: continue
+  const auto dm_dtheta =
+    Eigen::Vector3d{cos(phi) * cos(theta), 0, -cos(phi) * sin(theta)};
+  const auto dm_dphi =
+    Eigen::Vector3d{-sin(phi) * sin(theta), -cos(phi), -sin(phi) * cos(theta)};
+
+  Eigen::MatrixXd dhc_dyi = Eigen::MatrixXd::Zero(3, 6);  // Eq. (A.52)
+  dhc_dyi.block(0, 0, 3, 3) = rho * rotation_matrix;
+  dhc_dyi.block(0, 3, 3, 1) = rotation_matrix * dm_dtheta;
+  dhc_dyi.block(0, 4, 3, 1) = rotation_matrix * dm_dphi;
+  dhc_dyi.block(0, 5, 3, 1) =
+    rotation_matrix * (state_.segment(0, 3) - camera_position);
+
+  const auto dhi_dyi = dhd_dhu * dhu_dhc * dhc_dyi;  // Eq. (A.51)
+
+  return dhi_dyi;  // Not ok
 }
