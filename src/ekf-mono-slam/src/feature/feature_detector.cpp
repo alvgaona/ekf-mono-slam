@@ -227,7 +227,7 @@ void FeatureDetector::group_features_and_prediction_by_zone(
 
     const auto image_feature_measurement =
       std::make_shared<ImageFeatureMeasurement>(
-        keypoint.pt, descriptors.row(static_cast<int>(i)), i
+        keypoint.pt, descriptors.row(static_cast<int>(i))
       );
 
     const int zone_id = image_feature_measurement->compute_zone(

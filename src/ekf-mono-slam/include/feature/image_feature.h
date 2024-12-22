@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "opencv2/opencv.hpp"
 
 class ImageFeature {
@@ -17,6 +19,8 @@ class ImageFeature {
   ) const;
 
   [[nodiscard]] bool is_visible_in_frame() const;
+
+  void index(uint16_t value) { index_ = value; }
 
   [[nodiscard]] int index() const { return index_; }
 
