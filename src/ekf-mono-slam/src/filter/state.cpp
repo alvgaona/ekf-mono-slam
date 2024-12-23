@@ -232,7 +232,11 @@ void State::predict_measurement_state() {
 
 void State::predict_measurement_covariance() {
   for (const auto& map_feature : features_) {
-    const auto dhi_dx =
-      map_feature->measurement_jacobian(position_, rotation_matrix_.inverse());
+    map_feature->measurement_jacobian(
+      position_,
+      rotation_matrix_.inverse(),
+      static_cast<int>(inverse_depth_features_.size()),
+      static_cast<int>(cartesian_features_.size())
+    );
   }
 }

@@ -49,9 +49,11 @@ class MapFeature {
 
   Eigen::Vector3d directional_vector(const Eigen::Vector3d& camera_position);
 
-  virtual Eigen::MatrixXd measurement_jacobian(
+  virtual void measurement_jacobian(
     const Eigen::Vector3d& camera_position,
-    const Eigen::Matrix3d& rotation_matrix
+    const Eigen::Matrix3d& rotation_matrix,
+    int num_inv_depth_features,
+    int num_cartesian_features
   ) = 0;
 
   static bool is_in_front_of_camera(const Eigen::Vector3d& directional_vector);
@@ -64,4 +66,5 @@ class MapFeature {
   int times_predicted_;
   int times_matched_;
   std::unique_ptr<ImageFeaturePrediction> prediction_;
+  Eigen::MatrixXd jacobian_;
 };

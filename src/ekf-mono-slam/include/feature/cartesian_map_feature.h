@@ -19,8 +19,10 @@ class CartesianMapFeature final : public MapFeature {
     const Eigen::Vector3d& camera_position
   ) override;
 
-  Eigen::MatrixXd measurement_jacobian(
+  void measurement_jacobian(
     const Eigen::Vector3d& camera_position,
-    const Eigen::Matrix3d& rotation_matrix
+    const Eigen::Matrix3d& rotation_matrix,
+    int num_inv_depth_features,
+    int num_cartesian_features
   ) override;
 };

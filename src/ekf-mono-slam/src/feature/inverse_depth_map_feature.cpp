@@ -30,8 +30,11 @@ Eigen::Vector3d InverseDepthMapFeature::directional_vector(
   return rotation_matrix * (rho * (state_.segment(0, 3) - camera_position) + m);
 }
 
-Eigen::MatrixXd InverseDepthMapFeature::measurement_jacobian(
-  const Eigen::Vector3d& camera_position, const Eigen::Matrix3d& rotation_matrix
+void InverseDepthMapFeature::measurement_jacobian(
+  const Eigen::Vector3d& camera_position,
+  const Eigen::Matrix3d& rotation_matrix,
+  int num_inv_depth_features,
+  int num_cartesian_features
 ) {
   const auto theta = state_[3];
   const auto phi = state_[4];
@@ -82,5 +85,12 @@ Eigen::MatrixXd InverseDepthMapFeature::measurement_jacobian(
 
   const auto dhi_dyi = dhd_dhu * dhu_dhc * dhc_dyi;  // Eq. (A.51)
 
-  return dhi_dyi;  // Not ok
+  Eigen::Matrix2Xd dhi_dxm = Eigen::Matrix2Xd::Zero(
+    2, 6 * num_inv_depth_features + 3 * num_cartesian_features
+  );
+
+  dhi_dxm.block(0, index_, 2, 6) = dhi_dyi;
+
+  jacobian_ = Eigen::MatrixXd::Zero(2, dhi_dxc.cols() + dhi_dxm.cols());
+  jacobian_ << dhi_dxc, dhi_dxm;
 }
