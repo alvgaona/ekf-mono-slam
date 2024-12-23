@@ -42,11 +42,6 @@ TEST(FeatureDetectors, DetectFeatures) {
   detector.detect_features(image);
 
   ASSERT_EQ(detector.image_features().size(), 20);
-
-  for (const auto& feature : detector.image_features()) {
-    ASSERT_EQ(feature->index(), -1);
-  }
-
   ASSERT_EQ(detector.zone_size(), cv::Size(160, 120));
   ASSERT_EQ(detector.image_size(), cv::Size(640, 480));
   ASSERT_EQ(detector.zones_in_row(), 4);

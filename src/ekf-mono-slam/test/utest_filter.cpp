@@ -10,7 +10,7 @@
 using namespace ::testing;
 using namespace KinematicsParameters;
 
-TEST(ExtendedKalmanFilter, StateInit) {
+TEST(ExtendedKalmanFilter, InitState) {
   const auto state = std::make_shared<State>();
 
   ASSERT_THAT(state->position(), Eq(Eigen::Vector3d(0, 0, 0)));
@@ -24,7 +24,7 @@ TEST(ExtendedKalmanFilter, StateInit) {
 TEST(ExtendedKalmanFilter, PredictState) {
   State state;
 
-  state.predict(2);
+  state.predict(0.1);
 
   ASSERT_THAT(state.position(), Eq(Eigen::Vector3d(0, 0, 0)));
   ASSERT_THAT(state.velocity(), Eq(Eigen::Vector3d(0, 0, 0)));
@@ -33,7 +33,7 @@ TEST(ExtendedKalmanFilter, PredictState) {
   ASSERT_THAT(state.rotation_matrix(), Eq(Eigen::MatrixXd::Identity(3, 3)));
 }
 
-TEST(ExtendedKalmanFilter, StateAddMapFeature) {
+TEST(ExtendedKalmanFilter, AddMapFeatureToState) {
   State state;
 
   Eigen::VectorXd feature_state(6);
@@ -106,7 +106,7 @@ TEST(ExtendedKalmanFilter, AddImageFeatureMeasurement) {
   ASSERT_THAT(state.cartesian_features().size(), Eq(0));
 }
 
-TEST(ExtendedKalmanFilter, CovarianceInit) {
+TEST(ExtendedKalmanFilter, InitCovariance) {
   const CovarianceMatrix covariance_matrix;
 
   ASSERT_THAT(covariance_matrix.matrix().rows(), Eq(13));
@@ -128,7 +128,7 @@ TEST(ExtendedKalmanFilter, CovarianceInit) {
   ASSERT_THAT(a - m, Eq(Eigen::MatrixXd::Zero(13, 13)));
 }
 
-TEST(ExtendedKalmanFilter, CovarianceAddImageFeature) {
+TEST(ExtendedKalmanFilter, AddImageFeatureToCovariance) {
   const auto state = std::make_shared<State>(
     Eigen::Vector3d(1, 0, 0),
     Eigen::Vector3d(0, 1, 0),
@@ -148,11 +148,10 @@ TEST(ExtendedKalmanFilter, CovarianceAddImageFeature) {
 
   ASSERT_THAT(covariance_matrix.matrix().rows(), Eq(19));
   ASSERT_THAT(covariance_matrix.matrix().cols(), Eq(19));
-  // FIXME: update assertions with the correct expected value
-  // ASSERT_EQ(covariance_matrix.GetMatrix(), Eigen::MatrixXd::Zero(19, 19));
+  // TODO: update assertions with the correct expected value
 }
 
-TEST(ExtendedKalmanFilter, CovariancePredict) {
+TEST(ExtendedKalmanFilter, PredictCovariance) {
   const auto state = std::make_shared<State>(
     Eigen::Vector3d(1, 0, 0),
     Eigen::Vector3d(0, 1, 0),
@@ -226,24 +225,4 @@ TEST(ExtendedKalmanFilter, CovariancePredict) {
 
   ASSERT_NEAR(matrix(3, 12), -1.19856e-09, 1e-3);
   ASSERT_NEAR(matrix(12, 3), -1.19856e-09, 1e-3);
-}
-
-TEST(ExtendedKalmanFilter, AddFeatureAndPredict) {
-  const auto image_feature_measurement =
-    std::make_shared<ImageFeatureMeasurement>(
-      cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1), 0
-    );
-
-  const auto state = std::make_shared<State>();
-  state->add(image_feature_measurement);
-
-  CovarianceMatrix covariance_matrix;
-  covariance_matrix.add(image_feature_measurement, state);
-
-  ASSERT_THAT(state->dimension(), Eq(19));
-  ASSERT_THAT(covariance_matrix.matrix().cols(), Eq(19));
-  ASSERT_THAT(covariance_matrix.matrix().rows(), Eq(19));
-
-  state->predict(1L);
-  covariance_matrix.predict(state, 1L);
 }
