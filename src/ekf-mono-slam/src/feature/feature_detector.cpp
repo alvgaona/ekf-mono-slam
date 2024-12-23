@@ -88,6 +88,11 @@ void FeatureDetector::detect_features(
   compute_image_feature_measurements(
     image_mask, descriptors, predictions, image_keypoints
   );
+
+  // Set the right indices on the image features
+  for (auto i = 0u; i < image_features_.size(); i++) {
+    image_features_[i]->index(i);
+  }
 }
 
 /**
