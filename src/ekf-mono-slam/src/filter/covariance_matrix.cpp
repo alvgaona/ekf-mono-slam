@@ -71,21 +71,21 @@ void CovarianceMatrix::predict(
     q1.w();  // Eq. (A. 10) and Eq. (A. 12)
 
   Eigen::Quaterniond q2 = state->orientation();
-  Eigen::MatrixXd dq3dq1 = Eigen::MatrixXd::Zero(4, 4);
-  dq3dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(),
+  Eigen::MatrixXd dq3_dq1 = Eigen::MatrixXd::Zero(4, 4);
+  dq3_dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(),
     q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(), -q2.y(), q2.x(),
     q2.w();  // Eq. (A. 14)
 
   // Compute df/dn. Eq. (A. 11)
-  Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
+  Eigen::Matrix<double, 4, 3> dq1_domega = Eigen::Matrix<double, 4, 3>::Zero();
 
   const auto& comega = state->angular_velocity();
-  dq1domega.row(0) = partial_derivative_q0_by_omegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3).diagonal() =
+  dq1_domega.row(0) = partial_derivative_q0_by_omegai(comega, dt);
+  dq1_domega.block(1, 0, 3, 3).diagonal() =
     partial_derivative_qi_by_omegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3) += partial_derivative_qi_by_omegaj(comega, dt);
+  dq1_domega.block(1, 0, 3, 3) += partial_derivative_qi_by_omegaj(comega, dt);
 
-  F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
+  F.block(3, 10, 4, 3) = dq3_dq1 * dq1_domega;
 
   Eigen::MatrixXd G = Eigen::MatrixXd::Zero(13, 6);  // Eq. (A. 11)
 
@@ -144,6 +144,7 @@ void CovarianceMatrix::add(
 ) {
   const int n = state->dimension();
   matrix_.conservativeResize(n + 3, n + 3);
+
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(n + 6, n + 3);
 
   jacobian.block(0, 0, n, n) = Eigen::MatrixXd::Identity(n, n);
