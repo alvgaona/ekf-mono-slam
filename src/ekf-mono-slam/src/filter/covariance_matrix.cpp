@@ -59,18 +59,19 @@ void CovarianceMatrix::predict(
   // Compute df/dx
   const Eigen::Vector3d angles = state->angular_velocity() * dt;
   // Compute the orientation and its rotation matrix from angles
-  Eigen::Quaterniond q1;
-  q1 = Eigen::AngleAxisd(angles.norm(), angles.normalized());
+  const Eigen::Quaterniond q1{
+    Eigen::AngleAxisd(angles.norm(), angles.normalized())
+  };
 
   Eigen::MatrixXd F = Eigen::MatrixXd::Identity(13, 13);
   F.block(0, 7, 3, 3).diagonal().setConstant(dt);  // Eq. (A.10)
 
-  // This is dq3dq2
+  // This is dq3_dq2
   F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(),
     q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.y(), q1.z(), q1.y(), -q1.x(),
     q1.w();  // Eq. (A. 10) and Eq. (A. 12)
 
-  Eigen::Quaterniond q2 = state->orientation();
+  const Eigen::Quaterniond q2 = state->orientation();
   Eigen::MatrixXd dq3_dq1 = Eigen::MatrixXd::Zero(4, 4);
   dq3_dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(),
     q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(), -q2.y(), q2.x(),
@@ -93,7 +94,7 @@ void CovarianceMatrix::predict(
   G.block(7, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
 
   // This is actually not clear in the book. Looks like
-  // dq3dOmega is equal to dq3domegak.
+  // dq3_domega is equal to dq3_domegak.
   // Other implementations like Scenelib2 and OpenEKFMonoSLAM seem to do this as
   // well.
   G.block(3, 3, 4, 3) = F.block(3, 10, 4, 3);
