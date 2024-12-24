@@ -14,6 +14,7 @@
 class MapFeature;
 class CartesianMapFeature;
 class InverseDepthMapFeature;
+class CovarianceMatrix;
 
 class State final {
  public:
@@ -56,6 +57,14 @@ class State final {
     return rotation_matrix_;
   }
 
+  [[nodiscard]] int num_inverse_depth_features() const {
+    return static_cast<int>(inverse_depth_features_.size());
+  }
+
+  [[nodiscard]] int num_cartesian_features() const {
+    return static_cast<int>(cartesian_features_.size());
+  }
+
   [[nodiscard]] int dimension() const { return dimension_; }
 
   [[nodiscard]] const std::vector<std::shared_ptr<CartesianMapFeature>>&
@@ -69,7 +78,7 @@ class State final {
   }
 
   void predict(double delta_t);
-  void predict_measurement();
+  void predict_measurement(const CovarianceMatrix& covariance_matrix);
 
   void add(
     const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
@@ -91,5 +100,6 @@ class State final {
   int dimension_;
 
   void predict_measurement_state();
-  void predict_measurement_covariance();
+  void predict_measurement_covariance(const CovarianceMatrix& covariance_matrix
+  );
 };

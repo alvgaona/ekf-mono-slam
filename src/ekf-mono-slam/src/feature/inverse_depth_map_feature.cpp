@@ -31,14 +31,14 @@ Eigen::Vector3d InverseDepthMapFeature::directional_vector(
 }
 
 void InverseDepthMapFeature::measurement_jacobian(
-  const Eigen::Vector3d& camera_position,
-  const Eigen::Matrix3d& rotation_matrix,
-  int num_inv_depth_features,
-  int num_cartesian_features
+  const State& state, const CovarianceMatrix& covariance_matrix
 ) {
   const auto theta = state_[3];
   const auto phi = state_[4];
   const auto rho = state_[5];
+
+  const auto rotation_matrix = state.rotation_matrix().inverse();
+  const auto& camera_position = state.position();
 
   // Directional vector w.r.t the camera frame
   const auto hc = directional_vector(rotation_matrix, camera_position);
@@ -86,11 +86,19 @@ void InverseDepthMapFeature::measurement_jacobian(
   const auto dhi_dyi = dhd_dhu * dhu_dhc * dhc_dyi;  // Eq. (A.51)
 
   Eigen::Matrix2Xd dhi_dxm = Eigen::Matrix2Xd::Zero(
-    2, 6 * num_inv_depth_features + 3 * num_cartesian_features
+    2,
+    6 * state.num_inverse_depth_features() + 3 * state.num_cartesian_features()
   );
 
   dhi_dxm.block(0, index_, 2, 6) = dhi_dyi;
 
-  jacobian_ = Eigen::MatrixXd::Zero(2, dhi_dxc.cols() + dhi_dxm.cols());
-  jacobian_ << dhi_dxc, dhi_dxm;
+  // This matrix is 2x(13+6*num_inv_depth+3*num_cartesian)
+  // If there's only 1 feature, it'd be 2x19
+  Eigen::MatrixXd dhi_dx =
+    Eigen::MatrixXd::Zero(2, dhi_dxc.cols() + dhi_dxm.cols());
+  dhi_dx << dhi_dxc, dhi_dxm;
+
+  // This is the matrix noted Si_{k|k-1} which is 2x2
+  jacobian_ = dhi_dx * covariance_matrix.matrix() * dhi_dx.transpose() +
+              Eigen::Matrix2d::Identity();
 }

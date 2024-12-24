@@ -28,7 +28,7 @@ EKF::EKF() {
 void EKF::predict() const {
   covariance_matrix_->predict(state_, delta_t_);
   state_->predict(delta_t_);
-  state_->predict_measurement();
+  state_->predict_measurement(*covariance_matrix_);
 }
 
 void EKF::match_predicted_features(const cv::Mat& image) {
