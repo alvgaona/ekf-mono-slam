@@ -1,6 +1,9 @@
 #pragma once
 
+#include <eigen3/Eigen/Core>
+
 #include "feature/image_feature_measurement.h"
+#include "feature/map_feature.h"
 #include "math/ekf_math.h"
 #include "state.h"
 
@@ -21,6 +24,12 @@ class CovarianceMatrix final {
     os << covariance_matrix.matrix_;
     return os;
   }
+
+  [[nodiscard]] Eigen::MatrixXd feature_covariance_block(
+    const MapFeature& feature
+  ) const;
+
+  [[nodiscard]] Eigen::MatrixXd camera_covariance_block() const;
 
   void predict(const std::shared_ptr<State>& state, double dt);
 

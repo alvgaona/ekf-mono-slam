@@ -65,7 +65,6 @@ link_libraries(
   ${Eigen3_LIBRARIES}
 )
 
-
 # Create the file sequence target
 add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src} ${image_src})
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
@@ -91,7 +90,7 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  file(GLOB_RECURSE test_src test/utest_*.cpp)
+  file(GLOB_RECURSE test_src test/[i|u]test_*.cpp)
   file(GLOB_RECURSE src_for_test src/*.cpp)
   list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 

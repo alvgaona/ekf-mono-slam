@@ -12,8 +12,9 @@
  * coordinate system.
  *
  */
-ImageFeature::ImageFeature(const cv::Point2f coordinates) {
+ImageFeature::ImageFeature(const cv::Point2f coordinates, int index) {
   this->coordinates_ = coordinates;
+  this->index_ = index;
 }
 
 /**
@@ -46,6 +47,16 @@ int ImageFeature::compute_zone(
   return zone_y * (image_width / zone_width) + zone_x;
 }
 
+/**
+ * @brief Determines if the image feature falls within the visible frame
+ * boundaries.
+ *
+ * Checks whether the feature's coordinates (u,v) lie within the bounds of the
+ * visible image frame. Currently uses hardcoded image dimensions of 1920x1080
+ * pixels.
+ *
+ * @return true if the feature is within bounds, false otherwise
+ */
 bool ImageFeature::is_visible_in_frame() const {
   const auto u = coordinates_.x;
   const auto v = coordinates_.y;

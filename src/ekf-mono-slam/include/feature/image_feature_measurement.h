@@ -8,7 +8,7 @@
 class ImageFeatureMeasurement final : public ImageFeature {
  public:
   ImageFeatureMeasurement(
-    cv::Point2f coordinates, const cv::Mat& descriptor_data
+    cv::Point2f coordinates, const cv::Mat& descriptor_data, int index = -1
   );
 
   ImageFeatureMeasurement(const ImageFeatureMeasurement& source) = delete;

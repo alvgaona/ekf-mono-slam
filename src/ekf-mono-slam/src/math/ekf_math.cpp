@@ -7,6 +7,20 @@
 
 using namespace CameraParameters;
 
+/**
+ * @brief Computes the Jacobian matrix of the system dynamics model
+ *
+ * This function calculates the Jacobian matrix F that represents how small
+ * changes in the state vector affect the system dynamics. It incorporates
+ * quaternion dynamics and implements equations from Appendix A of the reference
+ * text.
+ *
+ * @param state The current system state containing position, orientation, and
+ * velocities
+ * @param dt The time step delta
+ *
+ * @return A 13x13 Jacobian matrix F representing the linearized system dynamics
+ */
 Eigen::MatrixXd EkfMath::dyn_model_jacobian(
   const State &state, const double dt
 ) {
@@ -43,6 +57,18 @@ Eigen::MatrixXd EkfMath::dyn_model_jacobian(
   return F;
 }
 
+/**
+ * @brief Computes the Jacobian matrix of the noise model
+ *
+ * This function calculates the G matrix that maps process noise inputs to state
+ * changes. It accounts for translational and rotational velocity noise effects
+ * according to Eq. (A.11) in the reference text.
+ *
+ * @param F The system dynamics Jacobian matrix
+ * @param dt The time step delta
+ *
+ * @return A 13x6 Jacobian matrix G mapping noise inputs to state effects
+ */
 Eigen::MatrixXd EkfMath::dyn_model_noise_jacobian(
   const Eigen::MatrixXd &F, const double dt
 ) {
@@ -60,6 +86,24 @@ Eigen::MatrixXd EkfMath::dyn_model_noise_jacobian(
   return G;
 }
 
+/**
+ * @brief Applies distortion to undistorted image feature coordinates
+ *
+ * This function takes undistorted image coordinates and applies radial lens
+ * distortion to obtain the corresponding distorted coordinates. It uses an
+ * iterative approach to solve for the distorted radius and applies the radial
+ * distortion model with parameters k1 and k2.
+ *
+ * The distortion process follows these steps:
+ * 1. Transform coordinates relative to principal point and scale by dx/dy
+ * 2. Compute initial estimate of distorted radius
+ * 3. Iteratively refine distorted radius using Newton-Raphson method
+ * 4. Apply final distortion and transform back to image coordinates
+ *
+ * @param image_feature The undistorted image feature containing the coordinates
+ * to distort
+ * @return Distorted coordinates as a cv::Point2d
+ */
 cv::Point2d EkfMath::distort_image_feature(
   const UndistortedImageFeature &image_feature
 ) {
@@ -108,26 +152,40 @@ cv::Point2d EkfMath::distort_image_feature(
  * calculations involving rotations and directional vectors.
  */
 Eigen::MatrixXd EkfMath::jacobian_directional_vector(
-  const Eigen::Quaterniond &q, const Eigen::Vector3d &directionalVector
+  const Eigen::Quaterniond &q, const Eigen::Vector3d &directional_vector
 ) {
   Eigen::MatrixXd jacobian(3, 4);
 
-  // Looks like in eq. (A.74) there multiplication is wrong.
+  // Looks like in eq. (A.74) the multiplication is wrong.
   // In order to comply with the eq. (A.73) this is how it should be multiplied,
   // directional vector on the right of the jacobian of the rotation matrix
   // w.r.t the ith quaternion.
   jacobian.block(0, 0, 3, 1) =
-    rotation_matrix_derivatives_by_q0(q) * directionalVector;
+    rotation_matrix_derivatives_by_q0(q) * directional_vector;
   jacobian.block(0, 1, 3, 1) =
-    rotation_matrix_derivatives_by_q1(q) * directionalVector;
+    rotation_matrix_derivatives_by_q1(q) * directional_vector;
   jacobian.block(0, 2, 3, 1) =
-    rotation_matrix_derivatives_by_q2(q) * directionalVector;
+    rotation_matrix_derivatives_by_q2(q) * directional_vector;
   jacobian.block(0, 3, 3, 1) =
-    rotation_matrix_derivatives_by_q3(q) * directionalVector;
+    rotation_matrix_derivatives_by_q3(q) * directional_vector;
 
   return jacobian;
 }
 
+/**
+ * @brief Computes the partial derivative of quaternion component q0 with
+ * respect to angular velocity
+ *
+ * Calculates how the scalar component q0 of a quaternion varies with changes in
+ * each component of the angular velocity vector omega. This implements equation
+ * (A.11) from the reference text.
+ *
+ * @param omega The angular velocity vector
+ * @param dt The time step delta
+ *
+ * @return A 3D vector containing the partial derivatives dq0/domega_x,
+ * dq0/domega_y, and dq0/domega_z
+ */
 Eigen::Vector3d EkfMath::partial_derivative_q0_by_omegai(
   const Eigen::Vector3d &omega, const double dt
 ) {
@@ -140,6 +198,20 @@ Eigen::Vector3d EkfMath::partial_derivative_q0_by_omegai(
   return -dt / 2 * omega / theta * sin(theta * dt / 2);
 }
 
+/**
+ * @brief Computes the partial derivative of quaternion components qi with
+ * respect to omega_i
+ *
+ * Calculates how the vector components qi of a quaternion vary with changes in
+ * the corresponding component of the angular velocity vector omega. This
+ * implements equation (A.11) from the reference text.
+ *
+ * @param omega The angular velocity vector
+ * @param dt The time step delta
+ *
+ * @return A 3D vector containing the partial derivatives dqi/domega_i for
+ * i=1,2,3
+ */
 Eigen::Vector3d EkfMath::partial_derivative_qi_by_omegai(
   const Eigen::Vector3d &omega, const double dt
 ) {
@@ -154,6 +226,19 @@ Eigen::Vector3d EkfMath::partial_derivative_qi_by_omegai(
            sin(theta * dt / 2);
 }
 
+/**
+ * @brief Computes the partial derivatives of quaternion components qi with
+ * respect to omega_j
+ *
+ * Calculates how the vector components qi of a quaternion vary with changes in
+ * the other components of the angular velocity vector omega (where i ≠ j). This
+ * implements equations from the reference text.
+ *
+ * @param omega The angular velocity vector
+ * @param dt The time step delta
+ *
+ * @return A 3x3 matrix containing the partial derivatives dqi/domega_j for i≠j
+ */
 Eigen::Matrix3d EkfMath::partial_derivative_qi_by_omegaj(
   const Eigen::Vector3d &omega, const double dt
 ) {
@@ -184,6 +269,17 @@ Eigen::Matrix3d EkfMath::partial_derivative_qi_by_omegaj(
   return out;
 }
 
+/**
+ * @brief Computes the derivative of the rotation matrix with respect to
+ * quaternion component q0
+ *
+ * Calculates the partial derivatives of the rotation matrix elements with
+ * respect to the scalar component q0 of the quaternion. Used in computing
+ * rotational Jacobians.
+ *
+ * @param q The quaternion representing the rotation
+ * @return A 3x3 matrix of partial derivatives dR/dq0
+ */
 Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q0(
   const Eigen::Quaterniond &q
 ) {
@@ -193,6 +289,17 @@ Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q0(
   return out;
 }
 
+/**
+ * @brief Computes the derivative of the rotation matrix with respect to
+ * quaternion component q1
+ *
+ * Calculates the partial derivatives of the rotation matrix elements with
+ * respect to the first vector component q1 of the quaternion. Used in computing
+ * rotational Jacobians.
+ *
+ * @param q The quaternion representing the rotation
+ * @return A 3x3 matrix of partial derivatives dR/dq1
+ */
 Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q1(
   const Eigen::Quaterniond &q
 ) {
@@ -202,6 +309,17 @@ Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q1(
   return out;
 }
 
+/**
+ * @brief Computes the derivative of the rotation matrix with respect to
+ * quaternion component q2
+ *
+ * Calculates the partial derivatives of the rotation matrix elements with
+ * respect to the second vector component q2 of the quaternion. Used in
+ * computing rotational Jacobians.
+ *
+ * @param q The quaternion representing the rotation
+ * @return A 3x3 matrix of partial derivatives dR/dq2
+ */
 Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q2(
   const Eigen::Quaterniond &q
 ) {
@@ -211,6 +329,17 @@ Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q2(
   return out;
 }
 
+/**
+ * @brief Computes the derivative of the rotation matrix with respect to
+ * quaternion component q3
+ *
+ * Calculates the partial derivatives of the rotation matrix elements with
+ * respect to the third vector component q3 of the quaternion. Used in computing
+ * rotational Jacobians.
+ *
+ * @param q The quaternion representing the rotation
+ * @return A 3x3 matrix of partial derivatives dR/dq3
+ */
 Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q3(
   const Eigen::Quaterniond &q
 ) {
@@ -220,6 +349,20 @@ Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q3(
   return out;
 }
 
+/**
+ * @brief Computes the Jacobian matrix for undistorting image coordinates
+ *
+ * This function calculates the Jacobian matrix that represents the
+ * transformation from distorted to undistorted image coordinates. It accounts
+ * for radial distortion parameters k1 and k2, as well as the camera's principal
+ * point and pixel scaling.
+ *
+ * @param feature The distorted image feature measurement containing the
+ * coordinates to undistort
+ *
+ * @return A 2x2 Jacobian matrix representing the partial derivatives of the
+ * undistorted coordinates with respect to the distorted coordinates
+ */
 Eigen::Matrix2d EkfMath::jacobian_undistortion(const cv::Point &coordinates) {
   const Eigen::Vector2d point(coordinates.x, coordinates.y);
   const Eigen::Vector2d principal_point(cx, cy);
@@ -243,4 +386,24 @@ Eigen::Matrix2d EkfMath::jacobian_undistortion(const cv::Point &coordinates) {
     2 * std::pow((dy * (coordinates.y - cy)), 2) * (k1 + 2 * k2 * rd * rd);
 
   return dhu_hd;
+}
+
+/**
+ * @brief Computes the Jacobian matrix for distorting image coordinates
+ *
+ * This function calculates the Jacobian matrix that represents the
+ * transformation from undistorted to distorted image coordinates by taking
+ * the inverse of the undistortion Jacobian. The resulting matrix represents
+ * the partial derivatives of distorted coordinates with respect to undistorted
+ * coordinates.
+ *
+ * @param feature The image feature measurement containing the coordinates to
+ * process
+ *
+ * @return A 2x2 Jacobian matrix representing the partial derivatives of the
+ * distorted coordinates with respect to the undistorted coordinates
+ */
+Eigen::Matrix2d EkfMath::jacobian_distortion(const cv::Point &coordinates) {
+  const Eigen::Matrix2d dhu_hd = jacobian_undistortion(coordinates);
+  return dhu_hd.inverse();
 }

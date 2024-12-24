@@ -88,6 +88,11 @@ void FeatureDetector::detect_features(
   compute_image_feature_measurements(
     image_mask, descriptors, predictions, image_keypoints
   );
+
+  // Set the right indices on the image features
+  for (auto i = 0u; i < image_features_.size(); i++) {
+    image_features_[i]->index(i);
+  }
 }
 
 /**
@@ -177,7 +182,7 @@ void FeatureDetector::search_features_by_zone(
  * @return A vector of `std::shared_ptr<Zone>` objects, each representing a zone
  * in the image.
  */
-std::vector<std::shared_ptr<Zone>> FeatureDetector::create_zones() {
+std::vector<std::shared_ptr<Zone>> FeatureDetector::create_zones() const {
   const int zones_count = static_cast<int>(std::pow(zones_in_row_, 2));
   std::vector<std::shared_ptr<Zone>> zones;
   zones.reserve(zones_count);
@@ -222,12 +227,12 @@ void FeatureDetector::group_features_and_prediction_by_zone(
 ) const {
   const auto keypoints_size = keypoints.size();
 
-  for (auto i = 0U; i < keypoints_size; i++) {
+  for (auto i = 0u; i < keypoints_size; i++) {
     const cv::KeyPoint& keypoint = keypoints.at(i);
 
     const auto image_feature_measurement =
       std::make_shared<ImageFeatureMeasurement>(
-        keypoint.pt, descriptors.row(i)
+        keypoint.pt, descriptors.row(static_cast<int>(i))
       );
 
     const int zone_id = image_feature_measurement->compute_zone(
@@ -344,10 +349,10 @@ void FeatureDetector::compute_image_feature_measurements(
 ) {
   if (const auto keypoints_size = image_keypoints.size();
       keypoints_size <= ImageFeatureParameters::features_per_image) {
-    for (auto i = 0U; i < keypoints_size; i++) {
+    for (auto i = 0u; i < keypoints_size; i++) {
       const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(
-        keypoint.pt, descriptors.row(i)
+        keypoint.pt, descriptors.row(static_cast<int>(i)), i
       ));
     }
   } else {

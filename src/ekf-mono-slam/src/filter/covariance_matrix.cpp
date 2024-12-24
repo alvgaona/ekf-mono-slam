@@ -39,39 +39,84 @@ CovarianceMatrix::CovarianceMatrix() {
     angular_accel_sd * angular_accel_sd;
 }
 
+/**
+ * @brief Extracts the covariance matrix block corresponding to a specific map
+ * feature.
+ *
+ * This function returns a submatrix of the full covariance matrix containing
+ * only the elements corresponding to the specified map feature's uncertainty.
+ * The submatrix is located using:
+ * - Base state size offset of 13 (representing core state variables)
+ * - Feature index to locate its position in the extended state
+ * - Feature dimension to determine block size
+ *
+ * @param feature The map feature whose covariance block should be extracted
+ * @return Eigen::MatrixXd A square matrix containing just the covariance block
+ * for this feature
+ */
+Eigen::MatrixXd CovarianceMatrix::feature_covariance_block(
+  const MapFeature& feature
+) const {
+  constexpr int base_state_size =
+    13;  // Index of 13 represents base state variables before features
+  const auto feature_start_idx = base_state_size + feature.index() * 3;
+  const auto feature_dim = feature.dimension();
+
+  // Return the covariance block corresponding to this feature's dimensions
+  return matrix_.block(
+    feature_start_idx, feature_start_idx, feature_dim, feature_dim
+  );
+}
+
+/**
+ * @brief Predicts the covariance matrix for the next state.
+ *
+ * Updates the covariance matrix based on the motion model and process noise.
+ * The prediction follows these steps:
+ * 1. Computes state transition matrix F using quaternion derivatives
+ * 2. Computes noise input matrix G
+ * 3. Forms process noise covariance matrix Q
+ * 4. Updates covariance using the standard EKF prediction equation:
+ *    P = F*P*F' + G*Q*G'
+ *
+ * @param state Current state estimate containing position, orientation,
+ * velocities
+ * @param dt Time step between predictions
+ */
 void CovarianceMatrix::predict(
   const std::shared_ptr<State>& state, const double dt
 ) {
   // Compute df/dx
   const Eigen::Vector3d angles = state->angular_velocity() * dt;
   // Compute the orientation and its rotation matrix from angles
-  Eigen::Quaterniond q1;
-  q1 = Eigen::AngleAxisd(angles.norm(), angles.normalized());
+  const Eigen::Quaterniond q1{
+    Eigen::AngleAxisd(angles.norm(), angles.normalized())
+  };
 
   Eigen::MatrixXd F = Eigen::MatrixXd::Identity(13, 13);
   F.block(0, 7, 3, 3).diagonal().setConstant(dt);  // Eq. (A.10)
 
-  // This is dq3dq2
+  // This is dq3_dq2
   F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(),
     q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.y(), q1.z(), q1.y(), -q1.x(),
     q1.w();  // Eq. (A. 10) and Eq. (A. 12)
 
-  Eigen::Quaterniond q2 = state->orientation();
-  Eigen::MatrixXd dq3dq1 = Eigen::MatrixXd::Zero(4, 4);
-  dq3dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(),
+  const Eigen::Quaterniond q2 = state->orientation();
+  Eigen::MatrixXd dq3_dq1 = Eigen::MatrixXd::Zero(4, 4);
+  dq3_dq1 << q2.w(), -q2.x(), -q2.y(), -q2.z(), q2.x(), q2.w(), -q2.z(), q2.y(),
     q2.y(), q2.z(), q2.w(), -q2.x(), q2.z(), -q2.y(), q2.x(),
     q2.w();  // Eq. (A. 14)
 
   // Compute df/dn. Eq. (A. 11)
-  Eigen::Matrix<double, 4, 3> dq1domega = Eigen::Matrix<double, 4, 3>::Zero();
+  Eigen::Matrix<double, 4, 3> dq1_domega = Eigen::Matrix<double, 4, 3>::Zero();
 
   const auto& comega = state->angular_velocity();
-  dq1domega.row(0) = partial_derivative_q0_by_omegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3).diagonal() =
+  dq1_domega.row(0) = partial_derivative_q0_by_omegai(comega, dt);
+  dq1_domega.block(1, 0, 3, 3).diagonal() =
     partial_derivative_qi_by_omegai(comega, dt);
-  dq1domega.block(1, 0, 3, 3) += partial_derivative_qi_by_omegaj(comega, dt);
+  dq1_domega.block(1, 0, 3, 3) += partial_derivative_qi_by_omegaj(comega, dt);
 
-  F.block(3, 10, 4, 3) = dq3dq1 * dq1domega;
+  F.block(3, 10, 4, 3) = dq3_dq1 * dq1_domega;
 
   Eigen::MatrixXd G = Eigen::MatrixXd::Zero(13, 6);  // Eq. (A. 11)
 
@@ -79,7 +124,7 @@ void CovarianceMatrix::predict(
   G.block(7, 0, 6, 6) = Eigen::MatrixXd::Identity(6, 6);
 
   // This is actually not clear in the book. Looks like
-  // dq3dOmega is equal to dq3domegak.
+  // dq3_domega is equal to dq3_domegak.
   // Other implementations like Scenelib2 and OpenEKFMonoSLAM seem to do this as
   // well.
   G.block(3, 3, 4, 3) = F.block(3, 10, 4, 3);
@@ -130,6 +175,7 @@ void CovarianceMatrix::add(
 ) {
   const int n = state->dimension();
   matrix_.conservativeResize(n + 3, n + 3);
+
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(n + 6, n + 3);
 
   jacobian.block(0, 0, n, n) = Eigen::MatrixXd::Identity(n, n);

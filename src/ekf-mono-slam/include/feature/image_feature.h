@@ -1,12 +1,14 @@
 #pragma once
 
+#include <cstdint>
+
 #include "opencv2/opencv.hpp"
 
 class ImageFeature {
  public:
   ImageFeature() = default;
 
-  explicit ImageFeature(cv::Point2f coordinates);
+  explicit ImageFeature(cv::Point2f coordinates, int index);
 
   virtual ~ImageFeature() = default;
 
@@ -18,6 +20,11 @@ class ImageFeature {
 
   [[nodiscard]] bool is_visible_in_frame() const;
 
+  void index(uint16_t value) { index_ = value; }
+
+  [[nodiscard]] int index() const { return index_; }
+
  protected:
   cv::Point2f coordinates_;
+  int index_ = -1;
 };

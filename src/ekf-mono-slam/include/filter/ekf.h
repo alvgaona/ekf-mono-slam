@@ -33,6 +33,9 @@ class EKF final {
   }
 
   void predict() const;
+
+  void match_predicted_features(const cv::Mat& image);
+
   void add_features(
     const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
   ) const;

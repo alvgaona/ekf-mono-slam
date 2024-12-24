@@ -7,18 +7,21 @@
 class ImageFeaturePrediction final : public ImageFeature {
  public:
   ImageFeaturePrediction() = default;
-  explicit ImageFeaturePrediction(const cv::Point& coordinates);
+  explicit ImageFeaturePrediction(const cv::Point& coordinates, int index);
   ~ImageFeaturePrediction() override = default;
 
-  [[nodiscard]] const Eigen::MatrixXd& jacobian() const { return jacobian_; }
-
-  [[nodiscard]] const Eigen::MatrixXd& covariance_matrix() const {
-    return covariance_matrix_;
+  [[nodiscard]] const Eigen::Matrix2d& jacobian() const noexcept {
+    return jacobian_;
   }
 
-  static ImageFeaturePrediction from(const Eigen::Vector3d& directionalVector);
+  inline void jacobian(Eigen::Matrix2d&& jacobian) noexcept {
+    jacobian_ = std::move(jacobian);
+  }
+
+  static ImageFeaturePrediction from(
+    const Eigen::Vector3d& directional_vector, int index
+  );
 
  private:
-  Eigen::MatrixXd jacobian_;
-  Eigen::MatrixXd covariance_matrix_;
+  Eigen::Matrix2d jacobian_;
 };

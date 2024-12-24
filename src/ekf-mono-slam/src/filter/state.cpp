@@ -1,10 +1,14 @@
 #include "filter/state.h"
 
+#include <eigen3/Eigen/src/Core/Matrix.h>
 #include <math/ekf_math.h>
 
 #include <typeinfo>
 
+#include "configuration/camera_parameters.h"
 #include "configuration/image_feature_parameters.h"
+#include "feature/image_feature_prediction.h"
+#include "feature/map_feature.h"
 
 /**
  * @brief Constructs a State object with default initial values.
@@ -156,7 +160,7 @@ void State::add(
     image_feature_measurement->undistort();
   Eigen::Vector3d back_projected_point = undistorted_feature.backproject();
 
-  // Orientation of the camera respect to the world axis
+  // Orientation of the camera respect to the world axis. Eq (A. 59)
   back_projected_point = orientation_.toRotationMatrix() * back_projected_point;
 
   feature_state.segment(0, 3) = position_;
@@ -165,14 +169,15 @@ void State::add(
   const double hy = back_projected_point.y();
   const double hz = back_projected_point.z();
 
-  feature_state(3) = atan2(hx, hz);
-  feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));
+  feature_state(3) = atan2(hx, hz);                        // Eq. (A. 60)
+  feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));  // Eq. (A. 61)
   feature_state(5) = ImageFeatureParameters::init_inv_depth;
 
   const auto map_feature = std::make_shared<InverseDepthMapFeature>(
     feature_state,
     this->dimension_,
-    image_feature_measurement->descriptor_data()
+    image_feature_measurement->descriptor_data(),
+    image_feature_measurement->index()
   );
 
   dimension_ += 6;
@@ -201,22 +206,67 @@ void State::add(const std::shared_ptr<MapFeature>& feature) {
   }
 }
 
+void State::predict_measurement(const CovarianceMatrix& covariance_matrix) {
+  predict_measurement_state();
+  predict_measurement_covariance(covariance_matrix);
+}
+
+/**
+ * @brief Predicts the measurement state for each map feature in the system.
+ *
+ * This method processes each map feature to:
+ * 1. Calculate its directional vector in camera coordinates
+ * 2. Check if it's in front of the camera
+ * 3. Create and add predictions for features that are visible in the frame
+ *
+ * For each feature, the method:
+ * - Computes the directional vector using the rotation matrix and position
+ * - Checks if the feature is in front of the camera using the directional
+ * vector
+ * - If visible, creates an ImageFeaturePrediction and adds it to the map
+ * feature
+ *
+ * Features that are either behind the camera or outside the visible frame are
+ * skipped.
+ */
 void State::predict_measurement_state() {
-  for (const auto& mapFeature : features_) {
-    Eigen::Vector3d directionalVector = mapFeature->compute_directional_vector(
-      rotation_matrix_.transpose(), position_
-    );
+  for (const auto& map_feature : features_) {
+    Eigen::Vector3d directional_vector =
+      map_feature->directional_vector(rotation_matrix_.transpose(), position_);
     // directionalVector = Rcw * (yi - rwc);
-    if (!mapFeature->is_in_front_of_camera(directionalVector)) {
+    if (!map_feature->is_in_front_of_camera(directional_vector)) {
       continue;
     }
 
-    const auto image_feature_prediction =
-      ImageFeaturePrediction::from(directionalVector);
-
-    if (!image_feature_prediction.is_visible_in_frame()) {
+    if (const auto image_feature_prediction = ImageFeaturePrediction::from(
+          directional_vector, map_feature->index()
+        );
+        image_feature_prediction.is_visible_in_frame()) {
+      map_feature->add(image_feature_prediction);
       continue;
     }
-    // TODO: add prediction of map feature
+  }
+}
+
+/**
+ * @brief Predicts measurement covariance for all map features in the state.
+ *
+ * This method computes the measurement Jacobian matrix for each map feature
+ * in the state's feature list. The measurement Jacobian represents how small
+ * changes in the state affect the predicted measurements.
+ *
+ * @param covariance_matrix The current state covariance matrix used in
+ * calculating measurement Jacobians.
+ *
+ * For each feature, this method:
+ * - Calls the feature's measurement_jacobian() method to compute and store
+ *   the measurement Jacobian matrix
+ * - Uses the current state and covariance matrix to perform the calculations
+ */
+void State::predict_measurement_covariance(
+  const CovarianceMatrix& covariance_matrix
+) {
+  for (const auto& map_feature : features_) {
+    map_feature->measurement_jacobian(*this, covariance_matrix);
   }
 }

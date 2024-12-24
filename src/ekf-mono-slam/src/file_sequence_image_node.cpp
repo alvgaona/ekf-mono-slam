@@ -34,10 +34,6 @@ void FileSequenceImageNode::timer_callback() const {
   const cv::Mat image = image_provider_->next();
 
   if (!image.empty()) {
-    cv_bridge::CvImage cv_bridge_image;
-    cv_bridge_image.encoding = sensor_msgs::image_encodings::BGR8;
-    cv_bridge_image.image = image;
-
     sensor_msgs::msg::Image::SharedPtr image_msg =
       cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", image).toImageMsg();
 
