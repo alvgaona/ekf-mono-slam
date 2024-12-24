@@ -64,5 +64,4 @@ class MapFeature {
   int times_predicted_;
   int times_matched_;
   std::unique_ptr<ImageFeaturePrediction> prediction_;
-  Eigen::MatrixXd jacobian_;
 };

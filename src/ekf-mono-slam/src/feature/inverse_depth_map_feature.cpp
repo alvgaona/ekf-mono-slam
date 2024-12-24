@@ -99,6 +99,8 @@ void InverseDepthMapFeature::measurement_jacobian(
   dhi_dx << dhi_dxc, dhi_dxm;
 
   // This is the matrix noted Si_{k|k-1} which is 2x2
-  jacobian_ = dhi_dx * covariance_matrix.matrix() * dhi_dx.transpose() +
-              Eigen::Matrix2d::Identity();
+  prediction_->jacobian(
+    dhi_dx * covariance_matrix.matrix() * dhi_dx.transpose() +
+    Eigen::Matrix2d::Identity()
+  );
 }
