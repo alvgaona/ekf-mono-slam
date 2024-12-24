@@ -114,12 +114,12 @@ void State::predict(const double delta_t) {
  * tracking.
  */
 void State::remove(const std::shared_ptr<MapFeature>& feature) {
-  if (const auto& cartesian_feature =
-        std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
+  if (const auto& depth_feature =
+        std::dynamic_pointer_cast<DepthMapFeature>(feature)) {
     std::erase_if(
-      cartesian_features_,
-      [&cartesian_feature](const std::shared_ptr<MapFeature>& f) {
-        return f == cartesian_feature;
+      depth_features_,
+      [&depth_feature](const std::shared_ptr<MapFeature>& f) {
+        return f == depth_feature;
       }
     );
   } else if (const auto& inverse_depth_feature =
@@ -195,10 +195,10 @@ void State::add(
  * @param feature The MapFeature object to be added.
  */
 void State::add(const std::shared_ptr<MapFeature>& feature) {
-  if (const auto& cartesian_feature =
-        std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
-    cartesian_features_.push_back(cartesian_feature);
-    features_.push_back(cartesian_feature);
+  if (const auto& depth_feature =
+        std::dynamic_pointer_cast<DepthMapFeature>(feature)) {
+    depth_features_.push_back(depth_feature);
+    features_.push_back(depth_feature);
   } else if (const auto& inverse_depth_feature =
                std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
     inverse_depth_features_.push_back(inverse_depth_feature);

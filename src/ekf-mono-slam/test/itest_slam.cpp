@@ -37,7 +37,7 @@ TEST(SLAMIntegration, FindFeatureInStateAndCovariance) {
 
   ASSERT_EQ(ekf.state()->dimension(), 13 + 20 * 6);
   ASSERT_EQ(ekf.state()->inverse_depth_features().size(), 20);
-  ASSERT_EQ(ekf.state()->cartesian_features().size(), 0);
+  ASSERT_EQ(ekf.state()->depth_features().size(), 0);
 
   for (size_t i = 0; i < image_features.size(); i++) {
     ASSERT_EQ(

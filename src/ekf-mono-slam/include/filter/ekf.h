@@ -28,7 +28,7 @@ class EKF final {
   }
 
   [[nodiscard]] bool is_initilized() const {
-    return !state_->cartesian_features().empty() ||
+    return !state_->depth_features().empty() ||
            !state_->inverse_depth_features().empty();
   }
 

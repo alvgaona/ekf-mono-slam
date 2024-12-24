@@ -6,13 +6,13 @@
 #include <ostream>
 #include <vector>
 
-#include "feature/cartesian_map_feature.h"
+#include "feature/depth_map_feature.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/inverse_depth_map_feature.h"
 #include "feature/map_feature.h"
 
 class MapFeature;
-class CartesianMapFeature;
+class DepthMapFeature;
 class InverseDepthMapFeature;
 class CovarianceMatrix;
 
@@ -61,15 +61,15 @@ class State final {
     return static_cast<int>(inverse_depth_features_.size());
   }
 
-  [[nodiscard]] int num_cartesian_features() const {
-    return static_cast<int>(cartesian_features_.size());
+  [[nodiscard]] int num_depth_features() const {
+    return static_cast<int>(depth_features_.size());
   }
 
   [[nodiscard]] int dimension() const { return dimension_; }
 
-  [[nodiscard]] const std::vector<std::shared_ptr<CartesianMapFeature>>&
-  cartesian_features() const {
-    return cartesian_features_;
+  [[nodiscard]] const std::vector<std::shared_ptr<DepthMapFeature>>&
+  depth_features() const {
+    return depth_features_;
   }
 
   [[nodiscard]] std::vector<std::shared_ptr<InverseDepthMapFeature>>
@@ -95,7 +95,7 @@ class State final {
 
   std::vector<std::shared_ptr<MapFeature>> features_;
   std::vector<std::shared_ptr<InverseDepthMapFeature>> inverse_depth_features_;
-  std::vector<std::shared_ptr<CartesianMapFeature>> cartesian_features_;
+  std::vector<std::shared_ptr<DepthMapFeature>> depth_features_;
 
   int dimension_;
 
