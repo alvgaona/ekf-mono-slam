@@ -54,6 +54,16 @@ bool MapFeature::is_in_front_of_camera(const Eigen::Vector3d& directional_vector
          atanyz > -angular_vision_y && atanyz < angular_vision_y;
 }
 
+/**
+ * @brief Computes the directional vector from the camera to the feature.
+ *
+ * This method calculates the vector pointing from the camera position to the
+ * feature location without rotating to a different frame. The vector stays in
+ * the same reference frame.
+ *
+ * @param camera_position The 3D position of the camera
+ * @return The directional vector from camera to feature
+ */
 Eigen::Vector3d MapFeature::directional_vector(
   const Eigen::Vector3d& camera_position
 ) {

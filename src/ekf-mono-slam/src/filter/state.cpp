@@ -206,11 +206,29 @@ void State::add(const std::shared_ptr<MapFeature>& feature) {
   }
 }
 
-void State::predict_measurement() {
+void State::predict_measurement(const CovarianceMatrix& covariance_matrix) {
   predict_measurement_state();
-  predict_measurement_covariance();
+  predict_measurement_covariance(covariance_matrix);
 }
 
+/**
+ * @brief Predicts the measurement state for each map feature in the system.
+ *
+ * This method processes each map feature to:
+ * 1. Calculate its directional vector in camera coordinates
+ * 2. Check if it's in front of the camera
+ * 3. Create and add predictions for features that are visible in the frame
+ *
+ * For each feature, the method:
+ * - Computes the directional vector using the rotation matrix and position
+ * - Checks if the feature is in front of the camera using the directional
+ * vector
+ * - If visible, creates an ImageFeaturePrediction and adds it to the map
+ * feature
+ *
+ * Features that are either behind the camera or outside the visible frame are
+ * skipped.
+ */
 void State::predict_measurement_state() {
   for (const auto& map_feature : features_) {
     Eigen::Vector3d directional_vector =
@@ -230,13 +248,25 @@ void State::predict_measurement_state() {
   }
 }
 
-void State::predict_measurement_covariance() {
+/**
+ * @brief Predicts measurement covariance for all map features in the state.
+ *
+ * This method computes the measurement Jacobian matrix for each map feature
+ * in the state's feature list. The measurement Jacobian represents how small
+ * changes in the state affect the predicted measurements.
+ *
+ * @param covariance_matrix The current state covariance matrix used in
+ * calculating measurement Jacobians.
+ *
+ * For each feature, this method:
+ * - Calls the feature's measurement_jacobian() method to compute and store
+ *   the measurement Jacobian matrix
+ * - Uses the current state and covariance matrix to perform the calculations
+ */
+void State::predict_measurement_covariance(
+  const CovarianceMatrix& covariance_matrix
+) {
   for (const auto& map_feature : features_) {
-    map_feature->measurement_jacobian(
-      position_,
-      rotation_matrix_.inverse(),
-      static_cast<int>(inverse_depth_features_.size()),
-      static_cast<int>(cartesian_features_.size())
-    );
+    map_feature->measurement_jacobian(*this, covariance_matrix);
   }
 }

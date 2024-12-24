@@ -39,6 +39,21 @@ CovarianceMatrix::CovarianceMatrix() {
     angular_accel_sd * angular_accel_sd;
 }
 
+/**
+ * @brief Extracts the covariance matrix block corresponding to a specific map
+ * feature.
+ *
+ * This function returns a submatrix of the full covariance matrix containing
+ * only the elements corresponding to the specified map feature's uncertainty.
+ * The submatrix is located using:
+ * - Base state size offset of 13 (representing core state variables)
+ * - Feature index to locate its position in the extended state
+ * - Feature dimension to determine block size
+ *
+ * @param feature The map feature whose covariance block should be extracted
+ * @return Eigen::MatrixXd A square matrix containing just the covariance block
+ * for this feature
+ */
 Eigen::MatrixXd CovarianceMatrix::feature_covariance_block(
   const MapFeature& feature
 ) const {
@@ -53,6 +68,21 @@ Eigen::MatrixXd CovarianceMatrix::feature_covariance_block(
   );
 }
 
+/**
+ * @brief Predicts the covariance matrix for the next state.
+ *
+ * Updates the covariance matrix based on the motion model and process noise.
+ * The prediction follows these steps:
+ * 1. Computes state transition matrix F using quaternion derivatives
+ * 2. Computes noise input matrix G
+ * 3. Forms process noise covariance matrix Q
+ * 4. Updates covariance using the standard EKF prediction equation:
+ *    P = F*P*F' + G*Q*G'
+ *
+ * @param state Current state estimate containing position, orientation,
+ * velocities
+ * @param dt Time step between predictions
+ */
 void CovarianceMatrix::predict(
   const std::shared_ptr<State>& state, const double dt
 ) {
