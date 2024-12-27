@@ -67,6 +67,11 @@ class State final {
 
   [[nodiscard]] int dimension() const { return dimension_; }
 
+  [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& features(
+  ) const {
+    return features_;
+  }
+
   [[nodiscard]] const std::vector<std::shared_ptr<DepthMapFeature>>&
   depth_features() const {
     return depth_features_;
