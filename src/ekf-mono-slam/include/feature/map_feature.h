@@ -35,7 +35,7 @@ class MapFeature {
 
   [[nodiscard]] int index() const { return index_; }
 
-  [[nodiscard]] std::shared_ptr<ImageFeaturePrediction> prediction() {
+  [[nodiscard]] std::shared_ptr<ImageFeaturePrediction> prediction() const {
     return prediction_;
   }
 

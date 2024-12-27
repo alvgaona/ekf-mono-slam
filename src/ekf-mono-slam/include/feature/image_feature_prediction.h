@@ -2,6 +2,7 @@
 
 #include <eigen3/Eigen/Dense>
 
+#include "feature/ellipse.h"
 #include "image_feature.h"
 
 class ImageFeaturePrediction final : public ImageFeature {
@@ -21,6 +22,8 @@ class ImageFeaturePrediction final : public ImageFeature {
   static ImageFeaturePrediction from(
     const Eigen::Vector3d& directional_vector, int index
   );
+
+  [[nodiscard]] Ellipse ellipse() const;
 
  private:
   Eigen::Matrix2d covariance_matrix_;

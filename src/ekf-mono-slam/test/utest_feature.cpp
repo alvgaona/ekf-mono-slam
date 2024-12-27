@@ -18,10 +18,19 @@ TEST(FeatureDetectors, DetectFeatures) {
 
   detector.detect_features(image);
 
-  ASSERT_EQ(detector.image_features().size(), 20);
+  const auto image_features = detector.image_features();
+
+  ASSERT_EQ(image_features.size(), 20);
   ASSERT_EQ(detector.zone_size(), cv::Size(160, 120));
   ASSERT_EQ(detector.image_size(), cv::Size(640, 480));
   ASSERT_EQ(detector.zones_in_row(), 4);
+
+  for (const auto& feature : image_features) {
+    const auto coords = feature->coordinates();
+    ASSERT_GT(coords.x, 0);
+    ASSERT_GT(coords.y, 0);
+    ASSERT_FALSE(feature->descriptor_data().empty());
+  }
 }
 
 TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {

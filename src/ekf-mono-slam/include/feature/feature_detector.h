@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 
@@ -40,6 +41,15 @@ class FeatureDetector final {
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>> detect_and_compute(
+    const cv::Mat& image, const cv::Mat& image_mask
+  );
+
+  static void build_image_mask(
+    const cv::Mat& image_mask,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
+  );
+
  private:
   std::vector<std::shared_ptr<ImageFeatureMeasurement>> image_features_;
   cv::Ptr<cv::FeatureDetector> detector_;
@@ -50,15 +60,9 @@ class FeatureDetector final {
 
   static cv::Ptr<cv::FeatureDetector> create(Type type);
 
-  static void build_image_mask(
-    const cv::Mat& image_mask,
-    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
-  );
-
   void search_features_by_zone(
     const cv::Mat& image_mask,
-    const std::vector<cv::KeyPoint>& keypoints,
-    const cv::Mat& descriptors,
+    const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& image_features,
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
@@ -66,9 +70,8 @@ class FeatureDetector final {
 
   void group_features_and_prediction_by_zone(
     std::vector<std::shared_ptr<Zone>>& zones,
-    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-    const std::vector<cv::KeyPoint>& keypoints,
-    const cv::Mat& descriptors
+    const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   ) const;
 
   void compute_image_feature_measurements(

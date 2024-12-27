@@ -2,34 +2,30 @@
 
 #include <configuration/image_feature_parameters.h>
 
+#include <memory>
 #include <opencv2/features2d.hpp>
 #include <random>
 
 #include "feature/ellipse.h"
+#include "feature/image_feature_measurement.h"
 
 /**
  * @brief Construct a FeatureDetector object.
  *
- * @param detector The underlying OpenCV feature detector to be used by this
- * object.
- * @param descriptor_extractor The OpenCV descriptor extractor to be used for
- * feature description.
+ * @param feature_type The type of feature detector to create (BRISK, ORB, or
+ * AKAZE).
  * @param img_size The size of the image this object will process.
  *
  * This constructor initializes a FeatureDetector object with the provided
- * parameters. It stores references to the underlying OpenCV detector and
- * descriptor extractor, along with the image size. The constructor also
- * calculates and sets the zone size based on the image size and the predefined
- * `IMAGE_AREA_DIVIDE_TIMES` constant.
+ * parameters. It creates the underlying OpenCV detector based on the feature
+ * type and stores the image size. The constructor also calculates and sets the
+ * zone size based on the image size and the predefined
+ * `image_area_divide_times` constant.
  *
  * The `zones_in_row_` parameter determines the number of zones per row in the
  * image, which is used for dividing the image into smaller areas for efficient
  * feature search and prediction management. The `zone_size_` parameter
  * specifies the size of each individual zone.
- *
- * This object is responsible for managing the overall feature detection and
- * description pipeline, including zone management, prediction handling, and
- * feature selection.
  */
 FeatureDetector::FeatureDetector(
   const Type feature_type, const cv::Size img_size
@@ -44,27 +40,17 @@ FeatureDetector::FeatureDetector(
 }
 
 /**
- * @brief Detects and describes features in an image, optionally visualizing the
- * results.
+ * @brief Detects and describes features in an image.
+ *
  * @param image The image in which to detect features.
  * @param predictions Prior predictions about potential feature locations.
- * @param visualize Whether to visually show the detected keypoints on the
- * image.
  *
  * This function performs the following steps:
- * 1. Builds an image mask based on the provided predictions using
- * `BuildImageMask`.
- * 2. Uses the mask to guide the detection of keypoints (interesting points) in
- * the image using `detector_->detect`.
- * 3. Optionally visualizes the detected keypoints on the image using
- * `Visual::VisualizeKeyPoints`.
- * 4. Extracts feature descriptors for the detected keypoints using
- * `extractor_->compute`.
- * 5. Analyzes the extracted descriptors and predictions using
- * `ComputeImageFeatureMeasurements`.
- *
- * The detected keypoints and their descriptions are stored internally in the
- * `FeatureDetector` object and can be accessed later.
+ * 1. Creates an image mask with predictions using `build_image_mask`.
+ * 2. Detects and computes features using `detect_and_compute`.
+ * 3. If the number of detected features exceeds the maximum allowed,
+ *    uses zone-based search to select features.
+ * 4. Assigns sequential indices to the final set of features.
  */
 void FeatureDetector::detect_features(
   const cv::Mat& image,
@@ -76,15 +62,14 @@ void FeatureDetector::detect_features(
 
   build_image_mask(image_mask, predictions);
 
-  std::vector<cv::KeyPoint> image_keypoints;
-  detector_->detect(image, image_keypoints, image_mask);
+  const auto image_features = detect_and_compute(image, image_mask);
 
-  cv::Mat descriptors;
-  detector_->compute(image, image_keypoints, descriptors);
-
-  compute_image_feature_measurements(
-    image_mask, descriptors, predictions, image_keypoints
-  );
+  if (const auto image_features_size = image_features.size();
+      image_features_size <= ImageFeatureParameters::features_per_image) {
+    image_features_ = image_features;
+  } else {
+    search_features_by_zone(image_mask, image_features, predictions);
+  }
 
   // Set the right indices on the image features
   for (auto i = 0u; i < image_features_.size(); i++) {
@@ -93,18 +78,51 @@ void FeatureDetector::detect_features(
 }
 
 /**
+ * @brief Detects features and computes their descriptors in an image.
+ *
+ * @param image The input image to process.
+ * @param image_mask The mask indicating valid regions for feature detection.
+ * @return Vector of ImageFeatureMeasurement objects containing detected
+ * features.
+ *
+ * This function performs two main steps:
+ * 1. Detects keypoints in the image using the configured detector, constrained
+ * by the provided mask.
+ * 2. Computes descriptors for the detected keypoints.
+ *
+ * The detected keypoints and their corresponding descriptors are then combined
+ * into ImageFeatureMeasurement objects which are returned in a vector.
+ */
+std::vector<std::shared_ptr<ImageFeatureMeasurement>>
+FeatureDetector::detect_and_compute(
+  const cv::Mat& image, const cv::Mat& image_mask
+) {
+  std::vector<cv::KeyPoint> keypoints;
+  detector_->detect(image, keypoints, image_mask);
+
+  cv::Mat descriptors;
+  detector_->compute(image, keypoints, descriptors);
+
+  std::vector<std::shared_ptr<ImageFeatureMeasurement>> image_features;
+  for (auto i = 0u; i < keypoints.size(); i++) {
+    const cv::KeyPoint& keypoint = keypoints[i];
+    image_features.emplace_back(std::make_unique<ImageFeatureMeasurement>(
+      keypoint.pt, descriptors.row(static_cast<int>(i)), i
+    ));
+  }
+
+  return image_features;
+}
+
+/**
  * @brief Detects and describes features in an image, using an empty set of
- * predictions by default. Optionally, it can visualize the results.
+ * predictions.
  *
  * @param image The image in which to detect features.
- * @param visualize Whether to visually show the detected keypoints on the
- * image.
  *
  * This function performs feature detection and description on the provided
- * image when no predictions are provided (recommended for most cases), the
- * function will use an empty set of predictions internally. Additionally, the
- * function offers the option to visualize the detected keypoints on the image
- * for debugging purposes.
+ * image using an empty set of predictions. This is the recommended usage when
+ * no prior predictions are available.
  */
 void FeatureDetector::detect_features(const cv::Mat& image) {
   const std::vector<std::shared_ptr<ImageFeaturePrediction>> empty_predictions;
@@ -113,6 +131,7 @@ void FeatureDetector::detect_features(const cv::Mat& image) {
 
 /**
  * @brief Builds an image mask based on feature detector predictions.
+ *
  * @param image_mask The current image mask, which will be updated with the new
  * features.
  * @param predictions The feature predictions used to build the new mask.
@@ -134,8 +153,15 @@ void FeatureDetector::build_image_mask(
   }
 
   for (const auto& prediction : predictions) {
-    // FIXME: pass the right covariance matrix
-    Ellipse ellipse(prediction->coordinates(), cv::Mat());
+    const auto S = prediction->covariance_matrix();
+    cv::Mat uncertainty(2, 2, CV_64F);
+    uncertainty.at<double>(0, 0) = S(0, 0);
+    uncertainty.at<double>(0, 1) = S(0, 1);
+    uncertainty.at<double>(1, 0) = S(1, 0);
+    uncertainty.at<double>(1, 1) = S(1, 1);
+
+    Ellipse ellipse(prediction->coordinates(), uncertainty);
+
     ellipse.draw(
       image_mask,
       2 * (image_mask.rows + image_mask.cols),
@@ -148,22 +174,19 @@ void FeatureDetector::build_image_mask(
 /**
  * @brief Searches for and selects image features based on their location within
  * zones.
+ *
  * @param image_mask The image mask defining the valid region for feature
  * selection.
- * @param keypoints The detected keypoints in the image.
- * @param descriptors The extracted feature descriptors for the keypoints.
+ * @param image_features The detected image features.
  * @param predictions The prior predictions about potential feature locations.
  */
 void FeatureDetector::search_features_by_zone(
   const cv::Mat& image_mask,
-  const std::vector<cv::KeyPoint>& keypoints,
-  const cv::Mat& descriptors,
+  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& image_features,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
 ) {
   std::vector<std::shared_ptr<Zone>> zones = create_zones();
-  group_features_and_prediction_by_zone(
-    zones, predictions, keypoints, descriptors
-  );
+  group_features_and_prediction_by_zone(zones, image_features, predictions);
 
   std::list zones_list(
     std::make_move_iterator(zones.begin()), std::make_move_iterator(zones.end())
@@ -175,6 +198,7 @@ void FeatureDetector::search_features_by_zone(
 /**
  * @brief Creates a vector of zone objects based on the configured zone size and
  * number of zones per row.
+ *
  * @return A vector of `std::shared_ptr<Zone>` objects, each representing a zone
  * in the image.
  */
@@ -194,42 +218,27 @@ std::vector<std::shared_ptr<Zone>> FeatureDetector::create_zones() const {
 /**
  * @brief Groups extracted feature measurements and predictions into
  * corresponding zones.
+ *
  * @param zones The list of zones to be populated with features and predictions.
+ * @param features The vector of detected image features.
  * @param predictions The vector of prior predictions for potential feature
  * locations.
- * @param keypoints The detected keypoints in the image.
- * @param descriptors The extracted feature descriptors for the keypoints.
  *
  * This function performs the following tasks:
- * 1. **Iterates through each detected keypoint:**
- * Creates a corresponding `ImageFeatureMeasurement` object.
- * Computes the zone ID for the keypoint based on its location and the
- * configured zone and image sizes. Adds the `ImageFeatureMeasurement` object as
- * a candidate to the corresponding zone. Increments the candidate count for the
- * zone.
- * 2. **Iterates through each prediction:**
- * Computes the zone ID for the prediction based on its predicted location and
- * the zone and image sizes. Adds the prediction to the corresponding zone.
- * Increments the prediction feature count for the zone.
- * 3. **Sorts the zones based on their prediction feature count:**
- * This ensures that zones with more confirmed features are prioritized for
- * further processing.
+ * 1. Groups detected features into zones based on their locations.
+ * 2. Groups predictions into zones based on their predicted locations.
+ * 3. Sorts zones based on their prediction counts to prioritize zones with more
+ *    predicted features.
  */
 void FeatureDetector::group_features_and_prediction_by_zone(
   std::vector<std::shared_ptr<Zone>>& zones,
-  const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-  const std::vector<cv::KeyPoint>& keypoints,
-  const cv::Mat& descriptors
+  const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features,
+  const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
 ) const {
-  const auto keypoints_size = keypoints.size();
+  const auto features_size = features.size();
 
-  for (auto i = 0u; i < keypoints_size; i++) {
-    const cv::KeyPoint& keypoint = keypoints.at(i);
-
-    const auto image_feature_measurement =
-      std::make_shared<ImageFeatureMeasurement>(
-        keypoint.pt, descriptors.row(static_cast<int>(i))
-      );
+  for (auto i = 0u; i < features_size; i++) {
+    const auto& image_feature_measurement = features[i];
 
     const int zone_id = image_feature_measurement->compute_zone(
       zone_size_.width, zone_size_.height, img_size_.width
@@ -265,6 +274,7 @@ void FeatureDetector::group_features_and_prediction_by_zone(
 
 /**
  * @brief Creates a feature detector object based on the specified type.
+ *
  * @param type The type of feature detector to be created.
  * @return A pointer to a cv::Ptr<cv::FeatureDetector> object representing the
  * created feature detector.
@@ -289,73 +299,23 @@ cv::Ptr<cv::FeatureDetector> FeatureDetector::create(const Type type) {
 }
 
 /**
- * @brief Computes and stores image feature measurements based on detected
- * keypoints and descriptors.
- * @param image_mask The image mask defining the valid region for feature
- * selection.
- * @param descriptors The extracted feature descriptors for detected keypoints.
- * @param predictions The prior predictions about potential feature locations.
- * @param image_keypoints The detected keypoints in the image.
- *
- * This function performs the following tasks:
- * 1. Checks if the number of detected keypoints is less than or equal to the
- * desired number of features (specified by
- * `ImageFeatureParameters::FEATURES_PER_IMAGE`).
- * 2. If so, it iterates through each keypoint and creates a corresponding
- * `ImageFeatureMeasurement` object.
- * 3. Otherwise, it calls `SearchFeaturesByZone` to identify and select features
- * based on zone information.
- * 4. In both scenarios, the created `ImageFeatureMeasurement` objects are added
- * to the `image_features_` list.
- */
-void FeatureDetector::compute_image_feature_measurements(
-  const cv::Mat& image_mask,
-  const cv::Mat& descriptors,
-  const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-  const std::vector<cv::KeyPoint>& image_keypoints
-) {
-  if (const auto keypoints_size = image_keypoints.size();
-      keypoints_size <= ImageFeatureParameters::features_per_image) {
-    for (auto i = 0u; i < keypoints_size; i++) {
-      const cv::KeyPoint& keypoint = image_keypoints[i];
-      image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(
-        keypoint.pt, descriptors.row(static_cast<int>(i)), i
-      ));
-    }
-  } else {
-    search_features_by_zone(
-      image_mask, image_keypoints, descriptors, predictions
-    );
-  }
-}
-
-/**
  * @brief Selects feature measurements from zones based on their candidacy and
  * location within the image mask.
+ *
  * @param zones The list of zones containing potential feature measurements.
  * @param image_mask The image mask defining the valid region for feature
  * selection.
  *
- * This function iterates through the provided zones and selects feature
- * measurements based on the following criteria:
- * 1. **Candidate Availability:** Only zones with remaining candidate
- * measurements are considered.
- * 2. **Location within Image Mask:** A candidate is selected only if its
- * location falls within the valid region defined by the image mask.
- * 3. **Uncertainty Ellipse Drawing:** An uncertainty ellipse is drawn around
- * the chosen candidate to visualize its spatial uncertainty.
- * 4. **Feature Selection:** The selected candidate is added to the
- * `image_features_` list, which stores the collected features.
- * 5. **Zone Reordering:** The zones are re-sorted based on their current
- * prediction feature count, ensuring that zones with more confirmed features
- * are prioritized.
+ * This function iterates through zones and randomly selects features from each
+ * zone until either all zones are processed or the desired number of features
+ * is reached. For each selected feature:
+ * 1. Verifies its location is valid within the image mask
+ * 2. Adds it to the final feature set
+ * 3. Draws an uncertainty ellipse around it
+ * 4. Updates zone statistics and ordering
  *
- * The function continues selecting features until either all zones have been
- * processed or the desired number of features (specified by
- * `ImageFeatureParameters::FEATURES_PER_IMAGE`) has been collected.
- *
- * \pre The `measurementEllipseMatrix` member variable should be initialized
- * with appropriate dimensions and values.
+ * The zones are continuously reordered based on their prediction counts to
+ * prioritize zones with more predicted features.
  */
 void FeatureDetector::select_image_measurements_from_zones(
   std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
