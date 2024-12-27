@@ -35,7 +35,9 @@ class MapFeature {
 
   [[nodiscard]] int index() const { return index_; }
 
-  [[nodiscard]] ImageFeaturePrediction& prediction() { return *prediction_; }
+  [[nodiscard]] std::shared_ptr<ImageFeaturePrediction> prediction() {
+    return prediction_;
+  }
 
   void add(const ImageFeaturePrediction& prediction) {
     prediction_ = std::make_unique<ImageFeaturePrediction>(prediction);
@@ -63,5 +65,5 @@ class MapFeature {
   cv::Mat descriptor_data_;
   int times_predicted_;
   int times_matched_;
-  std::unique_ptr<ImageFeaturePrediction> prediction_;
+  std::shared_ptr<ImageFeaturePrediction> prediction_;
 };
