@@ -2,6 +2,7 @@
 
 #include <configuration/image_feature_parameters.h>
 
+#include <opencv2/features2d.hpp>
 #include <random>
 
 #include "feature/ellipse.h"
@@ -31,12 +32,9 @@
  * feature selection.
  */
 FeatureDetector::FeatureDetector(
-  const cv::Ptr<cv::FeatureDetector>& detector,
-  const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor,
-  const cv::Size img_size
+  const Type feature_type, const cv::Size img_size
 ) {
-  detector_ = detector;
-  extractor_ = descriptor_extractor;
+  detector_ = create(feature_type);
   img_size_ = img_size;
   zones_in_row_ =
     static_cast<int>(std::exp2(ImageFeatureParameters::image_area_divide_times)
@@ -82,7 +80,7 @@ void FeatureDetector::detect_features(
   detector_->detect(image, image_keypoints, image_mask);
 
   cv::Mat descriptors;
-  extractor_->compute(image, image_keypoints, descriptors);
+  detector_->compute(image, image_keypoints, descriptors);
 
   compute_image_feature_measurements(
     image_mask, descriptors, predictions, image_keypoints
@@ -271,50 +269,21 @@ void FeatureDetector::group_features_and_prediction_by_zone(
  * @return A pointer to a cv::Ptr<cv::FeatureDetector> object representing the
  * created feature detector.
  */
-cv::Ptr<cv::FeatureDetector> FeatureDetector::build_detector(
-  const DetectorType type
-) {
+cv::Ptr<cv::FeatureDetector> FeatureDetector::create(const Type type) {
   switch (type) {
-    case DetectorType::BRISK:
+    case Type::BRISK:
       return cv::BRISK::create(30, 3, 1.0);
-    case DetectorType::ORB:
+    case Type::ORB:
       return cv::ORB::create(
         750, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20
       );
-    case DetectorType::AKAZE:
+    case Type::AKAZE:
       return cv::AKAZE::create(
         cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 5, 5, cv::KAZE::DIFF_PM_G2
       );
     default:
       throw std::runtime_error(
         "The provided detector algorithm is not supported."
-      );
-  }
-}
-
-/**
- * @brief Creates a descriptor extractor object based on the specified type.
- * @param type The type of descriptor extractor to be created.
- * @return A pointer to a cv::Ptr<cv::DescriptorExtractor> object representing
- * the created descriptor extractor.
- */
-cv::Ptr<cv::DescriptorExtractor> FeatureDetector::build_descriptor_extractor(
-  const DescriptorExtractorType type
-) {
-  switch (type) {
-    case DescriptorExtractorType::AKAZE:
-      return cv::AKAZE::create(
-        cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2
-      );
-    case DescriptorExtractorType::BRISK:
-      return cv::BRISK::create(30, 3, 1.0f);
-    case DescriptorExtractorType::ORB:
-      return cv::ORB::create(
-        500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20
-      );
-    default:
-      throw std::runtime_error(
-        "The provided descriptor algorithm is not supported."
       );
   }
 }

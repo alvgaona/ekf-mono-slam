@@ -9,6 +9,7 @@
 
 #include "collection_adapters.h"
 #include "feature/feature_detector.h"
+#include "feature/map_feature.h"
 
 FeatureDetectorNode::FeatureDetectorNode() : Node("feature_detector") {
   detect_service_ = this->create_service<ekf_mono_slam::srv::FeatureDetect>(
@@ -57,9 +58,7 @@ void FeatureDetectorNode::detect_features(
   }
 
   FeatureDetector feature_detector(
-    FeatureDetector::build_detector(DetectorType::AKAZE),
-    FeatureDetector::build_descriptor_extractor(DescriptorExtractorType::AKAZE),
-    cv::Size(image.rows, image.cols)
+    FeatureDetector::Type::AKAZE, cv::Size(image.rows, image.cols)
   );
 
   feature_detector.detect_features(image, predictions);

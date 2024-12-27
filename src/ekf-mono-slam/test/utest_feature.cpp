@@ -8,36 +8,13 @@
 
 using namespace ::testing;
 
-TEST(FeatureDetectors, CreateFeatureDetector) {
-  const cv::Ptr<cv::FeatureDetector> akaze_detector =
-    FeatureDetector::build_detector(DetectorType::AKAZE);
-  const cv::Ptr<cv::FeatureDetector> orb_detector =
-    FeatureDetector::build_detector(DetectorType::ORB);
-  const cv::Ptr<cv::FeatureDetector> brisk_detector =
-    FeatureDetector::build_detector(DetectorType::BRISK);
-
-  ASSERT_NE(akaze_detector, nullptr);
-  ASSERT_NE(orb_detector, nullptr);
-  ASSERT_NE(brisk_detector, nullptr);
-}
-
-TEST(FeatureDetectors, NotSupportedDetector) {
-  ASSERT_THROW(
-    { FeatureDetector::build_detector(DetectorType::FAST); }, std::runtime_error
-  );
-}
-
 TEST(FeatureDetectors, DetectFeatures) {
   FileSequenceImageProvider image_provider(
     "./src/ekf-mono-slam/test/resources/desk_translation/"
   );
   const cv::Mat image = image_provider.next();
 
-  FeatureDetector detector(
-    FeatureDetector::build_detector(DetectorType::BRISK),
-    FeatureDetector::build_descriptor_extractor(DescriptorExtractorType::BRISK),
-    cv::Size(640, 480)
-  );
+  FeatureDetector detector(FeatureDetector::Type::BRISK, cv::Size(640, 480));
 
   detector.detect_features(image);
 

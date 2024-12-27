@@ -3,29 +3,24 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 
-#include "descriptor_extractor_type.h"
-#include "detector_type.h"
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
 #include "zone.h"
 
 class FeatureDetector final {
  public:
-  FeatureDetector(
-    const cv::Ptr<cv::FeatureDetector>& detector,
-    const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor,
-    cv::Size img_size
-  );
+  enum class Type {
+    BRISK,
+    AKAZE,
+    ORB,
+  };
+
+  FeatureDetector(Type feature_type, cv::Size img_size);
   ~FeatureDetector() = default;
   FeatureDetector(const FeatureDetector& source) = delete;
   FeatureDetector(FeatureDetector&& source) noexcept = delete;
   FeatureDetector& operator=(const FeatureDetector& source) = delete;
   FeatureDetector& operator=(FeatureDetector&& source) noexcept = delete;
-
-  static cv::Ptr<cv::FeatureDetector> build_detector(DetectorType type);
-  static cv::Ptr<cv::DescriptorExtractor> build_descriptor_extractor(
-    DescriptorExtractorType type
-  );
 
   const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& image_features(
   ) {
@@ -48,11 +43,12 @@ class FeatureDetector final {
  private:
   std::vector<std::shared_ptr<ImageFeatureMeasurement>> image_features_;
   cv::Ptr<cv::FeatureDetector> detector_;
-  cv::Ptr<cv::DescriptorExtractor> extractor_;
 
   cv::Size img_size_;
   cv::Size zone_size_;
   int zones_in_row_;
+
+  static cv::Ptr<cv::FeatureDetector> create(Type type);
 
   static void build_image_mask(
     const cv::Mat& image_mask,

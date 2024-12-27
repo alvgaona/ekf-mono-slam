@@ -15,11 +15,7 @@ TEST(SLAMIntegration, FindFeatureInStateAndCovariance) {
   );
   const cv::Mat image = image_provider.next();
 
-  FeatureDetector detector(
-    FeatureDetector::build_detector(DetectorType::BRISK),
-    FeatureDetector::build_descriptor_extractor(DescriptorExtractorType::BRISK),
-    cv::Size(640, 480)
-  );
+  FeatureDetector detector(FeatureDetector::Type::BRISK, cv::Size(640, 480));
 
   detector.detect_features(image);
 
