@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
 class Ellipse final {
  public:
@@ -9,10 +9,14 @@ class Ellipse final {
 
   [[nodiscard]] cv::Point2f center() const { return center_; }
 
-  cv::Size2f axes();
-  double angle();
+  [[nodiscard]] cv::Size2f axes() const;
+  [[nodiscard]] double angle() const;
 
-  bool contains(cv::Point2f point);
+  [[nodiscard]] bool contains(cv::Point2f point) const;
+
+  void draw(
+    const cv::Mat& mask, int max_axes_size, const cv::Scalar& color, bool fill
+  ) const;
 
  private:
   cv::Point2f center_;
