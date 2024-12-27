@@ -1,11 +1,12 @@
 #pragma once
 
+#include <opencv2/core/types.hpp>
+#include <opencv2/features2d.hpp>
+
 #include "descriptor_extractor_type.h"
 #include "detector_type.h"
 #include "image_feature_measurement.h"
 #include "image_feature_prediction.h"
-#include "opencv2/core/types.hpp"
-#include "opencv2/features2d.hpp"
 #include "zone.h"
 
 class FeatureDetector final {
