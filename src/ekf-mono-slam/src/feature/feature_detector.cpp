@@ -136,11 +136,10 @@ void FeatureDetector::build_image_mask(
   }
 
   for (const auto& prediction : predictions) {
-    // FIXME: pass the right value
+    // FIXME: pass the right covariance matrix
     Ellipse ellipse(prediction->coordinates(), cv::Mat());
-    Visual::UncertaintyEllipse2D(
+    ellipse.draw(
       image_mask,
-      ellipse,
       2 * (image_mask.rows + image_mask.cols),
       cv::Scalar(0, 0, 0),
       true
@@ -392,8 +391,8 @@ void FeatureDetector::compute_image_feature_measurements(
 void FeatureDetector::select_image_measurements_from_zones(
   std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
 ) {
-  const cv::Mat1d measurementEllipseMatrix(2, 2);
-  measurementEllipseMatrix << ImageFeatureParameters::image_mask_ellipse_size,
+  const cv::Mat1d measurement_ellipse_matrix(2, 2);
+  measurement_ellipse_matrix << ImageFeatureParameters::image_mask_ellipse_size,
     0.0, 0.0, ImageFeatureParameters::image_mask_ellipse_size;
 
   auto zones_left = zones.size();
@@ -435,10 +434,9 @@ void FeatureDetector::select_image_measurements_from_zones(
           }
         );
 
-        Ellipse ellipse(candidate_coordinates, measurementEllipseMatrix);
-        Visual::UncertaintyEllipse2D(
+        Ellipse ellipse(candidate_coordinates, measurement_ellipse_matrix);
+        ellipse.draw(
           image_mask,
-          ellipse,
           2 * (image_mask.cols + image_mask.rows),
           cv::Scalar(0, 0, 0),
           true
