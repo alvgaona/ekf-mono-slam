@@ -5,7 +5,6 @@
 #include <random>
 
 #include "feature/ellipse.h"
-#include "visual/visual.h"
 
 /**
  * @brief Construct a FeatureDetector object.

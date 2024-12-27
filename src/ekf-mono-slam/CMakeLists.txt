@@ -30,7 +30,6 @@ file(GLOB_RECURSE math_src src/math/*.cpp)
 file(GLOB_RECURSE filter_src src/filter/*.cpp)
 file(GLOB_RECURSE image_src src/image/*.cpp)
 file(GLOB_RECURSE feature_src src/feature/*.cpp)
-file(GLOB_RECURSE visual_src src/visual/*.cpp)
 
 # Fetch and set the msg and srv files
 file(GLOB msg_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*.msg)
@@ -70,11 +69,11 @@ add_executable(file_sequence_image src/file_sequence_image_node.cpp ${config_src
 ament_target_dependencies(file_sequence_image PUBLIC rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 
 # Create the feature detector target
-add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${visual_src} ${math_src})
+add_executable(feature_detector src/feature_detector_node.cpp ${feature_src} ${math_src})
 ament_target_dependencies(feature_detector PUBLIC rclcpp std_msgs sensor_msgs cv_bridge)
 
 # Create the EKF target
-add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src} ${feature_src} ${visual_src})
+add_executable(ekf src/ekf_node.cpp ${filter_src} ${math_src} ${feature_src})
 ament_target_dependencies(ekf PUBLIC rclcpp std_msgs sensor_msgs geometry_msgs cv_bridge image_transport)
 
 install(TARGETS
