@@ -3,7 +3,7 @@
 #include "feature/image_feature_measurement.h"
 #include "feature/map_feature.h"
 
-void match_predictions(
+void search_ic_matches(
   const cv::Mat& image,
   const std::vector<std::shared_ptr<MapFeature>>& map_features
 );

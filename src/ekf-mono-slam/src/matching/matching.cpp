@@ -34,7 +34,7 @@ static constexpr std::array<uint8_t, 256> POPCOUNT_TABLE = {
  * @param map_features Vector of map features to match against
  * @return Nothing. Successful matches are currently ignored due to TODO
  */
-void match_predictions(
+void search_ic_matches(
   const cv::Mat& image,
   const std::vector<std::shared_ptr<MapFeature>>& map_features
 ) {
