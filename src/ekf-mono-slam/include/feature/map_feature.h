@@ -39,6 +39,8 @@ class MapFeature {
     return prediction_;
   }
 
+  [[nodiscard]] cv::Mat& descriptor_data() { return descriptor_data_; }
+
   void add(const ImageFeaturePrediction& prediction) {
     prediction_ = std::make_unique<ImageFeaturePrediction>(prediction);
   }

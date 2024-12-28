@@ -10,7 +10,6 @@
  *
  */
 namespace CameraParameters {
-
   /**
    * @brief Image width in pixels.
    * @units pixels
