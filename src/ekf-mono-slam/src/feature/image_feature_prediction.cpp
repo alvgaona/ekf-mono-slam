@@ -30,3 +30,13 @@ ImageFeaturePrediction ImageFeaturePrediction::from(
 
   return ImageFeaturePrediction(distorted_feature, index);
 }
+
+Ellipse ImageFeaturePrediction::ellipse() const {
+  cv::Mat uncertainty(2, 2, CV_64F);
+  uncertainty.at<double>(0, 0) = covariance_matrix_(0, 0);
+  uncertainty.at<double>(0, 1) = covariance_matrix_(0, 1);
+  uncertainty.at<double>(1, 0) = covariance_matrix_(1, 0);
+  uncertainty.at<double>(1, 1) = covariance_matrix_(1, 1);
+
+  return {coordinates_, uncertainty};
+}

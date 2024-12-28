@@ -15,11 +15,7 @@ TEST(SLAMIntegration, FindFeatureInStateAndCovariance) {
   );
   const cv::Mat image = image_provider.next();
 
-  FeatureDetector detector(
-    FeatureDetector::build_detector(DetectorType::BRISK),
-    FeatureDetector::build_descriptor_extractor(DescriptorExtractorType::BRISK),
-    cv::Size(640, 480)
-  );
+  FeatureDetector detector(FeatureDetector::Type::BRISK, cv::Size(640, 480));
 
   detector.detect_features(image);
 
@@ -37,7 +33,7 @@ TEST(SLAMIntegration, FindFeatureInStateAndCovariance) {
 
   ASSERT_EQ(ekf.state()->dimension(), 13 + 20 * 6);
   ASSERT_EQ(ekf.state()->inverse_depth_features().size(), 20);
-  ASSERT_EQ(ekf.state()->cartesian_features().size(), 0);
+  ASSERT_EQ(ekf.state()->depth_features().size(), 0);
 
   for (size_t i = 0; i < image_features.size(); i++) {
     ASSERT_EQ(

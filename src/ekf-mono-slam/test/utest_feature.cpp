@@ -8,43 +8,29 @@
 
 using namespace ::testing;
 
-TEST(FeatureDetectors, CreateFeatureDetector) {
-  const cv::Ptr<cv::FeatureDetector> akaze_detector =
-    FeatureDetector::build_detector(DetectorType::AKAZE);
-  const cv::Ptr<cv::FeatureDetector> orb_detector =
-    FeatureDetector::build_detector(DetectorType::ORB);
-  const cv::Ptr<cv::FeatureDetector> brisk_detector =
-    FeatureDetector::build_detector(DetectorType::BRISK);
-
-  ASSERT_NE(akaze_detector, nullptr);
-  ASSERT_NE(orb_detector, nullptr);
-  ASSERT_NE(brisk_detector, nullptr);
-}
-
-TEST(FeatureDetectors, NotSupportedDetector) {
-  ASSERT_THROW(
-    { FeatureDetector::build_detector(DetectorType::FAST); }, std::runtime_error
-  );
-}
-
 TEST(FeatureDetectors, DetectFeatures) {
   FileSequenceImageProvider image_provider(
     "./src/ekf-mono-slam/test/resources/desk_translation/"
   );
   const cv::Mat image = image_provider.next();
 
-  FeatureDetector detector(
-    FeatureDetector::build_detector(DetectorType::BRISK),
-    FeatureDetector::build_descriptor_extractor(DescriptorExtractorType::BRISK),
-    cv::Size(640, 480)
-  );
+  FeatureDetector detector(FeatureDetector::Type::BRISK, cv::Size(640, 480));
 
   detector.detect_features(image);
 
-  ASSERT_EQ(detector.image_features().size(), 20);
+  const auto image_features = detector.image_features();
+
+  ASSERT_EQ(image_features.size(), 20);
   ASSERT_EQ(detector.zone_size(), cv::Size(160, 120));
   ASSERT_EQ(detector.image_size(), cv::Size(640, 480));
   ASSERT_EQ(detector.zones_in_row(), 4);
+
+  for (const auto& feature : image_features) {
+    const auto coords = feature->coordinates();
+    ASSERT_GT(coords.x, 0);
+    ASSERT_GT(coords.y, 0);
+    ASSERT_FALSE(feature->descriptor_data().empty());
+  }
 }
 
 TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {

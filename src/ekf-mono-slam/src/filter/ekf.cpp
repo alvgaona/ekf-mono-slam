@@ -1,6 +1,13 @@
 #include "filter/ekf.h"
 
+#include <opencv2/core/hal/interface.h>
+
+#include <memory>
+#include <opencv2/core/mat.hpp>
+
+#include "feature/ellipse.h"
 #include "feature/feature_detector.h"
+#include "feature/image_feature_prediction.h"
 
 /**
  * @brief Constructs an EKF object with default settings.
@@ -29,10 +36,6 @@ void EKF::predict() const {
   covariance_matrix_->predict(state_, delta_t_);
   state_->predict(delta_t_);
   state_->predict_measurement(*covariance_matrix_);
-}
-
-void EKF::match_predicted_features(const cv::Mat& image) {
-  // Not implemented
 }
 
 /**

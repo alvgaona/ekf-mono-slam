@@ -55,7 +55,7 @@ Ellipse::Ellipse(const cv::Point2f center, const cv::Mat& matrix) {
  * feature's location. A larger ellipse indicates higher uncertainty, while a
  * smaller ellipse signifies better localization precision.
  */
-cv::Size2f Ellipse::axes() {
+cv::Size2f Ellipse::axes() const {
   const cv::Size2f axes(
     static_cast<float>(
       2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
@@ -80,7 +80,7 @@ cv::Size2f Ellipse::axes() {
  * This angle represents the orientation of the ellipse and is used for
  * visualization and analysis tasks.
  */
-double Ellipse::angle() {
+double Ellipse::angle() const {
   return std::atan(
     eigen_vectors_.at<double>(1, 0) / eigen_vectors_.at<double>(0, 0)
   );
@@ -111,7 +111,7 @@ double Ellipse::angle() {
  * This method provides a way to check if a point belongs to the region of
  * interest represented by the ellipse.
  */
-bool Ellipse::contains(const cv::Point2f point) {
+bool Ellipse::contains(const cv::Point2f point) const {
   const cv::Size2f axes = this->axes();
   const double major_axis = std::max(axes.width, axes.height);
   const double minor_axis = std::min(axes.width, axes.height);
@@ -147,4 +147,41 @@ bool Ellipse::contains(const cv::Point2f point) {
   const double norm_sum = f1_diff.norm() + f2_diff.norm();
 
   return norm_sum <= 2 * major_axis;
+}
+
+/**
+ * @brief Draws the ellipse on a given mask image.
+ *
+ * This method draws the ellipse representation on the provided mask image using
+ * OpenCV's ellipse drawing function.
+ *
+ * @param mask The image/mask on which to draw the ellipse.
+ * @param max_axes_size Maximum allowed size for the ellipse axes.
+ * @param color The color to use when drawing the ellipse.
+ * @param fill If true, fills the ellipse; if false, draws only the outline.
+ *
+ * The drawing process involves:
+ * 1. Computing the actual axes sizes, capped by max_axes_size
+ * 2. Converting the ellipse angle from radians to degrees
+ * 3. Drawing either a filled or outlined ellipse based on the fill parameter
+ *
+ * The ellipse is drawn using the stored center point, computed axes lengths,
+ * and orientation angle. The drawing starts at 0 degrees and completes a full
+ * 360-degree rotation.
+ */
+void Ellipse::draw(
+  const cv::Mat& mask, int max_axes_size, const cv::Scalar& color, bool fill
+) const {
+  const cv::Size ellipse_axes = axes();
+  const cv::Size axes(
+    MIN(ellipse_axes.width, max_axes_size),
+    MIN(ellipse_axes.height, max_axes_size)
+  );
+  const double angle_in_deg = EkfMath::rad2deg(angle());
+
+  if (fill) {
+    cv::ellipse(mask, center_, axes, angle_in_deg, 0, 360, color, -1);
+  } else {
+    cv::ellipse(mask, center_, axes, angle_in_deg, 0, 360, color);
+  }
 }

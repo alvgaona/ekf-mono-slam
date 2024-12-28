@@ -86,20 +86,19 @@ void InverseDepthMapFeature::measurement_jacobian(
   const auto dhi_dyi = dhd_dhu * dhu_dhc * dhc_dyi;  // Eq. (A.51)
 
   Eigen::Matrix2Xd dhi_dxm = Eigen::Matrix2Xd::Zero(
-    2,
-    6 * state.num_inverse_depth_features() + 3 * state.num_cartesian_features()
+    2, 6 * state.num_inverse_depth_features() + 3 * state.num_depth_features()
   );
 
   dhi_dxm.block(0, index_, 2, 6) = dhi_dyi;
 
-  // This matrix is 2x(13+6*num_inv_depth+3*num_cartesian)
+  // This matrix is 2x(13+6*num_inv_depth+3*num_depth)
   // If there's only 1 feature, it'd be 2x19
   Eigen::MatrixXd dhi_dx =
     Eigen::MatrixXd::Zero(2, dhi_dxc.cols() + dhi_dxm.cols());
   dhi_dx << dhi_dxc, dhi_dxm;
 
   // This is the matrix noted Si_{k|k-1} which is 2x2
-  prediction_->jacobian(
+  prediction_->covariance_matrix(
     dhi_dx * covariance_matrix.matrix() * dhi_dx.transpose() +
     Eigen::Matrix2d::Identity()
   );

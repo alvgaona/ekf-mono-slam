@@ -5,9 +5,9 @@
 
 #include "map_feature.h"
 
-class CartesianMapFeature final : public MapFeature {
+class DepthMapFeature final : public MapFeature {
  public:
-  CartesianMapFeature(
+  DepthMapFeature(
     const Eigen::VectorXd& state,
     int position,
     const cv::Mat& descriptor_data,

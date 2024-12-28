@@ -1,8 +1,7 @@
 #pragma once
 
 #include <cstdint>
-
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
 class ImageFeature {
  public:

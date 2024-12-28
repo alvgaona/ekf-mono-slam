@@ -4,6 +4,7 @@
 
 #include "covariance_matrix.h"
 #include "feature/feature_detector.h"
+#include "feature/map_feature.h"
 #include "state.h"
 
 class EKF final {
@@ -27,14 +28,16 @@ class EKF final {
     return feature_detector_;
   }
 
+  [[nodiscard]] std::vector<std::shared_ptr<MapFeature>> features() const {
+    return state_->features();
+  }
+
   [[nodiscard]] bool is_initilized() const {
-    return !state_->cartesian_features().empty() ||
+    return !state_->depth_features().empty() ||
            !state_->inverse_depth_features().empty();
   }
 
   void predict() const;
-
-  void match_predicted_features(const cv::Mat& image);
 
   void add_features(
     const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
