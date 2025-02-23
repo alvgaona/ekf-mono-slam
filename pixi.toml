@@ -4,33 +4,52 @@ version = "0.1.0"
 description = "Visual Mono SLAM with 1-Point RANSAC EKF"
 authors = ["Alvaro J. Gaona <alvgaona@gmail.com>"]
 channels = ["conda-forge", "robostack-staging"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
+
+[target.linux-64.tasks]
+build = { cmd = [
+    "colcon",
+    "build",
+    "--symlink-install",
+    "--event-handler",
+    "console_direct+",
+    "--cmake-args",
+    "-G Ninja",
+    "-DPython3_EXECUTABLE=$CONDA_PREFIX/bin/python",
+] }
+
+[target.win-64.tasks]
+build = { cmd = [
+    "colcon",
+    "build",
+    "--symlink-install",
+    "--event-handler",
+    "console_direct+",
+    "--cmake-args",
+    "-G Ninja",
+    "-DPython3_EXECUTABLE=$CONDA_PREFIX/python.exe",
+], env = { CXX = "g++", CC = "gcc" } }
 
 [tasks]
-app = { cmd = ["ros2", "launch", "ekf_mono_slam", "vslam.launch.py"] }
-build = { cmd = [
-  "colcon",
-  "build",
-  "--symlink-install",
-  "--event-handler",
-  "console_direct+",
-  "--cmake-args",
-  "-G Ninja",
-  "-DPython3_EXECUTABLE=$CONDA_PREFIX/bin/python",
-] }
+app = { cmd = [
+    "ros2",
+    "launch",
+    "ekf_mono_slam",
+    "vslam.launch.py",
+], env = { LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" } }
 test = { cmd = [
-  "colcon",
-  "test",
-  "--ctest-args",
-  "tests",
-  "ekf_mono_slam",
-  "&&",
-  "./build/ekf_mono_slam/slam_test",
+    "colcon",
+    "test",
+    "--ctest-args",
+    "tests",
+    "ekf_mono_slam",
+    "&&",
+    "./build/ekf_mono_slam/slam_test",
 ], depends-on = [
-  "build",
+    "build",
 ] }
 clean = "rm -rf build install log"
-clean-build = { depends_on = ["clean", "build"] }
+clean-build = { depends-on = ["clean", "build"] }
 
 [dependencies]
 ros-humble-desktop = ">=0.10.0,<0.11"
@@ -49,3 +68,6 @@ cxx-compiler = ">=1.8.0,<2"
 
 [activation]
 scripts = ["install/setup.sh"]
+
+[target.win-64.activation]
+scripts = ["install/setup.bat"]
