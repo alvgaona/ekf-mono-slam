@@ -94,10 +94,34 @@ if(BUILD_TESTING)
     file(GLOB_RECURSE src_for_test src/*.cpp)
     list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 
-    find_package(ament_cmake_gtest REQUIRED)
+    # Use GTest/GMock from pixi directly (not ament wrappers)
+    find_package(GTest REQUIRED)
 
-    ament_add_gtest(slam_test ${test_src} ${src_for_test})
-    ament_target_dependencies(slam_test std_msgs OpenCV)
+    # Build test executable with GTest/GMock
+    add_executable(slam_test ${test_src} ${src_for_test})
+    
+    # Link against GTest and GMock libraries
+    target_link_libraries(slam_test 
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        ${cpp_typesupport_target}
+        ${OpenCV_LIBRARIES}
+        ${Eigen3_LIBRARIES}
+    )
+    
+    # Add ROS dependencies
+    ament_target_dependencies(slam_test std_msgs sensor_msgs geometry_msgs OpenCV)
+    
+    # Include directories
+    target_include_directories(slam_test PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${Eigen3_INCLUDE_DIRS}
+        ${OpenCV_INCLUDE_DIRS}
+    )
+    
+    # Register test with CTest for colcon test
+    add_test(NAME slam_test COMMAND slam_test)
 endif()
 
 ament_package()
