@@ -1,12 +1,9 @@
-#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
 #include "feature/feature_detector.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/zone.h"
 #include "image/file_sequence_image_provider.h"
-
-using namespace ::testing;
 
 TEST(FeatureDetectors, CreateFeatureDetector) {
   const cv::Ptr<cv::FeatureDetector> akaze_detector =

@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.16)
 project(ekf_mono_slam)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 20)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -90,14 +90,14 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  file(GLOB_RECURSE test_src test/[i|u]test_*.cpp)
-  file(GLOB_RECURSE src_for_test src/*.cpp)
-  list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
+    file(GLOB_RECURSE test_src test/[i|u]test_*.cpp)
+    file(GLOB_RECURSE src_for_test src/*.cpp)
+    list(FILTER src_for_test EXCLUDE REGEX "src/.*_node.cpp")
 
-  find_package(ament_cmake_gmock REQUIRED)
+    find_package(ament_cmake_gtest REQUIRED)
 
-  ament_add_gmock(slam_test ${test_src} ${src_for_test})
-  ament_target_dependencies(slam_test std_msgs OpenCV)
+    ament_add_gtest(slam_test ${test_src} ${src_for_test})
+    ament_target_dependencies(slam_test std_msgs OpenCV)
 endif()
 
 ament_package()

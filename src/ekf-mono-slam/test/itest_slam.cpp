@@ -1,4 +1,3 @@
-#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
 #include "feature/feature_detector.h"
@@ -6,8 +5,6 @@
 #include "feature/zone.h"
 #include "filter/ekf.h"
 #include "image/file_sequence_image_provider.h"
-
-using namespace ::testing;
 
 TEST(SLAMIntegration, FindFeatureInStateAndCovariance) {
   FileSequenceImageProvider image_provider(

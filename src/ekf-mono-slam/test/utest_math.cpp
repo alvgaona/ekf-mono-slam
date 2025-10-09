@@ -1,11 +1,9 @@
-#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
 #include "filter/state.h"
 #include "math/ekf_math.h"
 
 using namespace EkfMath;
-using namespace ::testing;
 
 TEST(JacobianDirectionalVector, ComputeJacobianDirectionalVector) {
   const Eigen::Quaterniond q(1, 1, 1, 1);
@@ -15,10 +13,10 @@ TEST(JacobianDirectionalVector, ComputeJacobianDirectionalVector) {
   const Eigen::MatrixXd jacobian =
     jacobian_directional_vector(q, directionalVector);
 
-  ASSERT_THAT(jacobian.col(0), Eq(Eigen::Vector3d(1, 1, 1)));
-  ASSERT_THAT(jacobian.col(1), Eq(Eigen::Vector3d(3, -1, 1)));
-  ASSERT_THAT(jacobian.col(2), Eq(Eigen::Vector3d(1, 3, -1)));
-  ASSERT_THAT(jacobian.col(3), Eq(Eigen::Vector3d(-1, 1, 3)));
+  ASSERT_EQ(jacobian.col(0), Eigen::Vector3d(1, 1, 1));
+  ASSERT_EQ(jacobian.col(1), Eigen::Vector3d(3, -1, 1));
+  ASSERT_EQ(jacobian.col(2), Eigen::Vector3d(1, 3, -1));
+  ASSERT_EQ(jacobian.col(3), Eigen::Vector3d(-1, 1, 3));
 }
 
 TEST(QuaternionDerivatives, ZeroAngularVelocity) {
@@ -26,7 +24,7 @@ TEST(QuaternionDerivatives, ZeroAngularVelocity) {
   const Eigen::Vector3d dq0domegai =
     partial_derivative_q0_by_omegai(omega, 1.0);
 
-  ASSERT_THAT(dq0domegai, Eq(Eigen::Vector3d(0, 0, 0)));
+  ASSERT_EQ(dq0domegai, Eigen::Vector3d(0, 0, 0));
 }
 
 TEST(QuaternionDerivatives, NonZeroAngularVelocity) {
@@ -48,14 +46,14 @@ TEST(QuaternionDerivatives, NonZeroAngularVelocity) {
   const Eigen::Matrix3d dqidomegaj =
     partial_derivative_qi_by_omegaj(omega, 1.0);
 
-  ASSERT_THAT(dqidomegaj.diagonal(), Eq(Eigen::Vector3d::Zero()));
+  ASSERT_EQ(dqidomegaj.diagonal(), Eigen::Vector3d::Zero());
   ASSERT_NEAR(dqidomegaj(0, 1), -0.4164, 1e-3);
   ASSERT_NEAR(dqidomegaj(0, 2), -0.5471, 1e-3);
   ASSERT_NEAR(dqidomegaj(1, 2), -0.5632, 1e-3);
 
-  ASSERT_THAT(dqidomegaj(0, 1), DoubleEq(dqidomegaj(1, 0)));
-  ASSERT_THAT(dqidomegaj(0, 2), DoubleEq(dqidomegaj(2, 0)));
-  ASSERT_THAT(dqidomegaj(1, 2), DoubleEq(dqidomegaj(2, 1)));
+  ASSERT_DOUBLE_EQ(dqidomegaj(0, 1), dqidomegaj(1, 0));
+  ASSERT_DOUBLE_EQ(dqidomegaj(0, 2), dqidomegaj(2, 0));
+  ASSERT_DOUBLE_EQ(dqidomegaj(1, 2), dqidomegaj(2, 1));
 }
 
 TEST(RotationMatrix, RotationMatrixDerivativeByQuaternion) {
@@ -65,19 +63,19 @@ TEST(RotationMatrix, RotationMatrixDerivativeByQuaternion) {
 
   Eigen::Matrix3d expected;
   expected << 2, -2, 2, 2, 2, -2, -2, 2, 2;
-  ASSERT_THAT(dRbyq0, Eq(expected));
+  ASSERT_EQ(dRbyq0, expected);
 
   const Eigen::Matrix3d dRbyq1 = rotation_matrix_derivatives_by_q1(q);
   expected << 2, 2, 2, 2, -2, -2, 2, 2, -2;
-  ASSERT_THAT(dRbyq1, Eq(expected));
+  ASSERT_EQ(dRbyq1, expected);
 
   const Eigen::Matrix3d dRbyq2 = rotation_matrix_derivatives_by_q2(q);
   expected << -2, 2, 2, 2, 2, 2, -2, 2, -2;
-  ASSERT_THAT(dRbyq2, Eq(expected));
+  ASSERT_EQ(dRbyq2, expected);
 
   const Eigen::Matrix3d dRbyq3 = rotation_matrix_derivatives_by_q3(q);
   expected << -2, -2, 2, 2, -2, 2, 2, 2, 2;
-  ASSERT_THAT(dRbyq3, Eq(expected));
+  ASSERT_EQ(dRbyq3, expected);
 }
 
 TEST(RotationMatrix, ComputeRotationMatrix) {
@@ -90,7 +88,7 @@ TEST(RotationMatrix, ComputeRotationMatrix) {
 
   Eigen::Matrix3d expected;
   expected << 0, 0, 1, 1, 0, 0, 0, 1, 0;
-  ASSERT_THAT(state.rotation_matrix(), Eq(expected));
+  ASSERT_EQ(state.rotation_matrix(), expected);
 }
 
 TEST(FeatureDistortion, DistortFeature) {
@@ -98,6 +96,6 @@ TEST(FeatureDistortion, DistortFeature) {
 
   const auto distorted_feature = distort_image_feature(feature);
 
-  ASSERT_THAT(distorted_feature.x, DoubleNear(-1.28542, 1e-5));
-  ASSERT_THAT(distorted_feature.y, DoubleNear(-0.985089, 1e-5));
+  ASSERT_NEAR(distorted_feature.x, -1.28542, 1e-5);
+  ASSERT_NEAR(distorted_feature.y, -0.985089, 1e-5);
 }

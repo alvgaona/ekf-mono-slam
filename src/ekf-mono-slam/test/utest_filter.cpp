@@ -1,24 +1,22 @@
-#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
+#include <algorithm>
 
 #include "configuration/kinematics_parameters.h"
 #include "filter/covariance_matrix.h"
 #include "filter/ekf.h"
 #include "filter/state.h"
 #include "image/file_sequence_image_provider.h"
-
-using namespace ::testing;
 using namespace KinematicsParameters;
 
 TEST(ExtendedKalmanFilter, InitState) {
   const auto state = std::make_shared<State>();
 
-  ASSERT_THAT(state->position(), Eq(Eigen::Vector3d(0, 0, 0)));
-  ASSERT_THAT(state->velocity(), Eq(Eigen::Vector3d(0, 0, 0)));
-  ASSERT_THAT(state->angular_velocity(), Eq(Eigen::Vector3d(0, 0, 0)));
-  ASSERT_THAT(state->orientation(), Eq(Eigen::Quaterniond(1, 0, 0, 0)));
-  ASSERT_THAT(state->rotation_matrix(), Eq(Eigen::MatrixXd::Identity(3, 3)));
-  ASSERT_THAT(state->dimension(), Eq(13));
+  ASSERT_EQ(state->position(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state->velocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state->angular_velocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state->orientation(), Eigen::Quaterniond(1, 0, 0, 0));
+  ASSERT_EQ(state->rotation_matrix(), Eigen::MatrixXd::Identity(3, 3));
+  ASSERT_EQ(state->dimension(), 13);
 }
 
 TEST(ExtendedKalmanFilter, PredictState) {
@@ -26,11 +24,11 @@ TEST(ExtendedKalmanFilter, PredictState) {
 
   state.predict(0.1);
 
-  ASSERT_THAT(state.position(), Eq(Eigen::Vector3d(0, 0, 0)));
-  ASSERT_THAT(state.velocity(), Eq(Eigen::Vector3d(0, 0, 0)));
-  ASSERT_THAT(state.angular_velocity(), Eq(Eigen::Vector3d(0, 0, 0)));
-  ASSERT_THAT(state.orientation(), Eq(Eigen::Quaterniond(1, 0, 0, 0)));
-  ASSERT_THAT(state.rotation_matrix(), Eq(Eigen::MatrixXd::Identity(3, 3)));
+  ASSERT_EQ(state.position(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.velocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.angular_velocity(), Eigen::Vector3d(0, 0, 0));
+  ASSERT_EQ(state.orientation(), Eigen::Quaterniond(1, 0, 0, 0));
+  ASSERT_EQ(state.rotation_matrix(), Eigen::MatrixXd::Identity(3, 3));
 }
 
 TEST(ExtendedKalmanFilter, AddMapFeatureToState) {
@@ -57,10 +55,10 @@ TEST(ExtendedKalmanFilter, AddMapFeatureToState) {
   const std::vector<std::shared_ptr<CartesianMapFeature>>
     cartesian_map_features = state.cartesian_features();
 
-  ASSERT_THAT(cartesian_map_features, SizeIs(1));
-  ASSERT_THAT(cartesian_map_features, Contains(cartesian_map_feature));
-  ASSERT_THAT(inverse_depth_features, SizeIs(1));
-  ASSERT_THAT(inverse_depth_features, Contains(inverse_depth_map_feature));
+  ASSERT_EQ(cartesian_map_features.size(), 1);
+  ASSERT_TRUE(std::find(cartesian_map_features.begin(), cartesian_map_features.end(), cartesian_map_feature) != cartesian_map_features.end());
+  ASSERT_EQ(inverse_depth_features.size(), 1);
+  ASSERT_TRUE(std::find(inverse_depth_features.begin(), inverse_depth_features.end(), inverse_depth_map_feature) != inverse_depth_features.end());
 }
 
 TEST(ExtendedKalmanFilter, RemoveMapFeature) {
@@ -89,8 +87,8 @@ TEST(ExtendedKalmanFilter, RemoveMapFeature) {
   const std::vector<std::shared_ptr<CartesianMapFeature>>
     cartesian_map_features = state.cartesian_features();
 
-  ASSERT_THAT(inverse_depth_features, SizeIs(0));
-  ASSERT_THAT(cartesian_map_features, SizeIs(0));
+  ASSERT_EQ(inverse_depth_features.size(), 0);
+  ASSERT_EQ(cartesian_map_features.size(), 0);
 }
 
 TEST(ExtendedKalmanFilter, AddImageFeatureMeasurement) {
@@ -102,15 +100,15 @@ TEST(ExtendedKalmanFilter, AddImageFeatureMeasurement) {
 
   state.add(image_feature_measurement);
 
-  ASSERT_THAT(state.inverse_depth_features().size(), Eq(1));
-  ASSERT_THAT(state.cartesian_features().size(), Eq(0));
+  ASSERT_EQ(state.inverse_depth_features().size(), 1);
+  ASSERT_EQ(state.cartesian_features().size(), 0);
 }
 
 TEST(ExtendedKalmanFilter, InitCovariance) {
   const CovarianceMatrix covariance_matrix;
 
-  ASSERT_THAT(covariance_matrix.matrix().rows(), Eq(13));
-  ASSERT_THAT(covariance_matrix.matrix().cols(), Eq(13));
+  ASSERT_EQ(covariance_matrix.matrix().rows(), 13);
+  ASSERT_EQ(covariance_matrix.matrix().cols(), 13);
 
   Eigen::VectorXd expected_diagonal(13);
   expected_diagonal << epsilon, epsilon, epsilon, epsilon, epsilon, epsilon,
@@ -125,7 +123,7 @@ TEST(ExtendedKalmanFilter, InitCovariance) {
   m.diagonal() << expected_diagonal;
   const Eigen::MatrixXd& a = covariance_matrix.matrix();
 
-  ASSERT_THAT(a - m, Eq(Eigen::MatrixXd::Zero(13, 13)));
+  ASSERT_EQ(a - m, Eigen::MatrixXd::Zero(13, 13));
 }
 
 TEST(ExtendedKalmanFilter, AddImageFeatureToCovariance) {
@@ -146,8 +144,8 @@ TEST(ExtendedKalmanFilter, AddImageFeatureToCovariance) {
     );
   covariance_matrix.add(image_feature_measurement, state);
 
-  ASSERT_THAT(covariance_matrix.matrix().rows(), Eq(19));
-  ASSERT_THAT(covariance_matrix.matrix().cols(), Eq(19));
+  ASSERT_EQ(covariance_matrix.matrix().rows(), 19);
+  ASSERT_EQ(covariance_matrix.matrix().cols(), 19);
   // TODO: update assertions with the correct expected value
 }
 
