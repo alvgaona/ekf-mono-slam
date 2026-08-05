@@ -19,7 +19,9 @@ class ImageFeaturePrediction final : public ImageFeature {
   }
 
   static ImageFeaturePrediction from(
-    const Eigen::Vector3d& directional_vector, int index
+    const Eigen::Vector3d& directional_vector,
+    int index,
+    const CameraConfig& camera
   );
 
  private:

@@ -21,12 +21,14 @@ ImageFeaturePrediction::ImageFeaturePrediction(
  * the direction vector
  */
 ImageFeaturePrediction ImageFeaturePrediction::from(
-  const Eigen::Vector3d& directional_vector, int index
+  const Eigen::Vector3d& directional_vector,
+  int index,
+  const CameraConfig& camera
 ) {
   const auto undistorted_image_feature =
-    UndistortedImageFeature::project(directional_vector);
+    UndistortedImageFeature::project(directional_vector, camera);
   const auto distorted_feature =
-    EkfMath::distort_image_feature(undistorted_image_feature);
+    EkfMath::distort_image_feature(undistorted_image_feature, camera);
 
   return ImageFeaturePrediction(distorted_feature, index);
 }

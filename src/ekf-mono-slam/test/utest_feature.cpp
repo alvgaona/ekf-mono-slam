@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "configuration/slam_config.h"
 #include "feature/feature_detector.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/zone.h"
@@ -48,11 +49,12 @@ TEST(FeatureDetectors, DetectFeatures) {
 }
 
 TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {
+  const CameraConfig camera;
   const ImageFeatureMeasurement image_feature_measurement(
     cv::Point2f(0, 0), cv::Mat::zeros(cv::Size(30, 30), CV_64FC1), 0
   );
   const UndistortedImageFeature undistorted_image_feature =
-    image_feature_measurement.undistort();
+    image_feature_measurement.undistort(camera);
 
   // Using AllOf matcher for better precision comparison
   ASSERT_THAT(

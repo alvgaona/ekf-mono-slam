@@ -2,10 +2,7 @@
 
 #include <cmath>
 
-#include "configuration/camera_parameters.h"
 #include "feature/image_feature_measurement.h"
-
-using namespace CameraParameters;
 
 /**
  * @brief Computes the Jacobian matrix of the system dynamics model
@@ -105,14 +102,15 @@ Eigen::MatrixXd EkfMath::dyn_model_noise_jacobian(
  * @return Distorted coordinates as a cv::Point2d
  */
 cv::Point2d EkfMath::distort_image_feature(
-  const UndistortedImageFeature &image_feature
+  const UndistortedImageFeature &image_feature, const CameraConfig &camera
 ) {
   const auto feature_coordinates = image_feature.coordinates();
-  const auto xu = (feature_coordinates[0] - cx) * dx;
-  const auto yu = (feature_coordinates[1] - cy) * dy;
+  const auto xu = (feature_coordinates[0] - camera.cx) * camera.dx;
+  const auto yu = (feature_coordinates[1] - camera.cy) * camera.dy;
 
   const auto ru = sqrt(xu * xu + yu * yu);
-  auto rd = ru / (1L + k1 * ru * ru + k2 * ru * ru * ru * ru);
+  auto rd =
+    ru / (1L + camera.k1 * ru * ru + camera.k2 * ru * ru * ru * ru);
 
   for (auto i = 0; i < 10; i++) {
     const auto rd2 = rd * rd;
@@ -120,17 +118,19 @@ cv::Point2d EkfMath::distort_image_feature(
     const auto rd4 = rd3 * rd;
     const auto rd5 = rd4 * rd;
 
-    const auto f = rd + k1 * rd3 + k2 * rd5 - ru;
-    const auto fp = 1 + 3 * k1 * rd2 + 5 * k2 * rd4;
+    const auto f = rd + camera.k1 * rd3 + camera.k2 * rd5 - ru;
+    const auto fp = 1 + 3 * camera.k1 * rd2 + 5 * camera.k2 * rd4;
     rd -= f / fp;
   }
 
   const auto rd2 = rd * rd;
   const auto rd4 = rd2 * rd2;
 
-  const auto d = 1L + k1 * rd2 + k2 * rd4;
+  const auto d = 1L + camera.k1 * rd2 + camera.k2 * rd4;
 
-  return {cx + xu / d / dx, cy + yu / d / dy};
+  return {
+    camera.cx + xu / d / camera.dx, camera.cy + yu / d / camera.dy
+  };
 }
 
 /**
@@ -363,47 +363,42 @@ Eigen::Matrix3d EkfMath::rotation_matrix_derivatives_by_q3(
  * @return A 2x2 Jacobian matrix representing the partial derivatives of the
  * undistorted coordinates with respect to the distorted coordinates
  */
-Eigen::Matrix2d EkfMath::jacobian_undistortion(const cv::Point &coordinates) {
+Eigen::Matrix2d EkfMath::jacobian_undistortion(
+  const cv::Point &coordinates, const CameraConfig &camera
+) {
   const Eigen::Vector2d point(coordinates.x, coordinates.y);
-  const Eigen::Vector2d principal_point(cx, cy);
+  const Eigen::Vector2d principal_point(camera.cx, camera.cy);
 
   const Eigen::Vector2d diff = point - principal_point;
-  const Eigen::Vector2d distorted_diff(dx * diff[0], dy * diff[1]);
+  const Eigen::Vector2d distorted_diff(
+    camera.dx * diff[0], camera.dy * diff[1]
+  );
 
   const double rd = distorted_diff.norm();
 
   Eigen::Matrix2d dhu_hd;
 
   dhu_hd(0, 0) =
-    1 + k1 * rd * rd + k2 * rd * rd * rd * rd +
-    2 * std::pow((dx * (coordinates.x - cx)), 2) * (k1 + 2 * k2 * rd * rd);
-  dhu_hd(0, 1) = 2 * dy * dy * (coordinates.x - cx) * (coordinates.y - cy) *
-                 (k1 + 2 * k2 * rd * rd);
-  dhu_hd(1, 0) = 2 * dx * dx * (coordinates.y - cy) * (coordinates.x - cx) *
-                 (k1 + 2 * k2 * rd * rd);
+    1 + camera.k1 * rd * rd + camera.k2 * rd * rd * rd * rd +
+    2 * std::pow((camera.dx * (coordinates.x - camera.cx)), 2) *
+      (camera.k1 + 2 * camera.k2 * rd * rd);
+  dhu_hd(0, 1) =
+    2 * camera.dy * camera.dy * (coordinates.x - camera.cx) *
+    (coordinates.y - camera.cy) * (camera.k1 + 2 * camera.k2 * rd * rd);
+  dhu_hd(1, 0) =
+    2 * camera.dx * camera.dx * (coordinates.y - camera.cy) *
+    (coordinates.x - camera.cx) * (camera.k1 + 2 * camera.k2 * rd * rd);
   dhu_hd(1, 1) =
-    1 + k1 * rd * rd + k2 * rd * rd * rd * rd +
-    2 * std::pow((dy * (coordinates.y - cy)), 2) * (k1 + 2 * k2 * rd * rd);
+    1 + camera.k1 * rd * rd + camera.k2 * rd * rd * rd * rd +
+    2 * std::pow((camera.dy * (coordinates.y - camera.cy)), 2) *
+      (camera.k1 + 2 * camera.k2 * rd * rd);
 
   return dhu_hd;
 }
 
-/**
- * @brief Computes the Jacobian matrix for distorting image coordinates
- *
- * This function calculates the Jacobian matrix that represents the
- * transformation from undistorted to distorted image coordinates by taking
- * the inverse of the undistortion Jacobian. The resulting matrix represents
- * the partial derivatives of distorted coordinates with respect to undistorted
- * coordinates.
- *
- * @param feature The image feature measurement containing the coordinates to
- * process
- *
- * @return A 2x2 Jacobian matrix representing the partial derivatives of the
- * distorted coordinates with respect to the undistorted coordinates
- */
-Eigen::Matrix2d EkfMath::jacobian_distortion(const cv::Point &coordinates) {
-  const Eigen::Matrix2d dhu_hd = jacobian_undistortion(coordinates);
+Eigen::Matrix2d EkfMath::jacobian_distortion(
+  const cv::Point &coordinates, const CameraConfig &camera
+) {
+  const Eigen::Matrix2d dhu_hd = jacobian_undistortion(coordinates, camera);
   return dhu_hd.inverse();
 }

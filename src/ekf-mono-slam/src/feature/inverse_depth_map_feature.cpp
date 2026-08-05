@@ -4,11 +4,7 @@
 
 #include <eigen3/Eigen/Core>
 
-#include "configuration/camera_parameters.h"
 #include "math/ekf_math.h"
-
-using CameraParameters::fx;
-using CameraParameters::fy;
 
 InverseDepthMapFeature::InverseDepthMapFeature(
   const Eigen::VectorXd& state,
@@ -36,6 +32,7 @@ void InverseDepthMapFeature::measurement_jacobian(
   const auto theta = state_[3];
   const auto phi = state_[4];
   const auto rho = state_[5];
+  const auto& camera = state.config().camera;
 
   const auto rotation_matrix = state.rotation_matrix().inverse();
   const auto& camera_position = state.position();
@@ -47,14 +44,15 @@ void InverseDepthMapFeature::measurement_jacobian(
   // Quaternion from the rotation matrix from world to camera
   const auto qcw = Eigen::Quaterniond(rotation_matrix);
 
-  const auto dhd_dhu =
-    EkfMath::jacobian_distortion(prediction_->coordinates());  // Eq. (A. 32)
+  const auto dhd_dhu = EkfMath::jacobian_distortion(
+    prediction_->coordinates(), camera
+  );  // Eq. (A. 32)
 
   Eigen::Matrix2Xd dhu_dhc = Eigen::Matrix2Xd::Zero(2, 3);  // Eq. (A. 34)
-  dhu_dhc(0, 0) = -fx / hc.z();
-  dhu_dhc(0, 2) = hc.x() * fx / (hc.z() * hc.z());
-  dhu_dhc(1, 1) = -fy / hc.z();
-  dhu_dhc(1, 2) = hc.y() * fy / (hc.z() * hc.z());
+  dhu_dhc(0, 0) = -camera.fx / hc.z();
+  dhu_dhc(0, 2) = hc.x() * camera.fx / (hc.z() * hc.z());
+  dhu_dhc(1, 1) = -camera.fy / hc.z();
+  dhu_dhc(1, 2) = hc.y() * camera.fy / (hc.z() * hc.z());
 
   const auto dhi_drwc =
     dhd_dhu * dhu_dhc * rho * rotation_matrix;  // Eq. (A. 31)

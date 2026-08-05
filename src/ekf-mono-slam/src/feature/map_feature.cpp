@@ -1,10 +1,8 @@
 #include "feature/map_feature.h"
 
-#include "configuration/camera_parameters.h"
 #include "math/ekf_math.h"
 
 using namespace EkfMath;
-using namespace CameraParameters;
 
 /**
  * @brief Constructs a MapFeature object with specified properties.
@@ -44,14 +42,17 @@ MapFeature::MapFeature(
  * @return true if the feature point lies within the camera's field of view,
  * false otherwise
  */
-bool MapFeature::is_in_front_of_camera(const Eigen::Vector3d& directional_vector
+bool MapFeature::is_in_front_of_camera(
+  const Eigen::Vector3d& directional_vector, const CameraConfig& camera
 ) {
   const auto atanxz =
     rad2deg(atan2(directional_vector[0], directional_vector[2]));
   const auto atanyz =
     rad2deg(atan2(directional_vector[1], directional_vector[2]));
-  return atanxz > -angular_vision_x && atanxz < angular_vision_x &&
-         atanyz > -angular_vision_y && atanyz < angular_vision_y;
+  return atanxz > -camera.angular_vision_x &&
+         atanxz < camera.angular_vision_x &&
+         atanyz > -camera.angular_vision_y &&
+         atanyz < camera.angular_vision_y;
 }
 
 /**

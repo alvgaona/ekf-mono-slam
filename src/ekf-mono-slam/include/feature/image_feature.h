@@ -1,5 +1,8 @@
 #pragma once
 
+#include "configuration/slam_config.h"
+
+
 #include <cstdint>
 
 #include "opencv2/opencv.hpp"
@@ -18,7 +21,7 @@ class ImageFeature {
     int zone_width, int zone_height, int image_width
   ) const;
 
-  [[nodiscard]] bool is_visible_in_frame() const;
+  [[nodiscard]] bool is_visible_in_frame(const CameraConfig& camera) const;
 
   void index(uint16_t value) { index_ = value; }
 

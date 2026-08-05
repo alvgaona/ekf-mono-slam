@@ -5,8 +5,6 @@
 
 #include <typeinfo>
 
-#include "configuration/camera_parameters.h"
-#include "configuration/image_feature_parameters.h"
 #include "feature/image_feature_prediction.h"
 #include "feature/map_feature.h"
 
@@ -27,7 +25,7 @@
  * where you can further update the state variables based on sensor measurements
  * and dynamic models.
  */
-State::State() {
+State::State(const SlamConfig& config) : config_(config) {
   position_ = Eigen::Vector3d(0, 0, 0);
   velocity_ = Eigen::Vector3d(0, 0, 0);
   angular_velocity_ = Eigen::Vector3d(0, 0, 0);
@@ -40,8 +38,10 @@ State::State(
   const Eigen::Vector3d& position,
   const Eigen::Vector3d& velocity,
   const Eigen::Quaterniond& orientation,
-  const Eigen::Vector3d& angular_velocity
-) {
+  const Eigen::Vector3d& angular_velocity,
+  const SlamConfig& config
+)
+  : config_(config) {
   position_ = position;
   velocity_ = velocity;
   angular_velocity_ = angular_velocity;
@@ -157,8 +157,9 @@ void State::add(
   Eigen::VectorXd feature_state(6);
 
   const UndistortedImageFeature undistorted_feature =
-    image_feature_measurement->undistort();
-  Eigen::Vector3d back_projected_point = undistorted_feature.backproject();
+    image_feature_measurement->undistort(config_.camera);
+  Eigen::Vector3d back_projected_point =
+    undistorted_feature.backproject(config_.camera);
 
   // Orientation of the camera respect to the world axis. Eq (A. 59)
   back_projected_point = orientation_.toRotationMatrix() * back_projected_point;
@@ -171,7 +172,7 @@ void State::add(
 
   feature_state(3) = atan2(hx, hz);                        // Eq. (A. 60)
   feature_state(4) = atan2(-hy, sqrt(hx * hx + hz * hz));  // Eq. (A. 61)
-  feature_state(5) = ImageFeatureParameters::init_inv_depth;
+  feature_state(5) = config_.image_feature.init_inv_depth;
 
   const auto map_feature = std::make_shared<InverseDepthMapFeature>(
     feature_state,
@@ -234,14 +235,16 @@ void State::predict_measurement_state() {
     Eigen::Vector3d directional_vector =
       map_feature->directional_vector(rotation_matrix_.transpose(), position_);
     // directionalVector = Rcw * (yi - rwc);
-    if (!map_feature->is_in_front_of_camera(directional_vector)) {
+    if (!MapFeature::is_in_front_of_camera(
+          directional_vector, config_.camera
+        )) {
       continue;
     }
 
     if (const auto image_feature_prediction = ImageFeaturePrediction::from(
-          directional_vector, map_feature->index()
+          directional_vector, map_feature->index(), config_.camera
         );
-        image_feature_prediction.is_visible_in_frame()) {
+        image_feature_prediction.is_visible_in_frame(config_.camera)) {
       map_feature->add(image_feature_prediction);
       continue;
     }

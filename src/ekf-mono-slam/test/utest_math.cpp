@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "configuration/slam_config.h"
 #include "filter/state.h"
 #include "math/ekf_math.h"
 
@@ -95,9 +96,10 @@ TEST(RotationMatrix, ComputeRotationMatrix) {
 }
 
 TEST(FeatureDistortion, DistortFeature) {
+  const CameraConfig camera;
   const UndistortedImageFeature feature(Eigen::Vector2d{0, 0});
 
-  const auto distorted_feature = distort_image_feature(feature);
+  const auto distorted_feature = distort_image_feature(feature, camera);
 
   ASSERT_THAT(distorted_feature.x, DoubleNear(-1.28542, 1e-5));
   ASSERT_THAT(distorted_feature.y, DoubleNear(-0.985089, 1e-5));

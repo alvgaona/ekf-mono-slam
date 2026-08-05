@@ -2,29 +2,46 @@
 
 #include "feature/feature_detector.h"
 
-/**
- * @brief Constructs an EKF object with default settings.
- *
- * This constructor initializes a new EKF object with default values for its
- * internal state variables and parameters.
- */
-EKF::EKF() {
-  this->covariance_matrix_ = std::make_shared<CovarianceMatrix>();
-  this->state_ = std::make_shared<State>();
-  this->delta_t_ = 1;
-  this->step_ = 0;
+EKF::EKF() : EKF(SlamConfig{}) {}
+
+EKF::EKF(const SlamConfig& config)
+  : config_(config), step_(0), delta_t_(config.delta_t) {
+  covariance_matrix_ = std::make_shared<CovarianceMatrix>(config_);
+  state_ = std::make_shared<State>(config_);
 }
 
-/**
- * @brief Predicts the next state of the EKF using the current state and time
- * delta.
- *
- * This method performs the prediction step of the Extended Kalman Filter by:
- * 1. Predicting the covariance matrix using the current state and time delta
- * 2. Predicting the state using the time delta
- *
- * The camera measurements/features prediction is currently not implemented.
- */
+void EKF::ensure_feature_detector(const cv::Size& image_size) {
+  if (feature_detector_ && feature_detector_->image_size() == image_size) {
+    return;
+  }
+  feature_detector_ = std::make_shared<FeatureDetector>(
+    FeatureDetector::build_detector(config_.image_feature.detector_type),
+    FeatureDetector::build_descriptor_extractor(
+      config_.image_feature.descriptor_type
+    ),
+    image_size,
+    config_.image_feature
+  );
+}
+
+void EKF::initialize_from_image(const cv::Mat& image) {
+  ensure_feature_detector(cv::Size(image.cols, image.rows));
+  feature_detector_->detect_features(image);
+  add_features(feature_detector_->image_features());
+}
+
+void EKF::process_frame(const cv::Mat& image) {
+  if (!is_initialized()) {
+    initialize_from_image(image);
+    return;
+  }
+
+  predict();
+  match_predicted_features(image);
+  // TODO: 1-Point RANSAC update and map management
+  ++step_;
+}
+
 void EKF::predict() const {
   covariance_matrix_->predict(state_, delta_t_);
   state_->predict(delta_t_);
@@ -32,25 +49,11 @@ void EKF::predict() const {
 }
 
 void EKF::match_predicted_features(const cv::Mat& image) {
-  // Not implemented
+  ensure_feature_detector(cv::Size(image.cols, image.rows));
+  // Matching against predicted features is not implemented yet.
+  (void)image;
 }
 
-/**
- * @brief Adds a collection of image feature measurements to the EKF's internal
- * state and covariance matrix.
- *
- * This method integrates the provided image feature measurements into the EKF's
- * internal data structures to establish initial information or update existing
- * features.
- *
- * @param features A vector containing the `ImageFeatureMeasurement` objects
- * representing the extracted features.
- *
- * **Note:** This implementation relies on the `ImageFeatureMeasurement` object
- * containing all necessary information for conversion to a `MapFeature` and
- * covariance matrix update. Ensure the provided measurements hold the required
- * data for proper integration.
- */
 void EKF::add_features(
   const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
 ) const {

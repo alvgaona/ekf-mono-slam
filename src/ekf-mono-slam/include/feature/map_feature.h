@@ -6,6 +6,7 @@
 #include <memory>
 #include <ostream>
 
+#include "configuration/slam_config.h"
 #include "feature/image_feature_prediction.h"
 
 class State;
@@ -54,7 +55,9 @@ class MapFeature {
     const State& state, const CovarianceMatrix& covariance_matrix
   ) = 0;
 
-  static bool is_in_front_of_camera(const Eigen::Vector3d& directional_vector);
+  static bool is_in_front_of_camera(
+    const Eigen::Vector3d& directional_vector, const CameraConfig& camera
+  );
 
  protected:
   int index_ = 1;

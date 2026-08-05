@@ -57,10 +57,8 @@ int ImageFeature::compute_zone(
  *
  * @return true if the feature is within bounds, false otherwise
  */
-bool ImageFeature::is_visible_in_frame() const {
+bool ImageFeature::is_visible_in_frame(const CameraConfig& camera) const {
   const auto u = coordinates_.x;
   const auto v = coordinates_.y;
-
-  // FIXME: do not hardcode the image size
-  return u > 0 && u < 1920 && v > 0 && v < 1080;
+  return u > 0 && u < camera.px && v > 0 && v < camera.py;
 }

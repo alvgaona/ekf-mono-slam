@@ -1,0 +1,30 @@
+/**:
+  ros__parameters:
+    camera:
+      px: 640
+      py: 480
+      fx: 525.060143149240389
+      fy: 524.245488213640215
+      k1: -0.007613
+      k2: 0.0009388
+      cx: 308.649343121753361
+      cy: 236.536005491807288
+      dx: 0.007021618750000
+      dy: 0.007027222916667
+      pixel_error_x: 1.0
+      pixel_error_y: 1.0
+      angular_vision_x: 62.720770890650357
+      angular_vision_y: 49.163954709609868
+    kinematics:
+      linear_accel_sd: 0.0005
+      angular_accel_sd: 0.00005
+      inv_depth_sd: 1.0
+      epsilon: 2.22e-16
+    image_feature:
+      image_area_divide_times: 2
+      image_mask_ellipse_size: 5.0
+      features_per_image: 20
+      init_inv_depth: 1.0
+      detector_type: "AKAZE"
+      descriptor_type: "AKAZE"
+    delta_t: 0.04

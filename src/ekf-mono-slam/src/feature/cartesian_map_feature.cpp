@@ -3,12 +3,8 @@
 #include <eigen3/Eigen/Core>
 #include <opencv2/core.hpp>
 
-#include "configuration/camera_parameters.h"
 #include "feature/map_feature.h"
 #include "math/ekf_math.h"
-
-using CameraParameters::fx;
-using CameraParameters::fy;
 
 CartesianMapFeature::CartesianMapFeature(
   const Eigen::VectorXd& state,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "configuration/slam_config.h"
 #include "descriptor_extractor_type.h"
 #include "detector_type.h"
 #include "image_feature_measurement.h"
@@ -13,7 +14,8 @@ class FeatureDetector final {
   FeatureDetector(
     const cv::Ptr<cv::FeatureDetector>& detector,
     const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor,
-    cv::Size img_size
+    cv::Size img_size,
+    const ImageFeatureConfig& image_feature_config = {}
   );
   ~FeatureDetector() = default;
   FeatureDetector(const FeatureDetector& source) = delete;
@@ -52,6 +54,7 @@ class FeatureDetector final {
   cv::Size img_size_;
   cv::Size zone_size_;
   int zones_in_row_;
+  ImageFeatureConfig image_feature_config_;
 
   static void build_image_mask(
     const cv::Mat& image_mask,

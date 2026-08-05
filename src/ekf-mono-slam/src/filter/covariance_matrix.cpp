@@ -1,12 +1,6 @@
 #include "filter/covariance_matrix.h"
 
-#include "configuration/camera_parameters.h"
-#include "configuration/image_feature_parameters.h"
-#include "configuration/kinematics_parameters.h"
-
 using namespace EkfMath;
-using namespace KinematicsParameters;
-using namespace CameraParameters;
 
 /**
  * @brief Constructs a CovarianceMatrix object with default initial values.
@@ -30,13 +24,13 @@ using namespace CameraParameters;
  * velocity(3), angular velocity(3), linear acceleration(3), angular
  * acceleration(3)]
  */
-CovarianceMatrix::CovarianceMatrix() {
+CovarianceMatrix::CovarianceMatrix(const SlamConfig& config) : config_(config) {
+  const auto eps = config_.kinematics.epsilon;
+  const auto la = config_.kinematics.linear_accel_sd;
+  const auto aa = config_.kinematics.angular_accel_sd;
   matrix_ = Eigen::MatrixXd::Identity(13, 13);
-  matrix_.diagonal() << epsilon, epsilon, epsilon, epsilon, epsilon, epsilon,
-    epsilon, linear_accel_sd * linear_accel_sd,
-    linear_accel_sd * linear_accel_sd, linear_accel_sd * linear_accel_sd,
-    angular_accel_sd * angular_accel_sd, angular_accel_sd * angular_accel_sd,
-    angular_accel_sd * angular_accel_sd;
+  matrix_.diagonal() << eps, eps, eps, eps, eps, eps, eps, la * la, la * la,
+    la * la, aa * aa, aa * aa, aa * aa;
 }
 
 /**
@@ -131,12 +125,10 @@ void CovarianceMatrix::predict(
 
   Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(6, 6);
 
-  Q.block(0, 0, 3, 3)
-    .diagonal()
-    .setConstant(linear_accel_sd * linear_accel_sd * dt * dt);
-  Q.block(3, 3, 3, 3)
-    .diagonal()
-    .setConstant(angular_accel_sd * angular_accel_sd * dt * dt);
+  const auto la = config_.kinematics.linear_accel_sd;
+  const auto aa = config_.kinematics.angular_accel_sd;
+  Q.block(0, 0, 3, 3).diagonal().setConstant(la * la * dt * dt);
+  Q.block(3, 3, 3, 3).diagonal().setConstant(aa * aa * dt * dt);
 
   // P[0:13, 0:13] = F * P[0:13, 0:13] * F' + G * Q * G'
   matrix_.block(0, 0, 13, 13) =
@@ -173,6 +165,7 @@ void CovarianceMatrix::add(
   const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
   const std::shared_ptr<State>& state
 ) {
+  const auto& camera = config_.camera;
   const int n = state->dimension();
   matrix_.conservativeResize(n + 3, n + 3);
 
@@ -181,8 +174,8 @@ void CovarianceMatrix::add(
   jacobian.block(0, 0, n, n) = Eigen::MatrixXd::Identity(n, n);
 
   const UndistortedImageFeature undistorted_feature =
-    image_feature_measurement->undistort();
-  const Eigen::Vector3d hc = undistorted_feature.backproject();
+    image_feature_measurement->undistort(camera);
+  const Eigen::Vector3d hc = undistorted_feature.backproject(camera);
 
   const Eigen::Vector3d hw = state->rotation_matrix() * hc;
 
@@ -218,17 +211,17 @@ void CovarianceMatrix::add(
   jacobian.block(n, 3, 6, 4) = dy_dqwc;
 
   // Eq. (A. 75)
-  const Eigen::Matrix2d dhu_dhd =
-    jacobian_undistortion(image_feature_measurement->coordinates()
-    );  // Eq. (A.32)
+  const Eigen::Matrix2d dhu_dhd = jacobian_undistortion(
+    image_feature_measurement->coordinates(), camera
+  );  // Eq. (A.32)
 
   // Eq. (A.79). It is likely that in the book this equation is wrong, and it
   // must be the transposed version. The equation states this is a 2x3 matrix,
   // but in reality, it should be 3x2. FYI, I'm using the transposed version,
   // otherwise, the matrix multiplication won't work.
   Eigen::MatrixXd dhc_dhu = Eigen::MatrixXd::Zero(3, 2);
-  dhc_dhu(0, 0) = dx / fx;
-  dhc_dhu(1, 1) = dy / fy;
+  dhc_dhu(0, 0) = camera.dx / camera.fx;
+  dhc_dhu(1, 1) = camera.dy / camera.fy;
 
   // Eq. (A.77). Again this equation appears to be wrong as well.
   // The theta and phi jacobians are considered row vectors in the book,
@@ -246,9 +239,10 @@ void CovarianceMatrix::add(
 
   // Adding image noise covariance. Eq (A.64)
   matrix_.block(n, n, 2, 2).diagonal() = Eigen::Vector2d(
-    pixel_error_x * pixel_error_x, pixel_error_y * pixel_error_y
+    camera.pixel_error_x * camera.pixel_error_x,
+    camera.pixel_error_y * camera.pixel_error_y
   );
-  matrix_(n + 2, n + 2) = ImageFeatureParameters::init_inv_depth;
+  matrix_(n + 2, n + 2) = config_.image_feature.init_inv_depth;
 
   matrix_ = jacobian * matrix_ * jacobian.transpose();
 }

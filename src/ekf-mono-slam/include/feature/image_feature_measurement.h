@@ -2,6 +2,7 @@
 
 #include <opencv2/core.hpp>
 
+#include "configuration/slam_config.h"
 #include "image_feature.h"
 #include "undistorted_image_feature.h"
 
@@ -22,7 +23,9 @@ class ImageFeatureMeasurement final : public ImageFeature {
 
   [[nodiscard]] cv::Mat descriptor_data() const { return descriptor_data_; }
 
-  [[nodiscard]] UndistortedImageFeature undistort() const;
+  [[nodiscard]] UndistortedImageFeature undistort(
+    const CameraConfig& camera
+  ) const;
 
  private:
   cv::Mat descriptor_data_;

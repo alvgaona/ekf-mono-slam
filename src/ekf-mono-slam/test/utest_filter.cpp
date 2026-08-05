@@ -1,12 +1,11 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 
-#include "configuration/kinematics_parameters.h"
+#include "configuration/slam_config.h"
 #include "filter/covariance_matrix.h"
 #include "filter/ekf.h"
 #include "filter/state.h"
 #include "image/file_sequence_image_provider.h"
-using namespace KinematicsParameters;
 
 TEST(ExtendedKalmanFilter, InitState) {
   const auto state = std::make_shared<State>();
@@ -105,17 +104,18 @@ TEST(ExtendedKalmanFilter, AddImageFeatureMeasurement) {
 }
 
 TEST(ExtendedKalmanFilter, InitCovariance) {
-  const CovarianceMatrix covariance_matrix;
+  const SlamConfig config;
+  const CovarianceMatrix covariance_matrix(config);
 
   ASSERT_EQ(covariance_matrix.matrix().rows(), 13);
   ASSERT_EQ(covariance_matrix.matrix().cols(), 13);
 
+  const auto eps = config.kinematics.epsilon;
+  const auto la = config.kinematics.linear_accel_sd;
+  const auto aa = config.kinematics.angular_accel_sd;
   Eigen::VectorXd expected_diagonal(13);
-  expected_diagonal << epsilon, epsilon, epsilon, epsilon, epsilon, epsilon,
-    epsilon, linear_accel_sd * linear_accel_sd,
-    linear_accel_sd * linear_accel_sd, linear_accel_sd * linear_accel_sd,
-    angular_accel_sd * angular_accel_sd, angular_accel_sd * angular_accel_sd,
-    angular_accel_sd * angular_accel_sd;
+  expected_diagonal << eps, eps, eps, eps, eps, eps, eps, la * la, la * la,
+    la * la, aa * aa, aa * aa, aa * aa;
   ASSERT_TRUE(covariance_matrix.matrix().diagonal().isApprox(expected_diagonal)
   );
 

@@ -2,6 +2,8 @@
 
 #include <eigen3/Eigen/Dense>
 
+#include "configuration/slam_config.h"
+
 class UndistortedImageFeature final {
  public:
   explicit UndistortedImageFeature(const Eigen::Vector2d& coordinates);
@@ -13,10 +15,10 @@ class UndistortedImageFeature final {
   ) = delete;
   UndistortedImageFeature& operator=(UndistortedImageFeature&& source) = delete;
 
-  [[nodiscard]] Eigen::Vector3d backproject() const;
+  [[nodiscard]] Eigen::Vector3d backproject(const CameraConfig& camera) const;
 
   [[nodiscard]] static UndistortedImageFeature project(
-    Eigen::Vector3d directional_vector
+    Eigen::Vector3d directional_vector, const CameraConfig& camera
   );
 
   [[nodiscard]] Eigen::Vector2d coordinates() const { return coordinates_; }

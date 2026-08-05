@@ -2,6 +2,7 @@
 
 #include <eigen3/Eigen/Core>
 
+#include "configuration/slam_config.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/map_feature.h"
 #include "math/ekf_math.h"
@@ -9,7 +10,7 @@
 
 class CovarianceMatrix final {
  public:
-  CovarianceMatrix();
+  explicit CovarianceMatrix(const SlamConfig& config = {});
   CovarianceMatrix(const CovarianceMatrix& source) = delete;
   CovarianceMatrix(CovarianceMatrix&& source) noexcept = delete;
 
@@ -40,6 +41,9 @@ class CovarianceMatrix final {
 
   [[nodiscard]] const Eigen::MatrixXd& matrix() const { return matrix_; }
 
+  [[nodiscard]] const SlamConfig& config() const { return config_; }
+
  private:
   Eigen::MatrixXd matrix_;
+  SlamConfig config_;
 };

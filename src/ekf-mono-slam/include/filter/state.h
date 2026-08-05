@@ -6,6 +6,7 @@
 #include <ostream>
 #include <vector>
 
+#include "configuration/slam_config.h"
 #include "feature/cartesian_map_feature.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/inverse_depth_map_feature.h"
@@ -18,7 +19,7 @@ class CovarianceMatrix;
 
 class State final {
  public:
-  State();
+  explicit State(const SlamConfig& config = {});
   ~State() = default;
   State(const State& source) = delete;
   State(State&& source) = delete;
@@ -30,8 +31,11 @@ class State final {
     const Eigen::Vector3d& position,
     const Eigen::Vector3d& velocity,
     const Eigen::Quaterniond& orientation,
-    const Eigen::Vector3d& angular_velocity
+    const Eigen::Vector3d& angular_velocity,
+    const SlamConfig& config = {}
   );
+
+  [[nodiscard]] const SlamConfig& config() const { return config_; }
 
   friend std::ostream& operator<<(std::ostream& os, const State& state) {
     os << state.position_ << '\n'
@@ -98,6 +102,7 @@ class State final {
   std::vector<std::shared_ptr<CartesianMapFeature>> cartesian_features_;
 
   int dimension_;
+  SlamConfig config_;
 
   void predict_measurement_state();
   void predict_measurement_covariance(const CovarianceMatrix& covariance_matrix

@@ -1,7 +1,5 @@
 #include "feature/feature_detector.h"
 
-#include <configuration/image_feature_parameters.h>
-
 #include <random>
 
 #include "feature/ellipse.h"
@@ -34,14 +32,16 @@
 FeatureDetector::FeatureDetector(
   const cv::Ptr<cv::FeatureDetector>& detector,
   const cv::Ptr<cv::DescriptorExtractor>& descriptor_extractor,
-  const cv::Size img_size
-) {
+  const cv::Size img_size,
+  const ImageFeatureConfig& image_feature_config
+)
+  : image_feature_config_(image_feature_config) {
   detector_ = detector;
   extractor_ = descriptor_extractor;
   img_size_ = img_size;
-  zones_in_row_ =
-    static_cast<int>(std::exp2(ImageFeatureParameters::image_area_divide_times)
-    );
+  zones_in_row_ = static_cast<int>(
+    std::exp2(image_feature_config_.image_area_divide_times)
+  );
   zone_size_ =
     cv::Size(img_size.width / zones_in_row_, img_size.height / zones_in_row_);
 }
@@ -73,6 +73,8 @@ void FeatureDetector::detect_features(
   const cv::Mat& image,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
 ) {
+  image_features_.clear();
+
   const cv::Mat image_mask(
     cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255
   );
@@ -333,7 +335,7 @@ cv::Ptr<cv::DescriptorExtractor> FeatureDetector::build_descriptor_extractor(
  * This function performs the following tasks:
  * 1. Checks if the number of detected keypoints is less than or equal to the
  * desired number of features (specified by
- * `ImageFeatureParameters::FEATURES_PER_IMAGE`).
+ * `ImageFeatureConfig::features_per_image`).
  * 2. If so, it iterates through each keypoint and creates a corresponding
  * `ImageFeatureMeasurement` object.
  * 3. Otherwise, it calls `SearchFeaturesByZone` to identify and select features
@@ -348,7 +350,8 @@ void FeatureDetector::compute_image_feature_measurements(
   const std::vector<cv::KeyPoint>& image_keypoints
 ) {
   if (const auto keypoints_size = image_keypoints.size();
-      keypoints_size <= ImageFeatureParameters::features_per_image) {
+      keypoints_size <=
+      static_cast<size_t>(image_feature_config_.features_per_image)) {
     for (auto i = 0u; i < keypoints_size; i++) {
       const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(
@@ -385,7 +388,7 @@ void FeatureDetector::compute_image_feature_measurements(
  *
  * The function continues selecting features until either all zones have been
  * processed or the desired number of features (specified by
- * `ImageFeatureParameters::FEATURES_PER_IMAGE`) has been collected.
+ * `ImageFeatureConfig::features_per_image`) has been collected.
  *
  * \pre The `measurementEllipseMatrix` member variable should be initialized
  * with appropriate dimensions and values.
@@ -394,13 +397,13 @@ void FeatureDetector::select_image_measurements_from_zones(
   std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
 ) {
   const cv::Mat1d measurementEllipseMatrix(2, 2);
-  measurementEllipseMatrix << ImageFeatureParameters::image_mask_ellipse_size,
-    0.0, 0.0, ImageFeatureParameters::image_mask_ellipse_size;
+  measurementEllipseMatrix << image_feature_config_.image_mask_ellipse_size,
+    0.0, 0.0, image_feature_config_.image_mask_ellipse_size;
 
   auto zones_left = zones.size();
 
   // TODO: Change features_needed to be passed when calling DetectFeatures.
-  int features_needed = ImageFeatureParameters::features_per_image;
+  int features_needed = image_feature_config_.features_per_image;
   while (zones_left > 0 && features_needed > 0) {
     const std::shared_ptr<Zone> curr_zone = zones.front();
     int curr_zone_candidates_left = curr_zone->candidates_left();
