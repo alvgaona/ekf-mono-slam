@@ -19,8 +19,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
-find_package(Eigen3 3.4.0 REQUIRED)
-find_package(OpenCV 4.9.0 REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 set(msg_files
@@ -111,33 +111,40 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
+find_package(GTest REQUIRED)
+
+set(test_sources
+  test/itest_slam.cpp
+  test/utest_feature.cpp
+  test/utest_filter.cpp
+  test/utest_image.cpp
+  test/utest_math.cpp
+)
+
+add_executable(slam_test ${test_sources})
+target_link_libraries(slam_test
+  PRIVATE
+    ekf_mono_slam_core
+    GTest::gmock
+    GTest::gtest
+    GTest::gtest_main
+)
+target_include_directories(slam_test PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+install(TARGETS slam_test
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+install(DIRECTORY test/resources
+  DESTINATION share/${PROJECT_NAME}/test
+)
+
 if(BUILD_TESTING)
-  find_package(GTest REQUIRED)
-
-  set(test_sources
-    test/itest_slam.cpp
-    test/utest_feature.cpp
-    test/utest_filter.cpp
-    test/utest_image.cpp
-    test/utest_math.cpp
-  )
-
-  add_executable(slam_test ${test_sources})
-  target_link_libraries(slam_test
-    PRIVATE
-      ekf_mono_slam_core
-      GTest::gmock
-      GTest::gtest
-      GTest::gtest_main
-  )
-  target_include_directories(slam_test PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-
   add_test(NAME slam_test COMMAND slam_test)
-  # Tests use paths relative to the colcon workspace root.
+  # Fixture paths are relative to the package root (source or installed share).
   set_tests_properties(slam_test PROPERTIES
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../..
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 endif()
 

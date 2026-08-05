@@ -8,7 +8,7 @@
 
 TEST(SLAMIntegration, FindFeatureInStateAndCovariance) {
   FileSequenceImageProvider image_provider(
-    "./src/ekf-mono-slam/test/resources/desk_translation/"
+    "./test/resources/desk_translation/"
   );
   const cv::Mat image = image_provider.next();
 

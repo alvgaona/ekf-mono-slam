@@ -1,5 +1,7 @@
 CompileFlags:
-  CompilationDatabase: build
+  # pixi-build-ros writes compile_commands under .pixi/bld/.../work/build.
+  # Symlink or copy that file to the package root if clangd needs it.
+  CompilationDatabase: ekf-mono-slam
   Compiler: clang++
 Diagnostics:
   MissingIncludes: None

@@ -1,5 +1,5 @@
-# clang
-.cache/clangd
+# clang / tooling caches
+.cache/
 
 # Other
 datasets/
@@ -40,6 +40,8 @@ cmake-build-*/
 *.out
 *.app
 
-# pixi environments
+# pixi environments and build outputs
 .pixi/
 *.egg-info
+output/
+.pixi-build/

@@ -4,9 +4,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project overview
 
-Visual monocular SLAM using a 1-Point RANSAC EKF. Implemented as a ROS 2 Humble package (`ekf_mono_slam`) with C++20, Eigen, and OpenCV. Environment and tasks are managed with [pixi](https://pixi.sh).
+Visual monocular SLAM using a 1-Point RANSAC EKF. Implemented as a ROS 2 Humble package (`ekf_mono_slam`) with C++20, Eigen, and OpenCV. Environment and packaging are managed with [pixi](https://pixi.sh) and the `pixi-build-ros` backend.
 
-Domain logic lives in a ROS-free static/shared library target `ekf_mono_slam_core`. ROS nodes are thin wrappers.
+Domain logic lives in a ROS-free library target `ekf_mono_slam_core`. ROS nodes are thin wrappers.
 
 ## Setup
 
@@ -17,38 +17,33 @@ pixi install
 # Desk Translation: https://pub-db0cd070a4f94dabb9b58161850d4868.r2.dev/desk_translation.zip
 ```
 
-Platforms: `linux-64`, `osx-arm64`. Channels: `conda-forge`, `robostack-staging`.
+Platforms: `linux-64`, `osx-arm64`. Channels: `robostack-humble`, `conda-forge`. Preview: `pixi-build`.
 
-Pixi activation sources `install/setup.sh` after a successful build.
+`pixi install` builds the path package `ros-humble-ekf-mono-slam` from `ekf-mono-slam/` via `pixi-build-ros` and installs it into `.pixi/envs/default`.
 
 ## Common commands
 
 ```bash
-pixi run build          # colcon build --symlink-install -G Ninja
-pixi run test           # depends on build; colcon test + ./build/ekf_mono_slam/slam_test
-pixi run clean          # rm -rf build install log
-pixi run clean-build    # clean then build
+pixi install            # resolve + build path package into the env
+pixi run test           # run installed slam_test (cwd = share/ekf_mono_slam)
 pixi run app            # ros2 launch ekf_mono_slam vslam.launch.py
+pixi build              # from ekf-mono-slam/: produce a conda package artifact
 ```
 
-### Build details
-
-```bash
-colcon build --symlink-install --event-handler console_direct+ \
-  --cmake-args -G Ninja -DPython3_EXECUTABLE=$CONDA_PREFIX/bin/python
-```
-
-Artifacts: `build/`, `install/`, `log/` (gitignored). `CMAKE_EXPORT_COMPILE_COMMANDS` is ON; clangd uses `CompilationDatabase: build`.
+There is no colcon workspace. Do not recreate root `build/`, `install/`, or `log/` for this project.
 
 ### Tests
 
-- Binary: `build/ekf_mono_slam/slam_test` (links `ekf_mono_slam_core` + GTest).
+- Binary: installed as `lib/ekf_mono_slam/slam_test` (via `ros2 run ekf_mono_slam slam_test`).
 - Sources listed explicitly in `CMakeLists.txt` (`test/utest_*.cpp`, `test/itest_*.cpp`).
+- Fixtures: `test/resources/desk_translation/` (also installed under `share/ekf_mono_slam/test/resources`).
+- Paths in tests are relative to the package root / installed share prefix.
 - CI: `pixi run test` on `main` push/PR.
 
 ```bash
-pixi run build
-./build/ekf_mono_slam/slam_test --gtest_filter='ExtendedKalmanFilter.PredictState'
+pixi run test
+# or with a gtest filter:
+pixi run test -- --gtest_filter=ExtendedKalmanFilter.PredictState
 ```
 
 | File | Suites |
@@ -59,12 +54,10 @@ pixi run build
 | `test/utest_image.cpp` | `FileSequenceImageProvider`, `FileSequenceProvider` |
 | `test/itest_slam.cpp` | `SLAMIntegration` |
 
-Fixtures: `test/resources/desk_translation/`.
-
 ### Formatting / IDE
 
 - `.clang-format`: Google-based, 80 cols, `NamespaceIndentation: All`.
-- `.clangd`: compile DB under `build/`.
+- `.clangd`: looks for `compile_commands.json` under `ekf-mono-slam/` (copy/symlink from the latest `.pixi/bld/ros-humble-ekf-mono-slam/*/work/build/` if needed).
 - No dedicated pixi lint task; format touched C++ with clang-format.
 
 ### Run the system
@@ -79,7 +72,7 @@ pixi run app
 # or:
 ros2 launch ekf_mono_slam vslam.launch.py \
   image_dir:=./datasets/desk_translation/ \
-  config:=install/ekf_mono_slam/share/ekf_mono_slam/config/ekf.yaml
+  config:=$(ros2 pkg prefix ekf_mono_slam)/share/ekf_mono_slam/config/ekf.yaml
 ```
 
 `file_sequence_image` params: `image_dir`, `start_image_index` (1), `end_image_index` (350), ~25 Hz.
@@ -89,20 +82,22 @@ EKF runtime config: installed `config/ekf.yaml` (camera, kinematics, image_featu
 ## Repository layout
 
 ```
-pixi.toml / pixi.lock
-src/ekf-mono-slam/          # single ament_cmake package
-  CMakeLists.txt            # explicit source lists; ekf_mono_slam_core lib
+pixi.toml                 # workspace: path dep + tasks
+pixi.lock
+ekf-mono-slam/            # single ament_cmake package + package pixi.toml
+  pixi.toml               # pixi-build-ros backend, distro=humble
+  CMakeLists.txt          # explicit source lists; ekf_mono_slam_core lib
   package.xml
   config/ekf.yaml
   launch/vslam.launch.py
-  msg/                      # State, CovarianceMatrix, image feature msgs
-  include/                  # public headers (domain + node headers)
-  src/                      # core + *_node.cpp wrappers
+  msg/                    # State, CovarianceMatrix, image feature msgs
+  include/                # public headers (domain + node headers)
+  src/                    # core + *_node.cpp wrappers
   test/
-datasets/                   # gitignored
+datasets/                 # gitignored
 ```
 
-Package name `ekf_mono_slam`; directory `ekf-mono-slam`.
+Package name `ekf_mono_slam`; directory `ekf-mono-slam`. Conda package name `ros-humble-ekf-mono-slam`.
 
 ## Architecture
 
@@ -156,9 +151,9 @@ Msgs only (no srvs): `State`, `CovarianceMatrix`, `ImagePoint`, `ImageFeatureMea
 
 ## Dependencies
 
-ROS: humble desktop stack pieces used by nodes (`rclcpp`, msgs, `cv_bridge`, `image_transport`).
+ROS (via package.xml → RoboStack): humble `rclcpp`, msgs, `cv_bridge`, `image_transport`, `rosidl_*`.
 
-Libs: Eigen ≥ 3.4, OpenCV ≥ 4.9, GTest/GMock (pixi), Ninja, CMake ~3.28, clang-format.
+Libs: Eigen, OpenCV, GTest/GMock (test), mapped by `pixi-build-ros`.
 
 C++20. Warnings: `-Wall -Wextra -Wpedantic`.
 
