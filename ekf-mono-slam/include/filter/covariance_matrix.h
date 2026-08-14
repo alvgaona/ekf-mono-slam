@@ -26,6 +26,10 @@ class CovarianceMatrix final {
     return os;
   }
 
+  explicit CovarianceMatrix(
+    Eigen::MatrixXd matrix, const SlamConfig& config = {}
+  );
+
   [[nodiscard]] Eigen::MatrixXd feature_covariance_block(
     const MapFeature& feature
   ) const;
@@ -38,6 +42,8 @@ class CovarianceMatrix final {
     const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
     const std::shared_ptr<State>& state
   );
+
+  void remove(const MapFeature& feature);
 
   [[nodiscard]] const Eigen::MatrixXd& matrix() const { return matrix_; }
 

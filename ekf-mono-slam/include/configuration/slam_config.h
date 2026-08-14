@@ -24,6 +24,8 @@ struct CameraConfig {
 struct KinematicsConfig {
   double linear_accel_sd = 0.0005;
   double angular_accel_sd = 0.00005;
+  double std_v0 = 0.025;
+  double std_w0 = 0.025;
   double inv_depth_sd = 1.0;
   double epsilon = 2.22e-16;
 };
@@ -37,7 +39,8 @@ struct ImageFeatureConfig {
   DescriptorExtractorType descriptor_type = DescriptorExtractorType::AKAZE;
 };
 
-/** Full runtime SLAM configuration (loaded from config/ekf.yaml in the node). */
+/** Full runtime SLAM configuration (loaded from config/ekf.yaml in the node).
+ */
 struct SlamConfig {
   CameraConfig camera;
   KinematicsConfig kinematics;

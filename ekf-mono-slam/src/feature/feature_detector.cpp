@@ -39,9 +39,8 @@ FeatureDetector::FeatureDetector(
   detector_ = detector;
   extractor_ = descriptor_extractor;
   img_size_ = img_size;
-  zones_in_row_ = static_cast<int>(
-    std::exp2(image_feature_config_.image_area_divide_times)
-  );
+  zones_in_row_ =
+    static_cast<int>(std::exp2(image_feature_config_.image_area_divide_times));
   zone_size_ =
     cv::Size(img_size.width / zones_in_row_, img_size.height / zones_in_row_);
 }
@@ -139,8 +138,13 @@ void FeatureDetector::build_image_mask(
   }
 
   for (const auto& prediction : predictions) {
-    // FIXME: pass the right value
-    Ellipse ellipse(prediction->coordinates(), cv::Mat());
+    const Eigen::Matrix2d& S = prediction->jacobian();
+    cv::Mat S_cv(2, 2, CV_64FC1);
+    S_cv.at<double>(0, 0) = S(0, 0);
+    S_cv.at<double>(0, 1) = S(0, 1);
+    S_cv.at<double>(1, 0) = S(1, 0);
+    S_cv.at<double>(1, 1) = S(1, 1);
+    Ellipse ellipse(prediction->coordinates(), S_cv);
     Visual::UncertaintyEllipse2D(
       image_mask,
       ellipse,

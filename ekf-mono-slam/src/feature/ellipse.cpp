@@ -56,16 +56,14 @@ Ellipse::Ellipse(const cv::Point2f center, const cv::Mat& matrix) {
  * smaller ellipse signifies better localization precision.
  */
 cv::Size2f Ellipse::axes() {
-  const cv::Size2f axes(
+  return {
     static_cast<float>(
-      2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
+      2.0 * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
     ),
     static_cast<float>(
-      2.0L * std::sqrt(eigen_values_.at<double>(0, 0) * CHISQ_95_2)
+      2.0 * std::sqrt(eigen_values_.at<double>(1, 0) * CHISQ_95_2)
     )
-  );
-
-  return axes;
+  };
 }
 
 /**

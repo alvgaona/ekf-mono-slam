@@ -21,6 +21,7 @@ find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(fmt REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 set(msg_files
@@ -74,6 +75,7 @@ target_include_directories(ekf_mono_slam_core
 target_link_libraries(ekf_mono_slam_core
   PUBLIC
     ${OpenCV_LIBS}
+    fmt::fmt
 )
 
 add_executable(file_sequence_image src/file_sequence_image_node.cpp)

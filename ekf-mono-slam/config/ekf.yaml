@@ -18,6 +18,8 @@
     kinematics:
       linear_accel_sd: 0.0005
       angular_accel_sd: 0.00005
+      std_v0: 0.025
+      std_w0: 0.025
       inv_depth_sd: 1.0
       epsilon: 2.22e-16
     image_feature:
