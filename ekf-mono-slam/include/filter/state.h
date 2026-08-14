@@ -71,6 +71,14 @@ class State final {
 
   [[nodiscard]] int dimension() const { return dimension_; }
 
+  [[nodiscard]] Eigen::VectorXd packed() const;
+  void apply_delta(const Eigen::VectorXd& dx);
+
+  [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& features(
+  ) const {
+    return features_;
+  }
+
   [[nodiscard]] const std::vector<std::shared_ptr<CartesianMapFeature>>&
   cartesian_features() const {
     return cartesian_features_;

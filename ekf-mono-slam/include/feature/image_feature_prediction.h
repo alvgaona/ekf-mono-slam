@@ -18,6 +18,14 @@ class ImageFeaturePrediction final : public ImageFeature {
     jacobian_ = std::move(jacobian);
   }
 
+  [[nodiscard]] const Eigen::MatrixXd& measurement_jacobian() const noexcept {
+    return measurement_jacobian_;
+  }
+
+  void set_measurement_jacobian(Eigen::MatrixXd H) {
+    measurement_jacobian_ = std::move(H);
+  }
+
   static ImageFeaturePrediction from(
     const Eigen::Vector3d& directional_vector,
     int index,
@@ -25,5 +33,6 @@ class ImageFeaturePrediction final : public ImageFeature {
   );
 
  private:
-  Eigen::Matrix2d jacobian_;
+  Eigen::Matrix2d jacobian_ = Eigen::Matrix2d::Zero();
+  Eigen::MatrixXd measurement_jacobian_;
 };
