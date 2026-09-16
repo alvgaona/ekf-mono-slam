@@ -38,7 +38,8 @@ There is no colcon workspace. Do not recreate root `build/`, `install/`, or `log
 - Sources listed explicitly in `CMakeLists.txt` (`test/utest_*.cpp`, `test/itest_*.cpp`).
 - Fixtures: `test/resources/desk_translation/` (also installed under `share/ekf_mono_slam/test/resources`).
 - Paths in tests are relative to the package root / installed share prefix.
-- CI: `pixi run test` on `main` push/PR.
+- CI: `pixi run test` on `main` push/PR. Workflow installs pixi `v0.81.0`
+  (`setup-pixi@v0.10.2`); lockfile is version 7 and needs pixi ≥ 0.62.
 
 ```bash
 pixi run test
@@ -120,6 +121,28 @@ file_sequence_image                         ekf
 - **Tracking (partial):** later frames `predict()` then `match_predicted_features` (match/update still TODO inside `filter/`).
 - No feature-detect ROS service. No Rerun dependency.
 
+### Packed state (Phase 0)
+
+Camera block is `[r(3), q(4), v(3), ω(3)]` (quaternion `w,x,y,z`). Each map feature follows in `features_` order (inverse-depth = 6, cartesian = 3).
+
+- `State::packed()` / `State::apply_delta()` are the x / x+δx interface.
+- `MapFeature::position()` is the packed-state offset (13, 19, …), not a feature ordinal. `index()` is the feature id.
+- `State::remove` shrinks `dimension_` and shifts later offsets. Call `CovarianceMatrix::remove` first (it uses the current offset).
+
+### Covariance
+
+- Initial `P` matches MATLAB `initialize_x_and_p.m`: `eps` on pose/quat, `std_v0²` / `std_w0²` on `v`/`ω` (defaults 0.025). Accel SDs belong in `Q` only.
+- Inverse-depth `add()` builds a zeroed `(n+3)` augment (`R` and `inv_depth_sd²`), then `P ← J P_aug Jᵀ` of size `n+6`.
+- `feature_covariance_block` uses `feature.position()` and `feature.dimension()`.
+
+### Measurement model
+
+- `ImageFeaturePrediction` stores full `H` (`measurement_jacobian()`, 2×n) and innovation covariance `S` (`jacobian()`, 2×2).
+- Inverse-depth `H`: quaternion block at columns 3–6; map block at `feature.position()`, width 6.
+- Cartesian `H` is implemented (`calculate_Hi_cartesian.m`).
+- `times_predicted` increments when a feature is predicted as visible.
+- `build_image_mask` draws the `S` ellipse; `Ellipse::axes()` uses both eigenvalues.
+
 ### Build targets
 
 | Target | Role |
@@ -146,14 +169,17 @@ Msgs only (no srvs): `State`, `CovarianceMatrix`, `ImagePoint`, `ImageFeatureMea
 
 ### Implementation status
 
-- Post-init path: predict + stub match; 1-Point RANSAC update still TODO in `filter/`.
+- Phase 0 (predict/init packing, `P` layout, `H`/`S`, cartesian Jacobian) is done.
+- Post-init path: predict + stub match; 1-Point RANSAC update still TODO in `filter/` (Phase 1+).
 - Detector defaults to AKAZE; selectable via `image_feature.detector_type` / `descriptor_type` in YAML.
 
 ## Dependencies
 
 ROS (via package.xml → RoboStack): humble `rclcpp`, msgs, `cv_bridge`, `image_transport`, `rosidl_*`.
 
-Libs: Eigen, OpenCV, GTest/GMock (test), mapped by `pixi-build-ros`.
+Libs: Eigen, OpenCV, fmt, GTest/GMock (test), mapped by `pixi-build-ros`.
+Linux conda-build uses `--allow-shlib-undefined`; `ekf_mono_slam_core`
+must link `fmt::fmt` or `slam_test` fails with a missing `fmt::v12` symbol.
 
 C++20. Warnings: `-Wall -Wextra -Wpedantic`.
 
