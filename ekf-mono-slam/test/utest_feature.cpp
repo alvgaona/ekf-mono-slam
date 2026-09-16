@@ -1,11 +1,15 @@
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include <cmath>
 
 #include "configuration/slam_config.h"
+#include "feature/ellipse.h"
 #include "feature/feature_detector.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/zone.h"
 #include "image/file_sequence_image_provider.h"
+#include "math/ekf_math.h"
 
 using namespace testing;  // For GMock matchers
 
@@ -29,8 +33,7 @@ TEST(FeatureDetectors, NotSupportedDetector) {
 }
 
 TEST(FeatureDetectors, DetectFeatures) {
-  FileSequenceImageProvider image_provider(
-    "./test/resources/desk_translation/"
+  FileSequenceImageProvider image_provider("./test/resources/desk_translation/"
   );
   const cv::Mat image = image_provider.next();
 
@@ -61,6 +64,19 @@ TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {
     undistorted_image_feature.coordinates(),
     Eq(Eigen::Vector2d(1.4040732757828778, 1.0760232978706483))
   );
+}
+
+TEST(EllipseAxes, UsesBothEigenvalues) {
+  cv::Mat covariance = (cv::Mat_<double>(2, 2) << 1.0, 0.0, 0.0, 4.0);
+  Ellipse ellipse(cv::Point2f(0.0f, 0.0f), covariance);
+  const cv::Size2f axes = ellipse.axes();
+
+  const float major =
+    static_cast<float>(2.0 * std::sqrt(4.0 * EkfMath::CHISQ_95_2));
+  const float minor =
+    static_cast<float>(2.0 * std::sqrt(1.0 * EkfMath::CHISQ_95_2));
+  ASSERT_NEAR(axes.width, major, 1e-5);
+  ASSERT_NEAR(axes.height, minor, 1e-5);
 }
 
 TEST(Zones, CreateZone) {

@@ -85,19 +85,51 @@ State::State(
  * Note that this is a simplified prediction and might not be accurate for more
  * complex motion models or external influences.
  */
+Eigen::VectorXd State::packed() const {
+  Eigen::VectorXd x(dimension_);
+  x.segment<3>(0) = position_;
+  x(3) = orientation_.w();
+  x(4) = orientation_.x();
+  x(5) = orientation_.y();
+  x(6) = orientation_.z();
+  x.segment<3>(7) = velocity_;
+  x.segment<3>(10) = angular_velocity_;
+  for (const auto& feature : features_) {
+    x.segment(feature->position(), static_cast<int>(feature->dimension())) =
+      feature->state();
+  }
+  return x;
+}
+
+void State::apply_delta(const Eigen::VectorXd& dx) {
+  position_ += dx.segment<3>(0);
+  orientation_.w() += dx(3);
+  orientation_.x() += dx(4);
+  orientation_.y() += dx(5);
+  orientation_.z() += dx(6);
+  orientation_.normalize();
+  rotation_matrix_ = orientation_.toRotationMatrix();
+  velocity_ += dx.segment<3>(7);
+  angular_velocity_ += dx.segment<3>(10);
+  for (const auto& feature : features_) {
+    feature->apply_delta(
+      dx.segment(feature->position(), static_cast<int>(feature->dimension()))
+    );
+  }
+}
+
 void State::predict(const double delta_t) {
-  // This prediction assumes constant velocity
   position_ += velocity_ * delta_t;
   const Eigen::Vector3d angles = angular_velocity_ * delta_t;
-
-  // Compute the orientation and its rotation matrix from angles
   const double angle = angles.norm();
-  const Eigen::Vector3d axis = angles.normalized();
-  Eigen::Quaterniond q;
-  q = Eigen::AngleAxisd(angle, axis);
 
-  orientation_ *= q;
-  rotation_matrix_ = q.toRotationMatrix();
+  if (angle > 1e-15) {
+    const Eigen::Quaterniond q{Eigen::AngleAxisd(angle, angles.normalized())};
+    orientation_ *= q;
+    orientation_.normalize();
+  }
+
+  rotation_matrix_ = orientation_.toRotationMatrix();
 }
 
 /**
@@ -114,6 +146,9 @@ void State::predict(const double delta_t) {
  * tracking.
  */
 void State::remove(const std::shared_ptr<MapFeature>& feature) {
+  const int removed_position = feature->position();
+  const int removed_dimension = static_cast<int>(feature->dimension());
+
   if (const auto& cartesian_feature =
         std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
     std::erase_if(
@@ -134,6 +169,13 @@ void State::remove(const std::shared_ptr<MapFeature>& feature) {
   std::erase_if(features_, [&feature](const std::shared_ptr<MapFeature>& f) {
     return f == feature;
   });
+
+  dimension_ -= removed_dimension;
+  for (const auto& remaining : features_) {
+    if (remaining->position() > removed_position) {
+      remaining->set_position(remaining->position() - removed_dimension);
+    }
+  }
 }
 
 /**
@@ -181,8 +223,6 @@ void State::add(
     image_feature_measurement->index()
   );
 
-  dimension_ += 6;
-
   add(map_feature);
 }
 
@@ -200,10 +240,12 @@ void State::add(const std::shared_ptr<MapFeature>& feature) {
         std::dynamic_pointer_cast<CartesianMapFeature>(feature)) {
     cartesian_features_.push_back(cartesian_feature);
     features_.push_back(cartesian_feature);
+    dimension_ += static_cast<int>(cartesian_feature->dimension());
   } else if (const auto& inverse_depth_feature =
                std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
     inverse_depth_features_.push_back(inverse_depth_feature);
     features_.push_back(inverse_depth_feature);
+    dimension_ += static_cast<int>(inverse_depth_feature->dimension());
   }
 }
 
@@ -246,6 +288,7 @@ void State::predict_measurement_state() {
         );
         image_feature_prediction.is_visible_in_frame(config_.camera)) {
       map_feature->add(image_feature_prediction);
+      map_feature->increment_times_predicted();
       continue;
     }
   }
@@ -270,6 +313,8 @@ void State::predict_measurement_covariance(
   const CovarianceMatrix& covariance_matrix
 ) {
   for (const auto& map_feature : features_) {
-    map_feature->measurement_jacobian(*this, covariance_matrix);
+    if (map_feature->has_prediction()) {
+      map_feature->measurement_jacobian(*this, covariance_matrix);
+    }
   }
 }

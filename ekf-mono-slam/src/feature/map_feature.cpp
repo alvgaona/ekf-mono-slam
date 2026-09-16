@@ -1,5 +1,6 @@
 #include "feature/map_feature.h"
 
+#include "filter/covariance_matrix.h"
 #include "math/ekf_math.h"
 
 using namespace EkfMath;
@@ -51,8 +52,7 @@ bool MapFeature::is_in_front_of_camera(
     rad2deg(atan2(directional_vector[1], directional_vector[2]));
   return atanxz > -camera.angular_vision_x &&
          atanxz < camera.angular_vision_x &&
-         atanyz > -camera.angular_vision_y &&
-         atanyz < camera.angular_vision_y;
+         atanyz > -camera.angular_vision_y && atanyz < camera.angular_vision_y;
 }
 
 /**
@@ -69,4 +69,17 @@ Eigen::Vector3d MapFeature::directional_vector(
   const Eigen::Vector3d& camera_position
 ) {
   return directional_vector(Eigen::Matrix3d::Identity(), camera_position);
+}
+
+void MapFeature::store_measurement_jacobian(
+  const Eigen::MatrixXd& H,
+  const CovarianceMatrix& covariance_matrix,
+  const CameraConfig& camera
+) {
+  Eigen::Matrix2d R = Eigen::Matrix2d::Zero();
+  R(0, 0) = camera.pixel_error_x * camera.pixel_error_x;
+  R(1, 1) = camera.pixel_error_y * camera.pixel_error_y;
+  Eigen::Matrix2d S = H * covariance_matrix.matrix() * H.transpose() + R;
+  prediction_->set_measurement_jacobian(H);
+  prediction_->jacobian(std::move(S));
 }

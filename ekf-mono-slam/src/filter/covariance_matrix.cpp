@@ -1,5 +1,7 @@
 #include "filter/covariance_matrix.h"
 
+#include <utility>
+
 using namespace EkfMath;
 
 /**
@@ -26,12 +28,18 @@ using namespace EkfMath;
  */
 CovarianceMatrix::CovarianceMatrix(const SlamConfig& config) : config_(config) {
   const auto eps = config_.kinematics.epsilon;
-  const auto la = config_.kinematics.linear_accel_sd;
-  const auto aa = config_.kinematics.angular_accel_sd;
+  const auto std_v0 = config_.kinematics.std_v0;
+  const auto std_w0 = config_.kinematics.std_w0;
   matrix_ = Eigen::MatrixXd::Identity(13, 13);
-  matrix_.diagonal() << eps, eps, eps, eps, eps, eps, eps, la * la, la * la,
-    la * la, aa * aa, aa * aa, aa * aa;
+  matrix_.diagonal() << eps, eps, eps, eps, eps, eps, eps, std_v0 * std_v0,
+    std_v0 * std_v0, std_v0 * std_v0, std_w0 * std_w0, std_w0 * std_w0,
+    std_w0 * std_w0;
 }
+
+CovarianceMatrix::CovarianceMatrix(
+  Eigen::MatrixXd matrix, const SlamConfig& config
+)
+  : matrix_(std::move(matrix)), config_(config) {}
 
 /**
  * @brief Extracts the covariance matrix block corresponding to a specific map
@@ -51,12 +59,9 @@ CovarianceMatrix::CovarianceMatrix(const SlamConfig& config) : config_(config) {
 Eigen::MatrixXd CovarianceMatrix::feature_covariance_block(
   const MapFeature& feature
 ) const {
-  constexpr int base_state_size =
-    13;  // Index of 13 represents base state variables before features
-  const auto feature_start_idx = base_state_size + feature.index() * 3;
-  const auto feature_dim = feature.dimension();
+  const auto feature_start_idx = feature.position();
+  const auto feature_dim = static_cast<int>(feature.dimension());
 
-  // Return the covariance block corresponding to this feature's dimensions
   return matrix_.block(
     feature_start_idx, feature_start_idx, feature_dim, feature_dim
   );
@@ -92,7 +97,7 @@ void CovarianceMatrix::predict(
 
   // This is dq3_dq2
   F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(),
-    q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.y(), q1.z(), q1.y(), -q1.x(),
+    q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.x(), q1.z(), q1.y(), -q1.x(),
     q1.w();  // Eq. (A. 10) and Eq. (A. 12)
 
   const Eigen::Quaterniond q2 = state->orientation();
@@ -166,8 +171,14 @@ void CovarianceMatrix::add(
   const std::shared_ptr<State>& state
 ) {
   const auto& camera = config_.camera;
-  const int n = state->dimension();
-  matrix_.conservativeResize(n + 3, n + 3);
+  const int n = static_cast<int>(matrix_.rows());
+
+  Eigen::MatrixXd P_aug = Eigen::MatrixXd::Zero(n + 3, n + 3);
+  P_aug.topLeftCorner(n, n) = matrix_;
+  P_aug(n, n) = camera.pixel_error_x * camera.pixel_error_x;
+  P_aug(n + 1, n + 1) = camera.pixel_error_y * camera.pixel_error_y;
+  const auto inv_depth_sd = config_.kinematics.inv_depth_sd;
+  P_aug(n + 2, n + 2) = inv_depth_sd * inv_depth_sd;
 
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(n + 6, n + 3);
 
@@ -237,12 +248,23 @@ void CovarianceMatrix::add(
 
   jacobian.block(n, n, 6, 3) = dy_dh;
 
-  // Adding image noise covariance. Eq (A.64)
-  matrix_.block(n, n, 2, 2).diagonal() = Eigen::Vector2d(
-    camera.pixel_error_x * camera.pixel_error_x,
-    camera.pixel_error_y * camera.pixel_error_y
-  );
-  matrix_(n + 2, n + 2) = config_.image_feature.init_inv_depth;
+  matrix_ = jacobian * P_aug * jacobian.transpose();
+}
 
-  matrix_ = jacobian * matrix_ * jacobian.transpose();
+void CovarianceMatrix::remove(const MapFeature& feature) {
+  const int pos = feature.position();
+  const int dim = static_cast<int>(feature.dimension());
+  const int n = static_cast<int>(matrix_.rows());
+  const int tail = n - pos - dim;
+
+  Eigen::MatrixXd resized(n - dim, n - dim);
+  resized.topLeftCorner(pos, pos) = matrix_.topLeftCorner(pos, pos);
+  if (tail > 0) {
+    resized.topRightCorner(pos, tail) = matrix_.block(0, pos + dim, pos, tail);
+    resized.bottomLeftCorner(tail, pos) =
+      matrix_.block(pos + dim, 0, tail, pos);
+    resized.bottomRightCorner(tail, tail) =
+      matrix_.block(pos + dim, pos + dim, tail, tail);
+  }
+  matrix_ = std::move(resized);
 }

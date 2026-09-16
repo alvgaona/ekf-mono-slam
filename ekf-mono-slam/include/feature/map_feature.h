@@ -32,11 +32,29 @@ class MapFeature {
 
   [[nodiscard]] const Eigen::VectorXd& state() const { return state_; }
 
+  void apply_delta(const Eigen::VectorXd& dx) { state_ += dx; }
+
   [[nodiscard]] int64_t dimension() const { return state_.size(); }
 
   [[nodiscard]] int index() const { return index_; }
 
+  [[nodiscard]] int position() const { return position_; }
+
+  void set_position(int position) { position_ = position; }
+
+  [[nodiscard]] int times_predicted() const { return times_predicted_; }
+
+  [[nodiscard]] int times_matched() const { return times_matched_; }
+
+  void increment_times_predicted() { ++times_predicted_; }
+
+  [[nodiscard]] bool has_prediction() const { return prediction_ != nullptr; }
+
   [[nodiscard]] ImageFeaturePrediction& prediction() { return *prediction_; }
+
+  [[nodiscard]] const ImageFeaturePrediction& prediction() const {
+    return *prediction_;
+  }
 
   void add(const ImageFeaturePrediction& prediction) {
     prediction_ = std::make_unique<ImageFeaturePrediction>(prediction);
@@ -60,6 +78,12 @@ class MapFeature {
   );
 
  protected:
+  void store_measurement_jacobian(
+    const Eigen::MatrixXd& H,
+    const CovarianceMatrix& covariance_matrix,
+    const CameraConfig& camera
+  );
+
   int index_ = 1;
   Eigen::VectorXd state_;
   int position_;

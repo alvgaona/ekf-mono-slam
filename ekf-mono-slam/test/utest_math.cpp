@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "configuration/slam_config.h"
 #include "filter/state.h"
@@ -42,17 +42,17 @@ TEST(QuaternionDerivatives, NonZeroAngularVelocity) {
   const Eigen::Vector3d dqidomegai =
     partial_derivative_qi_by_omegai(omega, 1.0);
 
-  ASSERT_THAT(dqidomegai[0], DoubleNear(0.223, 1e-3));
-  ASSERT_THAT(dqidomegai[1], DoubleNear(0.048, 1e-3));
-  ASSERT_THAT(dqidomegai[2], DoubleNear(0.238, 1e-3));
+  ASSERT_THAT(dqidomegai[0], DoubleNear(0.48582, 1e-4));
+  ASSERT_THAT(dqidomegai[1], DoubleNear(0.48253, 1e-4));
+  ASSERT_THAT(dqidomegai[2], DoubleNear(0.48611, 1e-4));
 
   const Eigen::Matrix3d dqidomegaj =
     partial_derivative_qi_by_omegaj(omega, 1.0);
 
   ASSERT_THAT(dqidomegaj.diagonal(), Eq(Eigen::Vector3d::Zero()));
-  ASSERT_THAT(dqidomegaj(0, 1), DoubleNear(-0.4164, 1e-3));
-  ASSERT_THAT(dqidomegaj(0, 2), DoubleNear(-0.5471, 1e-3));
-  ASSERT_THAT(dqidomegaj(1, 2), DoubleNear(-0.5632, 1e-3));
+  ASSERT_THAT(dqidomegaj(0, 1), DoubleNear(-0.006490, 1e-5));
+  ASSERT_THAT(dqidomegaj(0, 2), DoubleNear(0.004904, 1e-5));
+  ASSERT_THAT(dqidomegaj(1, 2), DoubleNear(0.006305, 1e-5));
 
   // Check matrix symmetry
   ASSERT_THAT(dqidomegaj(0, 1), DoubleEq(dqidomegaj(1, 0)));

@@ -31,7 +31,7 @@ Eigen::MatrixXd EkfMath::dyn_model_jacobian(
 
   // This is dq3dq2
   F.block(3, 3, 4, 4) << q1.w(), -q1.x(), -q1.y(), -q1.z(), q1.x(), q1.w(),
-    q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.y(), q1.z(), q1.y(), -q1.x(),
+    q1.z(), -q1.y(), q1.y(), -q1.z(), q1.w(), q1.x(), q1.z(), q1.y(), -q1.x(),
     q1.w();  // Eq. (A. 10) and Eq. (A. 12)
 
   Eigen::Quaterniond q2 = state.orientation();
@@ -109,8 +109,7 @@ cv::Point2d EkfMath::distort_image_feature(
   const auto yu = (feature_coordinates[1] - camera.cy) * camera.dy;
 
   const auto ru = sqrt(xu * xu + yu * yu);
-  auto rd =
-    ru / (1L + camera.k1 * ru * ru + camera.k2 * ru * ru * ru * ru);
+  auto rd = ru / (1L + camera.k1 * ru * ru + camera.k2 * ru * ru * ru * ru);
 
   for (auto i = 0; i < 10; i++) {
     const auto rd2 = rd * rd;
@@ -128,9 +127,7 @@ cv::Point2d EkfMath::distort_image_feature(
 
   const auto d = 1L + camera.k1 * rd2 + camera.k2 * rd4;
 
-  return {
-    camera.cx + xu / d / camera.dx, camera.cy + yu / d / camera.dy
-  };
+  return {camera.cx + xu / d / camera.dx, camera.cy + yu / d / camera.dy};
 }
 
 /**
@@ -221,7 +218,7 @@ Eigen::Vector3d EkfMath::partial_derivative_qi_by_omegai(
     return {0, 0, 0};
   }
 
-  return -dt / 2 * Eigen::pow(omega.array() / theta, 2) * cos(theta * dt / 2) +
+  return dt / 2 * Eigen::pow(omega.array() / theta, 2) * cos(theta * dt / 2) +
          1 / theta * (1 - Eigen::pow(omega.array() / theta, 2)) *
            sin(theta * dt / 2);
 }
@@ -251,8 +248,8 @@ Eigen::Matrix3d EkfMath::partial_derivative_qi_by_omegaj(
 
   Eigen::Matrix3d out = Eigen::Matrix3d::Zero();
   const auto f = [dt, theta](const double omegai, const double omegaj) {
-    return dt / 2 * omegai * omegaj / theta * theta * cos(theta * dt / 2) -
-           1 / theta * sin(theta * dt / 2);
+    return (omegai * omegaj / (theta * theta)) *
+           (dt / 2 * cos(theta * dt / 2) - 1 / theta * sin(theta * dt / 2));
   };
 
   const auto dq1dwy = f(omega[0], omega[1]);
@@ -378,20 +375,18 @@ Eigen::Matrix2d EkfMath::jacobian_undistortion(
 
   Eigen::Matrix2d dhu_hd;
 
-  dhu_hd(0, 0) =
-    1 + camera.k1 * rd * rd + camera.k2 * rd * rd * rd * rd +
-    2 * std::pow((camera.dx * (coordinates.x - camera.cx)), 2) *
-      (camera.k1 + 2 * camera.k2 * rd * rd);
-  dhu_hd(0, 1) =
-    2 * camera.dy * camera.dy * (coordinates.x - camera.cx) *
-    (coordinates.y - camera.cy) * (camera.k1 + 2 * camera.k2 * rd * rd);
-  dhu_hd(1, 0) =
-    2 * camera.dx * camera.dx * (coordinates.y - camera.cy) *
-    (coordinates.x - camera.cx) * (camera.k1 + 2 * camera.k2 * rd * rd);
-  dhu_hd(1, 1) =
-    1 + camera.k1 * rd * rd + camera.k2 * rd * rd * rd * rd +
-    2 * std::pow((camera.dy * (coordinates.y - camera.cy)), 2) *
-      (camera.k1 + 2 * camera.k2 * rd * rd);
+  dhu_hd(0, 0) = 1 + camera.k1 * rd * rd + camera.k2 * rd * rd * rd * rd +
+                 2 * std::pow((camera.dx * (coordinates.x - camera.cx)), 2) *
+                   (camera.k1 + 2 * camera.k2 * rd * rd);
+  dhu_hd(0, 1) = 2 * camera.dy * camera.dy * (coordinates.x - camera.cx) *
+                 (coordinates.y - camera.cy) *
+                 (camera.k1 + 2 * camera.k2 * rd * rd);
+  dhu_hd(1, 0) = 2 * camera.dx * camera.dx * (coordinates.y - camera.cy) *
+                 (coordinates.x - camera.cx) *
+                 (camera.k1 + 2 * camera.k2 * rd * rd);
+  dhu_hd(1, 1) = 1 + camera.k1 * rd * rd + camera.k2 * rd * rd * rd * rd +
+                 2 * std::pow((camera.dy * (coordinates.y - camera.cy)), 2) *
+                   (camera.k1 + 2 * camera.k2 * rd * rd);
 
   return dhu_hd;
 }

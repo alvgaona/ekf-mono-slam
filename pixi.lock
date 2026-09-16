@@ -367,7 +367,7 @@ environments:
       - conda: https://prefix.dev/robostack-humble/linux-64/ros-humble-tracetools-4.1.2-np2py312h2ed9cc7_18.conda
       - conda: https://prefix.dev/robostack-humble/linux-64/ros-humble-unique-identifier-msgs-2.2.1-np2py312h2ed9cc7_18.conda
       - conda: https://prefix.dev/robostack-humble/linux-64/ros2-distro-mutex-0.9.0-humble_18.conda
-      - conda_source: ros-humble-ekf-mono-slam[1798c09f] @ ekf-mono-slam
+      - conda_source: ros-humble-ekf-mono-slam[6f2a2c37] @ ekf-mono-slam
       osx-arm64:
       - conda: https://prefix.dev/conda-forge/noarch/argcomplete-3.7.1-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
@@ -663,7 +663,7 @@ environments:
       - conda: https://prefix.dev/robostack-humble/osx-arm64/ros-humble-tracetools-4.1.2-np2py312h50b1e4c_18.conda
       - conda: https://prefix.dev/robostack-humble/osx-arm64/ros-humble-unique-identifier-msgs-2.2.1-np2py312h50b1e4c_18.conda
       - conda: https://prefix.dev/robostack-humble/osx-arm64/ros2-distro-mutex-0.9.0-humble_18.conda
-      - conda_source: ros-humble-ekf-mono-slam[91979f39] @ ekf-mono-slam
+      - conda_source: ros-humble-ekf-mono-slam[fe034bcc] @ ekf-mono-slam
 packages:
 - conda: https://prefix.dev/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
   build_number: 20
@@ -11919,7 +11919,7 @@ packages:
     - ros2-distro-mutex >=0.9.0,<0.10.0a0
   size: 2369
   timestamp: 1778812688309
-- conda_source: ros-humble-ekf-mono-slam[1798c09f] @ ekf-mono-slam
+- conda_source: ros-humble-ekf-mono-slam[6f2a2c37] @ ekf-mono-slam
   variants:
     target_platform: linux-64
   depends:
@@ -11941,6 +11941,8 @@ packages:
   - xorg-libxext
   - xorg-libxext >=1.3.7,<2.0a0
   - eigen
+  - fmt
+  - fmt >=12.1.0,<12.2.0a0
   - ros2-distro-mutex
   - ros2-distro-mutex >=0.9.0,<0.10.0a0
   - libgcc >=16
@@ -12657,7 +12659,7 @@ packages:
   - conda: https://prefix.dev/robostack-humble/linux-64/ros-humble-tracetools-4.1.2-np2py312h2ed9cc7_18.conda
   - conda: https://prefix.dev/robostack-humble/linux-64/ros-humble-unique-identifier-msgs-2.2.1-np2py312h2ed9cc7_18.conda
   - conda: https://prefix.dev/robostack-humble/linux-64/ros2-distro-mutex-0.9.0-humble_18.conda
-- conda_source: ros-humble-ekf-mono-slam[91979f39] @ ekf-mono-slam
+- conda_source: ros-humble-ekf-mono-slam[fe034bcc] @ ekf-mono-slam
   variants:
     target_platform: osx-arm64
   depends:
@@ -12677,6 +12679,8 @@ packages:
   - xorg-libxext
   - xorg-libxext >=1.3.7,<2.0a0
   - eigen
+  - fmt
+  - fmt >=12.1.0,<12.2.0a0
   - ros2-distro-mutex
   - ros2-distro-mutex >=0.9.0,<0.10.0a0
   - libcxx >=22
