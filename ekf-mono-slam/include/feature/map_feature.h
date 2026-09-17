@@ -22,6 +22,7 @@ class MapFeature {
   );
 
   virtual ~MapFeature() = default;
+  MapFeature& operator=(const MapFeature&) = delete;
 
   friend std::ostream& operator<<(
     std::ostream& os, const MapFeature& map_feature
@@ -31,6 +32,8 @@ class MapFeature {
   }
 
   [[nodiscard]] const Eigen::VectorXd& state() const { return state_; }
+
+  [[nodiscard]] cv::Mat descriptor() const { return descriptor_data_; }
 
   void apply_delta(const Eigen::VectorXd& dx) { state_ += dx; }
 
@@ -47,6 +50,8 @@ class MapFeature {
   [[nodiscard]] int times_matched() const { return times_matched_; }
 
   void increment_times_predicted() { ++times_predicted_; }
+
+  void increment_times_matched() { ++times_matched_; }
 
   [[nodiscard]] bool has_prediction() const { return prediction_ != nullptr; }
 
@@ -78,6 +83,8 @@ class MapFeature {
   );
 
  protected:
+  MapFeature(const MapFeature& other);
+
   void store_measurement_jacobian(
     const Eigen::MatrixXd& H,
     const CovarianceMatrix& covariance_matrix,

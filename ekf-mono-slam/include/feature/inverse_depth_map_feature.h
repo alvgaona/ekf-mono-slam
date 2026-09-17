@@ -13,6 +13,7 @@ class InverseDepthMapFeature final : public MapFeature {
     const cv::Mat& descriptor_data,
     int index
   );
+  InverseDepthMapFeature(const InverseDepthMapFeature&) = default;
 
   Eigen::Vector3d directional_vector(
     const Eigen::Matrix3d& rotation_matrix,

@@ -8,6 +8,8 @@
 #include "covariance_matrix.h"
 #include "feature/feature_detector.h"
 #include "feature/image_feature_measurement.h"
+#include "matching.h"
+#include "ransac.h"
 #include "state.h"
 
 class EKF final {
@@ -37,15 +39,24 @@ class EKF final {
            !state_->inverse_depth_features().empty();
   }
 
-  /** Full per-frame step: init on first image, else predict + match. */
+  /** Full per-frame step: init, else predict, match, LI then HI update. */
   void process_frame(const cv::Mat& image);
 
   void predict() const;
 
-  void match_predicted_features(const cv::Mat& image);
+  std::vector<FeatureAssociation> match_predicted_features(const cv::Mat& image);
 
   void add_features(
     const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
+  ) const;
+
+  void update(
+    const std::vector<FeatureAssociation>& associations,
+    bool count_matches = true
+  );
+
+  void update_state_only(
+    State& trial, const std::vector<FeatureAssociation>& associations
   ) const;
 
  private:
@@ -54,6 +65,8 @@ class EKF final {
   void initialize_from_image(const cv::Mat& image);
 
   SlamConfig config_;
+  FeatureMatcher matcher_;
+  OnePointRansac ransac_;
   std::shared_ptr<CovarianceMatrix> covariance_matrix_;
   std::shared_ptr<State> state_;
   std::shared_ptr<FeatureDetector> feature_detector_;

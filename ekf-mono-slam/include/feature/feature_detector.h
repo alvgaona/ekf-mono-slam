@@ -46,6 +46,13 @@ class FeatureDetector final {
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
+  void detect_and_describe(
+    const cv::Mat& image,
+    const cv::Mat& mask,
+    std::vector<cv::KeyPoint>& keypoints,
+    cv::Mat& descriptors
+  );
+
  private:
   std::vector<std::shared_ptr<ImageFeatureMeasurement>> image_features_;
   cv::Ptr<cv::FeatureDetector> detector_;

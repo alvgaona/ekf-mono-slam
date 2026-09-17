@@ -5,7 +5,11 @@
 EKF::EKF() : EKF(SlamConfig{}) {}
 
 EKF::EKF(const SlamConfig& config)
-  : config_(config), step_(0), delta_t_(config.delta_t) {
+  : config_(config),
+    matcher_(config.image_feature.match_ratio),
+    ransac_(config.ransac),
+    step_(0),
+    delta_t_(config.delta_t) {
   covariance_matrix_ = std::make_shared<CovarianceMatrix>(config_);
   state_ = std::make_shared<State>(config_);
 }
@@ -37,8 +41,13 @@ void EKF::process_frame(const cv::Mat& image) {
   }
 
   predict();
-  match_predicted_features(image);
-  // TODO: 1-Point RANSAC update and map management
+  const auto ic = match_predicted_features(image);
+  const auto split = ransac_.select_low_innovation(*this, ic);
+  update(split.low_innovation());
+  const auto high_innovation = ransac_.rescue_high_innovation(
+    *state_, *covariance_matrix_, split.outliers()
+  );
+  update(high_innovation);
   ++step_;
 }
 
@@ -48,10 +57,11 @@ void EKF::predict() const {
   state_->predict_measurement(*covariance_matrix_);
 }
 
-void EKF::match_predicted_features(const cv::Mat& image) {
+std::vector<FeatureAssociation> EKF::match_predicted_features(
+  const cv::Mat& image
+) {
   ensure_feature_detector(cv::Size(image.cols, image.rows));
-  // Matching against predicted features is not implemented yet.
-  (void)image;
+  return matcher_.match(image, *feature_detector_, state_->features());
 }
 
 void EKF::add_features(

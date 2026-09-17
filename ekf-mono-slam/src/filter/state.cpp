@@ -3,6 +3,7 @@
 #include <eigen3/Eigen/src/Core/Matrix.h>
 #include <math/ekf_math.h>
 
+#include <memory>
 #include <typeinfo>
 
 #include "feature/image_feature_prediction.h"
@@ -101,20 +102,49 @@ Eigen::VectorXd State::packed() const {
   return x;
 }
 
-void State::apply_delta(const Eigen::VectorXd& dx) {
+void State::apply_delta(
+  const Eigen::VectorXd& dx, const bool normalize_quaternion
+) {
   position_ += dx.segment<3>(0);
   orientation_.w() += dx(3);
   orientation_.x() += dx(4);
   orientation_.y() += dx(5);
   orientation_.z() += dx(6);
-  orientation_.normalize();
-  rotation_matrix_ = orientation_.toRotationMatrix();
   velocity_ += dx.segment<3>(7);
   angular_velocity_ += dx.segment<3>(10);
   for (const auto& feature : features_) {
     feature->apply_delta(
       dx.segment(feature->position(), static_cast<int>(feature->dimension()))
     );
+  }
+  if (normalize_quaternion) {
+    normalize_orientation();
+  }
+}
+
+void State::normalize_orientation() {
+  orientation_.normalize();
+  rotation_matrix_ = orientation_.toRotationMatrix();
+}
+
+State::State(const State& source)
+  : position_(source.position_),
+    velocity_(source.velocity_),
+    angular_velocity_(source.angular_velocity_),
+    orientation_(source.orientation_),
+    rotation_matrix_(source.rotation_matrix_),
+    dimension_(13),
+    config_(source.config_) {
+  for (const auto& feature : source.features_) {
+    if (const auto inverse =
+          std::dynamic_pointer_cast<InverseDepthMapFeature>(feature)) {
+      add(std::make_shared<InverseDepthMapFeature>(*inverse));
+    } else if (
+      const auto cartesian =
+        std::dynamic_pointer_cast<CartesianMapFeature>(feature)
+    ) {
+      add(std::make_shared<CartesianMapFeature>(*cartesian));
+    }
   }
 }
 
@@ -250,71 +280,35 @@ void State::add(const std::shared_ptr<MapFeature>& feature) {
 }
 
 void State::predict_measurement(const CovarianceMatrix& covariance_matrix) {
-  predict_measurement_state();
-  predict_measurement_covariance(covariance_matrix);
-}
-
-/**
- * @brief Predicts the measurement state for each map feature in the system.
- *
- * This method processes each map feature to:
- * 1. Calculate its directional vector in camera coordinates
- * 2. Check if it's in front of the camera
- * 3. Create and add predictions for features that are visible in the frame
- *
- * For each feature, the method:
- * - Computes the directional vector using the rotation matrix and position
- * - Checks if the feature is in front of the camera using the directional
- * vector
- * - If visible, creates an ImageFeaturePrediction and adds it to the map
- * feature
- *
- * Features that are either behind the camera or outside the visible frame are
- * skipped.
- */
-void State::predict_measurement_state() {
   for (const auto& map_feature : features_) {
-    Eigen::Vector3d directional_vector =
-      map_feature->directional_vector(rotation_matrix_.transpose(), position_);
-    // directionalVector = Rcw * (yi - rwc);
-    if (!MapFeature::is_in_front_of_camera(
-          directional_vector, config_.camera
-        )) {
-      continue;
-    }
-
-    if (const auto image_feature_prediction = ImageFeaturePrediction::from(
-          directional_vector, map_feature->index(), config_.camera
-        );
-        image_feature_prediction.is_visible_in_frame(config_.camera)) {
-      map_feature->add(image_feature_prediction);
-      map_feature->increment_times_predicted();
-      continue;
-    }
+    compute_feature_prediction(map_feature, covariance_matrix, true);
   }
 }
 
-/**
- * @brief Predicts measurement covariance for all map features in the state.
- *
- * This method computes the measurement Jacobian matrix for each map feature
- * in the state's feature list. The measurement Jacobian represents how small
- * changes in the state affect the predicted measurements.
- *
- * @param covariance_matrix The current state covariance matrix used in
- * calculating measurement Jacobians.
- *
- * For each feature, this method:
- * - Calls the feature's measurement_jacobian() method to compute and store
- *   the measurement Jacobian matrix
- * - Uses the current state and covariance matrix to perform the calculations
- */
-void State::predict_measurement_covariance(
-  const CovarianceMatrix& covariance_matrix
+bool State::compute_feature_prediction(
+  const std::shared_ptr<MapFeature>& map_feature,
+  const CovarianceMatrix& covariance_matrix,
+  const bool increment_predicted
 ) {
-  for (const auto& map_feature : features_) {
-    if (map_feature->has_prediction()) {
-      map_feature->measurement_jacobian(*this, covariance_matrix);
-    }
+  Eigen::Vector3d directional_vector =
+    map_feature->directional_vector(rotation_matrix_.transpose(), position_);
+  if (!MapFeature::is_in_front_of_camera(
+        directional_vector, config_.camera
+      )) {
+    return false;
   }
+
+  auto image_feature_prediction = ImageFeaturePrediction::from(
+    directional_vector, map_feature->index(), config_.camera
+  );
+  if (!image_feature_prediction.is_visible_in_frame(config_.camera)) {
+    return false;
+  }
+
+  map_feature->add(image_feature_prediction);
+  if (increment_predicted) {
+    map_feature->increment_times_predicted();
+  }
+  map_feature->measurement_jacobian(*this, covariance_matrix);
+  return true;
 }

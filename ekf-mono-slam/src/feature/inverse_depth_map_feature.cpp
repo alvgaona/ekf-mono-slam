@@ -3,6 +3,7 @@
 #include <eigen3/Eigen/src/Core/Matrix.h>
 
 #include <eigen3/Eigen/Core>
+#include <memory>
 
 #include "math/ekf_math.h"
 

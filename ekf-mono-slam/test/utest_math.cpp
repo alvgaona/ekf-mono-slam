@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -103,4 +105,21 @@ TEST(FeatureDistortion, DistortFeature) {
 
   ASSERT_THAT(distorted_feature.x, DoubleNear(-1.28542, 1e-5));
   ASSERT_THAT(distorted_feature.y, DoubleNear(-0.985089, 1e-5));
+}
+
+TEST(QuaternionNormalization, MatchesMatlabNormJac) {
+  const Eigen::Quaterniond q(2.0, 1.0, 0.5, -0.25);
+  const double r = q.w();
+  const double x = q.x();
+  const double y = q.y();
+  const double z = q.z();
+  const double a = std::pow(r * r + x * x + y * y + z * z, -1.5);
+  Eigen::Matrix4d expected;
+  expected << x * x + y * y + z * z, -r * x, -r * y, -r * z, -x * r,
+    r * r + y * y + z * z, -x * y, -x * z, -y * r, -y * x, r * r + x * x + z * z,
+    -y * z, -z * r, -z * x, -z * y, r * r + x * x + y * y;
+  expected *= a;
+
+  const Eigen::Matrix4d J = quaternion_normalization_jacobian(q);
+  ASSERT_TRUE(J.isApprox(expected, 1e-12));
 }

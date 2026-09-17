@@ -46,6 +46,7 @@ class CovarianceMatrix final {
   void remove(const MapFeature& feature);
 
   [[nodiscard]] const Eigen::MatrixXd& matrix() const { return matrix_; }
+  Eigen::MatrixXd& matrix() { return matrix_; }
 
   [[nodiscard]] const SlamConfig& config() const { return config_; }
 

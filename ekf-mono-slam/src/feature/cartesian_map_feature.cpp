@@ -1,6 +1,7 @@
 #include "feature/cartesian_map_feature.h"
 
 #include <eigen3/Eigen/Core>
+#include <memory>
 #include <opencv2/core.hpp>
 
 #include "feature/map_feature.h"

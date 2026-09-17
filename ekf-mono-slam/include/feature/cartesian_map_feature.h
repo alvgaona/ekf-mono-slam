@@ -13,6 +13,7 @@ class CartesianMapFeature final : public MapFeature {
     const cv::Mat& descriptor_data,
     int index
   );
+  CartesianMapFeature(const CartesianMapFeature&) = default;
 
   Eigen::Vector3d directional_vector(
     const Eigen::Matrix3d& rotation_matrix,

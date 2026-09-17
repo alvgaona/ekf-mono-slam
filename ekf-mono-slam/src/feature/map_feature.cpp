@@ -31,6 +31,19 @@ MapFeature::MapFeature(
     times_predicted_(0),
     times_matched_(0) {}
 
+MapFeature::MapFeature(const MapFeature& other)
+  : index_(other.index_),
+    state_(other.state_),
+    position_(other.position_),
+    descriptor_data_(other.descriptor_data_.clone()),
+    times_predicted_(other.times_predicted_),
+    times_matched_(other.times_matched_),
+    prediction_(
+      other.prediction_
+        ? std::make_unique<ImageFeaturePrediction>(*other.prediction_)
+        : nullptr
+    ) {}
+
 /**
  * @brief Checks if a feature point lies within the camera's field of view.
  *

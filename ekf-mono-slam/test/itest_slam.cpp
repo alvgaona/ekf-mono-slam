@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include "feature/feature_detector.h"
 #include "feature/image_feature_measurement.h"
 #include "feature/zone.h"
@@ -45,4 +47,42 @@ TEST(SLAMIntegration, FindFeatureInStateAndCovariance) {
 
   ASSERT_EQ(ekf.covariance_matrix()->matrix().cols(), 13 + 20 * 6);
   ASSERT_EQ(ekf.covariance_matrix()->matrix().rows(), 13 + 20 * 6);
+}
+
+TEST(SLAMIntegration, ProcessTwoFramesStaysFinite) {
+  FileSequenceImageProvider image_provider(
+    "./test/resources/desk_translation/", 1, 2
+  );
+  EKF ekf;
+  for (int i = 0; i < 2; ++i) {
+    const cv::Mat image = image_provider.next();
+    ASSERT_FALSE(image.empty());
+    ekf.process_frame(image);
+  }
+
+  const Eigen::VectorXd x = ekf.state()->packed();
+  const Eigen::MatrixXd& P = ekf.covariance_matrix()->matrix();
+  ASSERT_TRUE(x.allFinite());
+  ASSERT_TRUE(P.allFinite());
+  ASSERT_NEAR(ekf.state()->orientation().norm(), 1.0, 1e-9);
+  ASSERT_EQ(P.rows(), ekf.state()->dimension());
+  ASSERT_TRUE(P.isApprox(P.transpose(), 1e-9));
+}
+
+TEST(SLAMIntegration, ProcessTwoFramesProducesMatches) {
+  FileSequenceImageProvider image_provider(
+    "./test/resources/desk_translation/", 1, 2
+  );
+  EKF ekf;
+  for (int i = 0; i < 2; ++i) {
+    const cv::Mat image = image_provider.next();
+    ASSERT_FALSE(image.empty());
+    ekf.process_frame(image);
+  }
+
+  int matched = 0;
+  for (const auto& feature : ekf.state()->features()) {
+    matched += feature->times_matched();
+  }
+  ASSERT_GT(matched, 0);
 }

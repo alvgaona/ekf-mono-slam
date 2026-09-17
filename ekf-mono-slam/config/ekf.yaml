@@ -29,4 +29,10 @@
       init_inv_depth: 1.0
       detector_type: "AKAZE"
       descriptor_type: "AKAZE"
+      match_ratio: 0.8
+    ransac:
+      success_probability: 0.99
+      innovation_threshold: 1.0
+      max_hypotheses: 1000
+      rng_seed: 1
     delta_t: 0.04
