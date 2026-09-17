@@ -23,4 +23,9 @@ class InverseDepthMapFeature final : public MapFeature {
   void measurement_jacobian(
     const State& state, const CovarianceMatrix& covariance_matrix
   ) override;
+
+  /** Civera linearity of the inverse-depth parametrization: 4 σ_d cosα / d. */
+  [[nodiscard]] double linearity_index(
+    const Eigen::Vector3d& camera_position, const Eigen::MatrixXd& P
+  ) const;
 };

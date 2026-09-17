@@ -72,9 +72,7 @@ class State final {
   [[nodiscard]] int dimension() const { return dimension_; }
 
   [[nodiscard]] Eigen::VectorXd packed() const;
-  void apply_delta(
-    const Eigen::VectorXd& dx, bool normalize_quaternion = true
-  );
+  void apply_delta(const Eigen::VectorXd& dx, bool normalize_quaternion = true);
   void normalize_orientation();
 
   [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& features(
@@ -105,6 +103,10 @@ class State final {
   );
   void add(const std::shared_ptr<MapFeature>& feature);
   void remove(const std::shared_ptr<MapFeature>& feature);
+  void replace(
+    const std::shared_ptr<InverseDepthMapFeature>& inverse,
+    const std::shared_ptr<CartesianMapFeature>& cartesian
+  );
 
  private:
   Eigen::Vector3d position_;
@@ -118,5 +120,6 @@ class State final {
   std::vector<std::shared_ptr<CartesianMapFeature>> cartesian_features_;
 
   int dimension_;
+  int next_feature_id_ = 0;
   SlamConfig config_;
 };

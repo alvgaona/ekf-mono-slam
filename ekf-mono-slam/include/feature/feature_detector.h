@@ -1,5 +1,7 @@
 #pragma once
 
+#include <list>
+
 #include "configuration/slam_config.h"
 #include "descriptor_extractor_type.h"
 #include "detector_type.h"
@@ -46,6 +48,12 @@ class FeatureDetector final {
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
   );
 
+  void detect_features(
+    const cv::Mat& image,
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+    int features_needed
+  );
+
   void detect_and_describe(
     const cv::Mat& image,
     const cv::Mat& mask,
@@ -72,7 +80,8 @@ class FeatureDetector final {
     const cv::Mat& image_mask,
     const std::vector<cv::KeyPoint>& keypoints,
     const cv::Mat& descriptors,
-    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
+    const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+    int features_needed
   );
 
   [[nodiscard]] std::vector<std::shared_ptr<Zone>> create_zones() const;
@@ -88,10 +97,13 @@ class FeatureDetector final {
     const cv::Mat& image_mask,
     const cv::Mat& descriptors,
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-    const std::vector<cv::KeyPoint>& image_keypoints
+    const std::vector<cv::KeyPoint>& image_keypoints,
+    int features_needed
   );
 
   void select_image_measurements_from_zones(
-    std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
+    std::list<std::shared_ptr<Zone>>& zones,
+    const cv::Mat& image_mask,
+    int features_needed
   );
 };

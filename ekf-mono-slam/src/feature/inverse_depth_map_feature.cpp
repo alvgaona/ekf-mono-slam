@@ -1,10 +1,12 @@
 #include "feature/inverse_depth_map_feature.h"
 
-#include <eigen3/Eigen/src/Core/Matrix.h>
-
+#include <algorithm>
+#include <cmath>
 #include <eigen3/Eigen/Core>
+#include <limits>
 #include <memory>
 
+#include "feature/cartesian_map_feature.h"
 #include "math/ekf_math.h"
 
 InverseDepthMapFeature::InverseDepthMapFeature(
@@ -83,4 +85,39 @@ void InverseDepthMapFeature::measurement_jacobian(
   H.block(0, position_, 2, 6) = dhi_dyi;
 
   store_measurement_jacobian(H, covariance_matrix, camera);
+}
+
+double InverseDepthMapFeature::linearity_index(
+  const Eigen::Vector3d& camera_position, const Eigen::MatrixXd& P
+) const {
+  const int rho_index = position_ + 5;
+  if (rho_index >= P.rows() || rho_index >= P.cols()) {
+    return std::numeric_limits<double>::infinity();
+  }
+
+  const double rho = state_(5);
+  const double P_rho = P(rho_index, rho_index);
+  if (!(std::abs(rho) > 1e-12) || !(P_rho >= 0.0) || !std::isfinite(P_rho)) {
+    return std::numeric_limits<double>::infinity();
+  }
+
+  const double std_d = std::sqrt(P_rho) / (rho * rho);
+  const Eigen::Vector3d x_c1 = state_.head<3>();
+  const Eigen::Vector3d p =
+    CartesianMapFeature::position_from_inverse_depth(state_);
+  const Eigen::Vector3d to_anchor = p - x_c1;
+  const Eigen::Vector3d to_camera = p - camera_position;
+  const double d_anchor = to_anchor.norm();
+  const double d_camera = to_camera.norm();
+  if (!(d_anchor > 1e-12) || !(d_camera > 1e-12)) {
+    return std::numeric_limits<double>::infinity();
+  }
+
+  const double cos_alpha =
+    std::clamp(to_anchor.dot(to_camera) / (d_anchor * d_camera), -1.0, 1.0);
+  const double linearity = 4.0 * std_d * cos_alpha / d_camera;
+  if (!std::isfinite(linearity)) {
+    return std::numeric_limits<double>::infinity();
+  }
+  return linearity;
 }

@@ -170,6 +170,13 @@ void CovarianceMatrix::add(
   const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
   const std::shared_ptr<State>& state
 ) {
+  add(image_feature_measurement, *state);
+}
+
+void CovarianceMatrix::add(
+  const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
+  const State& state
+) {
   const auto& camera = config_.camera;
   const int n = static_cast<int>(matrix_.rows());
 
@@ -188,7 +195,7 @@ void CovarianceMatrix::add(
     image_feature_measurement->undistort(camera);
   const Eigen::Vector3d hc = undistorted_feature.backproject(camera);
 
-  const Eigen::Vector3d hw = state->rotation_matrix() * hc;
+  const Eigen::Vector3d hw = state.rotation_matrix() * hc;
 
   const double hx = hw[0];
   const double hy = hw[1];
@@ -204,7 +211,7 @@ void CovarianceMatrix::add(
   );  // Eq. (A.72)
 
   const Eigen::MatrixXd dhw_dqwc =
-    jacobian_directional_vector(state->orientation(), hc);  // Eq. (A.73)
+    jacobian_directional_vector(state.orientation(), hc);  // Eq. (A.73)
 
   const Eigen::MatrixXd dtheta_dqwc = dtheta_dhw * dhw_dqwc;  // Eq. (A.69)
   const Eigen::MatrixXd dphi_dqwc = dphi_dhw * dhw_dqwc;      // Eq. (A.70)
@@ -243,12 +250,45 @@ void CovarianceMatrix::add(
 
   Eigen::MatrixXd dy_dh(6, 3);  // Eq. (A.75)
   dy_dh.block(0, 0, 5, 2) =
-    dyprime_dhw * state->rotation_matrix() * dhc_dhu * dhu_dhd;  // Eq. (A.76)
+    dyprime_dhw * state.rotation_matrix() * dhc_dhu * dhu_dhd;  // Eq. (A.76)
   dy_dh(5, 2) = 1;
 
   jacobian.block(n, n, 6, 3) = dy_dh;
 
   matrix_ = jacobian * P_aug * jacobian.transpose();
+}
+
+void CovarianceMatrix::convert_inverse_depth(
+  const MapFeature& feature, const Eigen::Matrix<double, 3, 6>& jacobian
+) {
+  constexpr int kOldDim = 6;
+  constexpr int kNewDim = 3;
+  const int pos = feature.position();
+  const int n = static_cast<int>(matrix_.rows());
+  const int tail = n - pos - kOldDim;
+  const int new_n = n - (kOldDim - kNewDim);
+
+  Eigen::MatrixXd P_new = Eigen::MatrixXd::Zero(new_n, new_n);
+  const Eigen::MatrixXd JP = jacobian * matrix_.block(pos, 0, kOldDim, n);
+
+  P_new.topLeftCorner(pos, pos) = matrix_.topLeftCorner(pos, pos);
+  P_new.block(pos, pos, kNewDim, kNewDim) =
+    (JP.block(0, pos, kNewDim, kOldDim) * jacobian.transpose()).eval();
+  if (pos > 0) {
+    P_new.block(pos, 0, kNewDim, pos) = JP.leftCols(pos);
+    P_new.block(0, pos, pos, kNewDim) = JP.leftCols(pos).transpose();
+  }
+  if (tail > 0) {
+    P_new.block(pos, pos + kNewDim, kNewDim, tail) = JP.rightCols(tail);
+    P_new.block(pos + kNewDim, pos, tail, kNewDim) =
+      JP.rightCols(tail).transpose();
+    P_new.block(pos + kNewDim, 0, tail, pos) =
+      matrix_.block(pos + kOldDim, 0, tail, pos);
+    P_new.block(0, pos + kNewDim, pos, tail) =
+      matrix_.block(0, pos + kOldDim, pos, tail);
+    P_new.bottomRightCorner(tail, tail) = matrix_.bottomRightCorner(tail, tail);
+  }
+  matrix_ = 0.5 * (P_new + P_new.transpose());
 }
 
 void CovarianceMatrix::remove(const MapFeature& feature) {
