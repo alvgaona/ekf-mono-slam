@@ -6,7 +6,8 @@
 #include "filter/covariance_matrix.h"
 #include "filter/matching.h"
 #include "filter/state.h"
-#include "filter/update.h"
+
+class EKF;
 
 class RansacSplit {
  public:
@@ -34,9 +35,7 @@ class OnePointRansac {
   explicit OnePointRansac(const RansacConfig& config = {});
 
   [[nodiscard]] RansacSplit select_low_innovation(
-    const State& state,
-    const CovarianceMatrix& covariance,
-    const std::vector<FeatureAssociation>& ic
+    const EKF& ekf, const std::vector<FeatureAssociation>& ic
   ) const;
 
   [[nodiscard]] std::vector<FeatureAssociation> rescue_high_innovation(
@@ -47,6 +46,5 @@ class OnePointRansac {
 
  private:
   RansacConfig config_;
-  KalmanUpdate updater_;
   FeatureMatcher matcher_;
 };

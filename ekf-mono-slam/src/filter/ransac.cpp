@@ -6,6 +6,8 @@
 #include <random>
 #include <utility>
 
+#include "filter/ekf.h"
+
 namespace {
 
   std::shared_ptr<MapFeature> feature_with_index(
@@ -52,14 +54,13 @@ RansacSplit::RansacSplit(
 OnePointRansac::OnePointRansac(const RansacConfig& config) : config_(config) {}
 
 RansacSplit OnePointRansac::select_low_innovation(
-  const State& state,
-  const CovarianceMatrix& covariance,
-  const std::vector<FeatureAssociation>& ic
+  const EKF& ekf, const std::vector<FeatureAssociation>& ic
 ) const {
   if (ic.empty()) {
     return {};
   }
 
+  const State& state = *ekf.state();
   std::mt19937 rng(config_.rng_seed);
   std::uniform_int_distribution<int> pick(0, static_cast<int>(ic.size()) - 1);
 
@@ -69,7 +70,7 @@ RansacSplit OnePointRansac::select_low_innovation(
   for (int i = 0; i < n_hyp; ++i) {
     const int sample = pick(rng);
     State trial(state);
-    updater_.update_state_only(trial, covariance, {ic[sample]});
+    ekf.update_state_only(trial, {ic[sample]});
 
     std::vector<int> support_indices;
     for (int j = 0; j < static_cast<int>(ic.size()); ++j) {

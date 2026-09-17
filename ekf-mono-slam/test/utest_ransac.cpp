@@ -5,10 +5,9 @@
 #include <vector>
 
 #include "feature/image_feature_measurement.h"
-#include "filter/covariance_matrix.h"
+#include "filter/ekf.h"
 #include "filter/matching.h"
 #include "filter/ransac.h"
-#include "filter/state.h"
 #include "math/ekf_math.h"
 
 namespace {
@@ -27,6 +26,23 @@ namespace {
     return {
       feature.prediction().coordinates().x, feature.prediction().coordinates().y
     };
+  }
+
+  void add_grid_features(
+    EKF& ekf, const int n, const double dx, const double dy
+  ) {
+    const auto& camera = ekf.state()->config().camera;
+    for (int i = 0; i < n; ++i) {
+      ekf.add_features({std::make_shared<ImageFeatureMeasurement>(
+        cv::Point2f(
+          static_cast<float>(camera.cx + dx * i),
+          static_cast<float>(camera.cy + dy * i)
+        ),
+        dummy_descriptor(),
+        i
+      )});
+    }
+    ekf.state()->predict_measurement(*ekf.covariance_matrix());
   }
 
 }  // namespace
@@ -81,57 +97,29 @@ TEST(MatchingHelpers, IndividuallyCompatibleUsesChiSquared) {
 
 TEST(Ransac, AllInliersAreLowInnovation) {
   SlamConfig config;
-  auto state = std::make_shared<State>(config);
-  CovarianceMatrix covariance(config);
+  EKF ekf(config);
+  add_grid_features(ekf, 3, 15.0, 0.0);
 
   std::vector<FeatureAssociation> ic;
-  for (int i = 0; i < 3; ++i) {
-    const auto measurement = std::make_shared<ImageFeatureMeasurement>(
-      cv::Point2f(
-        static_cast<float>(config.camera.cx + 15.0 * i),
-        static_cast<float>(config.camera.cy)
-      ),
-      dummy_descriptor(),
-      i
-    );
-    covariance.add(measurement, state);
-    state->add(measurement);
-  }
-  state->predict_measurement(covariance);
-
-  for (const auto& feature : state->features()) {
+  for (const auto& feature : ekf.state()->features()) {
     ASSERT_TRUE(feature->has_prediction());
     ic.push_back(association_from_prediction(feature, predicted_h(*feature)));
   }
 
   const auto split =
-    OnePointRansac(config.ransac).select_low_innovation(*state, covariance, ic);
+    OnePointRansac(config.ransac).select_low_innovation(ekf, ic);
   ASSERT_EQ(split.low_innovation().size(), ic.size());
   ASSERT_TRUE(split.outliers().empty());
 }
 
 TEST(Ransac, PlantedOutlierIsNotLowInnovation) {
   SlamConfig config;
-  auto state = std::make_shared<State>(config);
-  CovarianceMatrix covariance(config);
+  EKF ekf(config);
+  add_grid_features(ekf, 3, 20.0, 8.0);
 
   std::vector<FeatureAssociation> ic;
-  for (int i = 0; i < 3; ++i) {
-    const auto measurement = std::make_shared<ImageFeatureMeasurement>(
-      cv::Point2f(
-        static_cast<float>(config.camera.cx + 20.0 * i),
-        static_cast<float>(config.camera.cy + 8.0 * i)
-      ),
-      dummy_descriptor(),
-      i
-    );
-    covariance.add(measurement, state);
-    state->add(measurement);
-  }
-  state->predict_measurement(covariance);
-
-  for (int i = 0; i < static_cast<int>(state->features().size()); ++i) {
-    const auto& feature = state->features()[i];
+  for (int i = 0; i < static_cast<int>(ekf.state()->features().size()); ++i) {
+    const auto& feature = ekf.state()->features()[i];
     auto z = predicted_h(*feature);
     if (i == 2) {
       z += Eigen::Vector2d(80.0, -60.0);
@@ -140,7 +128,7 @@ TEST(Ransac, PlantedOutlierIsNotLowInnovation) {
   }
 
   const auto split =
-    OnePointRansac(config.ransac).select_low_innovation(*state, covariance, ic);
+    OnePointRansac(config.ransac).select_low_innovation(ekf, ic);
   ASSERT_EQ(split.low_innovation().size(), 2u);
   ASSERT_EQ(split.outliers().size(), 1u);
   ASSERT_EQ(split.outliers().front().feature()->index(), 2);
@@ -188,36 +176,21 @@ TEST(Ransac, RescueAcceptsChiSquaredLeftover) {
 
 TEST(Ransac, EmptyIcIsNoOp) {
   SlamConfig config;
-  State state(config);
-  CovarianceMatrix covariance(config);
+  EKF ekf(config);
   const auto split =
-    OnePointRansac(config.ransac).select_low_innovation(state, covariance, {});
+    OnePointRansac(config.ransac).select_low_innovation(ekf, {});
   ASSERT_TRUE(split.low_innovation().empty());
   ASSERT_TRUE(split.outliers().empty());
 }
 
 TEST(Ransac, HypothesisDoesNotMutateLiveState) {
   SlamConfig config;
-  auto state = std::make_shared<State>(config);
-  CovarianceMatrix covariance(config);
+  EKF ekf(config);
+  add_grid_features(ekf, 3, 20.0, 8.0);
 
   std::vector<FeatureAssociation> ic;
-  for (int i = 0; i < 3; ++i) {
-    const auto measurement = std::make_shared<ImageFeatureMeasurement>(
-      cv::Point2f(
-        static_cast<float>(config.camera.cx + 20.0 * i),
-        static_cast<float>(config.camera.cy + 8.0 * i)
-      ),
-      dummy_descriptor(),
-      i
-    );
-    covariance.add(measurement, state);
-    state->add(measurement);
-  }
-  state->predict_measurement(covariance);
-
-  for (int i = 0; i < static_cast<int>(state->features().size()); ++i) {
-    const auto& feature = state->features()[i];
+  for (int i = 0; i < static_cast<int>(ekf.state()->features().size()); ++i) {
+    const auto& feature = ekf.state()->features()[i];
     auto z = predicted_h(*feature);
     if (i == 2) {
       z += Eigen::Vector2d(80.0, -60.0);
@@ -225,13 +198,13 @@ TEST(Ransac, HypothesisDoesNotMutateLiveState) {
     ic.push_back(association_from_prediction(feature, z));
   }
 
-  const Eigen::VectorXd x0 = state->packed();
-  const Eigen::MatrixXd P0 = covariance.matrix();
-  OnePointRansac(config.ransac).select_low_innovation(*state, covariance, ic);
+  const Eigen::VectorXd x0 = ekf.state()->packed();
+  const Eigen::MatrixXd P0 = ekf.covariance_matrix()->matrix();
+  OnePointRansac(config.ransac).select_low_innovation(ekf, ic);
 
-  ASSERT_TRUE(state->packed().isApprox(x0));
-  ASSERT_TRUE(covariance.matrix().isApprox(P0));
-  for (const auto& feature : state->features()) {
+  ASSERT_TRUE(ekf.state()->packed().isApprox(x0));
+  ASSERT_TRUE(ekf.covariance_matrix()->matrix().isApprox(P0));
+  for (const auto& feature : ekf.state()->features()) {
     ASSERT_EQ(feature->times_matched(), 0);
   }
 }

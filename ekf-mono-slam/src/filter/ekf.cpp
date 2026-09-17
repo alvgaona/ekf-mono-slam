@@ -1,8 +1,6 @@
 #include "filter/ekf.h"
 
 #include "feature/feature_detector.h"
-#include "filter/ransac.h"
-#include "filter/update.h"
 
 EKF::EKF() : EKF(SlamConfig{}) {}
 
@@ -44,13 +42,12 @@ void EKF::process_frame(const cv::Mat& image) {
 
   predict();
   const auto ic = match_predicted_features(image);
-  const auto split =
-    ransac_.select_low_innovation(*state_, *covariance_matrix_, ic);
-  updater_.update(*state_, *covariance_matrix_, split.low_innovation());
+  const auto split = ransac_.select_low_innovation(*this, ic);
+  update(split.low_innovation());
   const auto high_innovation = ransac_.rescue_high_innovation(
     *state_, *covariance_matrix_, split.outliers()
   );
-  updater_.update(*state_, *covariance_matrix_, high_innovation);
+  update(high_innovation);
   ++step_;
 }
 

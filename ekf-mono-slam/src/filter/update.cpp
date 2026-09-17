@@ -1,4 +1,4 @@
-#include "filter/update.h"
+#include "filter/ekf.h"
 
 #include <utility>
 
@@ -86,50 +86,46 @@ namespace {
 
 }  // namespace
 
-void KalmanUpdate::update_state_only(
-  State& state,
-  const CovarianceMatrix& covariance,
-  const std::vector<FeatureAssociation>& associations
+void EKF::update_state_only(
+  State& trial, const std::vector<FeatureAssociation>& associations
 ) const {
   StackedMeasurement stacked;
-  if (!stack_measurements(state, associations, stacked)) {
+  if (!stack_measurements(trial, associations, stacked)) {
     return;
   }
 
   Eigen::MatrixXd K;
   Eigen::MatrixXd S;
   const Eigen::VectorXd dx =
-    kalman_delta(covariance.matrix(), stacked, K, S);
-  if (!dx.allFinite() || dx.size() != state.dimension()) {
+    kalman_delta(covariance_matrix_->matrix(), stacked, K, S);
+  if (!dx.allFinite() || dx.size() != trial.dimension()) {
     return;
   }
-  state.apply_delta(dx, true);
+  trial.apply_delta(dx, true);
 }
 
-void KalmanUpdate::update(
-  State& state,
-  CovarianceMatrix& covariance,
+void EKF::update(
   const std::vector<FeatureAssociation>& associations,
   const bool count_matches
-) const {
+) {
   StackedMeasurement stacked;
-  if (!stack_measurements(state, associations, stacked)) {
+  if (!stack_measurements(*state_, associations, stacked)) {
     return;
   }
 
-  const Eigen::MatrixXd P = covariance.matrix();
+  const Eigen::MatrixXd P = covariance_matrix_->matrix();
   Eigen::MatrixXd K;
   Eigen::MatrixXd S;
   const Eigen::VectorXd dx = kalman_delta(P, stacked, K, S);
-  if (!dx.allFinite() || dx.size() != state.dimension()) {
+  if (!dx.allFinite() || dx.size() != state_->dimension()) {
     return;
   }
 
-  state.apply_delta(dx, false);
+  state_->apply_delta(dx, false);
   Eigen::MatrixXd updated = P - K * S * K.transpose();
   updated = 0.5 * (updated + updated.transpose()).eval();
-  apply_norm_jac(state, updated);
-  covariance.matrix() = std::move(updated);
+  apply_norm_jac(*state_, updated);
+  covariance_matrix_->matrix() = std::move(updated);
 
   if (count_matches) {
     for (const auto& association : associations) {

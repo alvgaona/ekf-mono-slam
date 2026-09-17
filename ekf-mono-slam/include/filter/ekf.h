@@ -11,7 +11,6 @@
 #include "matching.h"
 #include "ransac.h"
 #include "state.h"
-#include "update.h"
 
 class EKF final {
  public:
@@ -51,6 +50,15 @@ class EKF final {
     const std::vector<std::shared_ptr<ImageFeatureMeasurement>>& features
   ) const;
 
+  void update(
+    const std::vector<FeatureAssociation>& associations,
+    bool count_matches = true
+  );
+
+  void update_state_only(
+    State& trial, const std::vector<FeatureAssociation>& associations
+  ) const;
+
  private:
   void ensure_feature_detector(const cv::Size& image_size);
 
@@ -58,7 +66,6 @@ class EKF final {
 
   SlamConfig config_;
   FeatureMatcher matcher_;
-  KalmanUpdate updater_;
   OnePointRansac ransac_;
   std::shared_ptr<CovarianceMatrix> covariance_matrix_;
   std::shared_ptr<State> state_;
