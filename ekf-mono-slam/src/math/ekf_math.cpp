@@ -397,3 +397,19 @@ Eigen::Matrix2d EkfMath::jacobian_distortion(
   const Eigen::Matrix2d dhu_hd = jacobian_undistortion(coordinates, camera);
   return dhu_hd.inverse();
 }
+
+Eigen::Matrix4d EkfMath::quaternion_normalization_jacobian(
+  const Eigen::Quaterniond &q
+) {
+  const double r = q.w();
+  const double x = q.x();
+  const double y = q.y();
+  const double z = q.z();
+  const double n2 = r * r + x * x + y * y + z * z;
+  const double a = std::pow(n2, -1.5);
+  Eigen::Matrix4d J;
+  J << x * x + y * y + z * z, -r * x, -r * y, -r * z, -x * r,
+    r * r + y * y + z * z, -x * y, -x * z, -y * r, -y * x, r * r + x * x + z * z,
+    -y * z, -z * r, -z * x, -z * y, r * r + x * x + y * y;
+  return a * J;
+}

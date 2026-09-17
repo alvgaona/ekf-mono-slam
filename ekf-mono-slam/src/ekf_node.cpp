@@ -86,6 +86,12 @@ void EKFNode::declare_parameters() {
   declare_parameter("image_feature.init_inv_depth", 1.0);
   declare_parameter("image_feature.detector_type", std::string("AKAZE"));
   declare_parameter("image_feature.descriptor_type", std::string("AKAZE"));
+  declare_parameter("image_feature.match_ratio", 0.8);
+
+  declare_parameter("ransac.success_probability", 0.99);
+  declare_parameter("ransac.innovation_threshold", 1.0);
+  declare_parameter("ransac.max_hypotheses", 1000);
+  declare_parameter("ransac.rng_seed", 1);
 
   declare_parameter("delta_t", 0.04);
 }
@@ -135,6 +141,18 @@ SlamConfig EKFNode::load_slam_config() {
     );
   config.image_feature.descriptor_type = parse_descriptor_type(
     get_parameter("image_feature.descriptor_type").as_string()
+  );
+  config.image_feature.match_ratio =
+    get_parameter("image_feature.match_ratio").as_double();
+
+  config.ransac.success_probability =
+    get_parameter("ransac.success_probability").as_double();
+  config.ransac.innovation_threshold =
+    get_parameter("ransac.innovation_threshold").as_double();
+  config.ransac.max_hypotheses =
+    get_parameter("ransac.max_hypotheses").as_int();
+  config.ransac.rng_seed = static_cast<unsigned>(
+    get_parameter("ransac.rng_seed").as_int()
   );
 
   config.delta_t = get_parameter("delta_t").as_double();

@@ -7,7 +7,7 @@
 class ImageFeaturePrediction final : public ImageFeature {
  public:
   ImageFeaturePrediction() = default;
-  explicit ImageFeaturePrediction(const cv::Point& coordinates, int index);
+  explicit ImageFeaturePrediction(const cv::Point2f& coordinates, int index);
   ~ImageFeaturePrediction() override = default;
 
   [[nodiscard]] const Eigen::Matrix2d& jacobian() const noexcept {

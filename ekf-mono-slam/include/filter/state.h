@@ -21,7 +21,7 @@ class State final {
  public:
   explicit State(const SlamConfig& config = {});
   ~State() = default;
-  State(const State& source) = delete;
+  State(const State& source);
   State(State&& source) = delete;
 
   State& operator=(const State& source) = delete;
@@ -72,7 +72,10 @@ class State final {
   [[nodiscard]] int dimension() const { return dimension_; }
 
   [[nodiscard]] Eigen::VectorXd packed() const;
-  void apply_delta(const Eigen::VectorXd& dx);
+  void apply_delta(
+    const Eigen::VectorXd& dx, bool normalize_quaternion = true
+  );
+  void normalize_orientation();
 
   [[nodiscard]] const std::vector<std::shared_ptr<MapFeature>>& features(
   ) const {
@@ -84,13 +87,18 @@ class State final {
     return cartesian_features_;
   }
 
-  [[nodiscard]] std::vector<std::shared_ptr<InverseDepthMapFeature>>
+  [[nodiscard]] const std::vector<std::shared_ptr<InverseDepthMapFeature>>&
   inverse_depth_features() const {
     return inverse_depth_features_;
   }
 
   void predict(double delta_t);
   void predict_measurement(const CovarianceMatrix& covariance_matrix);
+  bool compute_feature_prediction(
+    const std::shared_ptr<MapFeature>& feature,
+    const CovarianceMatrix& covariance_matrix,
+    bool increment_predicted
+  );
 
   void add(
     const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement
@@ -111,8 +119,4 @@ class State final {
 
   int dimension_;
   SlamConfig config_;
-
-  void predict_measurement_state();
-  void predict_measurement_covariance(const CovarianceMatrix& covariance_matrix
-  );
 };

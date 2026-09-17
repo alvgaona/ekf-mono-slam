@@ -55,7 +55,10 @@ set(core_sources
   src/feature/zone.cpp
   src/filter/covariance_matrix.cpp
   src/filter/ekf.cpp
+  src/filter/matching.cpp
+  src/filter/ransac.cpp
   src/filter/state.cpp
+  src/filter/update.cpp
   src/image/file_sequence_image_provider.cpp
   src/math/ekf_math.cpp
   src/visual/visual.cpp
@@ -121,6 +124,8 @@ set(test_sources
   test/utest_filter.cpp
   test/utest_image.cpp
   test/utest_math.cpp
+  test/utest_ransac.cpp
+  test/utest_update.cpp
 )
 
 add_executable(slam_test ${test_sources})

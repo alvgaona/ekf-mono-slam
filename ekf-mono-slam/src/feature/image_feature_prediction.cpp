@@ -8,7 +8,7 @@
  * @param index Numeric identifier for the feature
  */
 ImageFeaturePrediction::ImageFeaturePrediction(
-  const cv::Point& coordinates, int index
+  const cv::Point2f& coordinates, int index
 )
   : ImageFeature(coordinates, index) {}
 
@@ -30,5 +30,11 @@ ImageFeaturePrediction ImageFeaturePrediction::from(
   const auto distorted_feature =
     EkfMath::distort_image_feature(undistorted_image_feature, camera);
 
-  return ImageFeaturePrediction(distorted_feature, index);
+  return ImageFeaturePrediction(
+    cv::Point2f(
+      static_cast<float>(distorted_feature.x),
+      static_cast<float>(distorted_feature.y)
+    ),
+    index
+  );
 }

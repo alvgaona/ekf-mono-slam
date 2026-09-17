@@ -57,4 +57,7 @@ Eigen::Matrix2d jacobian_distortion(
 );
 
 Eigen::MatrixXd jacobian_measurement_i_by_state();
+
+/** Jacobian of q/||q||. MATLAB `normJac.m`; q is (w, x, y, z). */
+Eigen::Matrix4d quaternion_normalization_jacobian(const Eigen::Quaterniond& q);
 }  // namespace EkfMath

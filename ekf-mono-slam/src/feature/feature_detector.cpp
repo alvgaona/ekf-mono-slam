@@ -115,6 +115,17 @@ void FeatureDetector::detect_features(const cv::Mat& image) {
   detect_features(image, empty_predictions);
 }
 
+void FeatureDetector::detect_and_describe(
+  const cv::Mat& image,
+  const cv::Mat& mask,
+  std::vector<cv::KeyPoint>& keypoints,
+  cv::Mat& descriptors
+) {
+  keypoints.clear();
+  detector_->detect(image, keypoints, mask);
+  extractor_->compute(image, keypoints, descriptors);
+}
+
 /**
  * @brief Builds an image mask based on feature detector predictions.
  * @param image_mask The current image mask, which will be updated with the new

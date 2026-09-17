@@ -35,8 +35,16 @@ struct ImageFeatureConfig {
   double image_mask_ellipse_size = 5.0;
   int features_per_image = 20;
   double init_inv_depth = 1.0;
+  double match_ratio = 0.8;
   DetectorType detector_type = DetectorType::AKAZE;
   DescriptorExtractorType descriptor_type = DescriptorExtractorType::AKAZE;
+};
+
+struct RansacConfig {
+  double success_probability = 0.99;
+  double innovation_threshold = 1.0;
+  int max_hypotheses = 1000;
+  unsigned rng_seed = 1;
 };
 
 /** Full runtime SLAM configuration (loaded from config/ekf.yaml in the node).
@@ -45,5 +53,6 @@ struct SlamConfig {
   CameraConfig camera;
   KinematicsConfig kinematics;
   ImageFeatureConfig image_feature;
+  RansacConfig ransac;
   double delta_t = 0.04;
 };
