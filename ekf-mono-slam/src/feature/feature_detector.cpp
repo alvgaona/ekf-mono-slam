@@ -78,10 +78,10 @@ void FeatureDetector::detect_features(
 void FeatureDetector::detect_features(
   const cv::Mat& image,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-  const int max_features
+  const int features_needed
 ) {
   image_features_.clear();
-  if (max_features <= 0) {
+  if (features_needed <= 0) {
     return;
   }
 
@@ -98,7 +98,7 @@ void FeatureDetector::detect_features(
   extractor_->compute(image, image_keypoints, descriptors);
 
   compute_image_feature_measurements(
-    image_mask, descriptors, predictions, image_keypoints, max_features
+    image_mask, descriptors, predictions, image_keypoints, features_needed
   );
 
   for (auto i = 0u; i < image_features_.size(); i++) {
@@ -190,7 +190,7 @@ void FeatureDetector::search_features_by_zone(
   const std::vector<cv::KeyPoint>& keypoints,
   const cv::Mat& descriptors,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-  const int max_features
+  const int features_needed
 ) {
   std::vector<std::shared_ptr<Zone>> zones = create_zones();
   group_features_and_prediction_by_zone(
@@ -201,7 +201,7 @@ void FeatureDetector::search_features_by_zone(
     std::make_move_iterator(zones.begin()), std::make_move_iterator(zones.end())
   );
 
-  select_image_measurements_from_zones(zones_list, image_mask, max_features);
+  select_image_measurements_from_zones(zones_list, image_mask, features_needed);
 }
 
 /**
@@ -374,10 +374,10 @@ void FeatureDetector::compute_image_feature_measurements(
   const cv::Mat& descriptors,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
   const std::vector<cv::KeyPoint>& image_keypoints,
-  const int max_features
+  const int features_needed
 ) {
   if (const auto keypoints_size = image_keypoints.size();
-      keypoints_size <= static_cast<size_t>(max_features)) {
+      keypoints_size <= static_cast<size_t>(features_needed)) {
     for (auto i = 0u; i < keypoints_size; i++) {
       const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(
@@ -386,7 +386,7 @@ void FeatureDetector::compute_image_feature_measurements(
     }
   } else {
     search_features_by_zone(
-      image_mask, image_keypoints, descriptors, predictions, max_features
+      image_mask, image_keypoints, descriptors, predictions, features_needed
     );
   }
 }

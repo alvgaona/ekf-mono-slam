@@ -81,8 +81,8 @@ TEST(MapManagement, LinearityIndexMatchesCiveraFormula) {
 
 TEST(MapManagement, CartesianJacobianMatchesFiniteDifference) {
   const Eigen::VectorXd y0 = default_id_state();
-  const auto feature = make_id_feature(y0, 13, 0);
-  const Eigen::Matrix<double, 3, 6> J = feature->cartesian_jacobian();
+  const Eigen::Matrix<double, 3, 6> J =
+    CartesianMapFeature::jacobian_from_inverse_depth(y0);
 
   constexpr double eps = 1e-8;
   Eigen::Matrix<double, 3, 6> J_fd = Eigen::Matrix<double, 3, 6>::Zero();
@@ -91,11 +91,20 @@ TEST(MapManagement, CartesianJacobianMatchesFiniteDifference) {
     Eigen::VectorXd ym = y0;
     yp(i) += eps;
     ym(i) -= eps;
-    const Eigen::Vector3d pp = make_id_feature(yp, 13, 0)->cartesian_position();
-    const Eigen::Vector3d pm = make_id_feature(ym, 13, 0)->cartesian_position();
+    const Eigen::Vector3d pp =
+      CartesianMapFeature::position_from_inverse_depth(yp);
+    const Eigen::Vector3d pm =
+      CartesianMapFeature::position_from_inverse_depth(ym);
     J_fd.col(i) = (pp - pm) / (2.0 * eps);
   }
   ASSERT_TRUE(J.isApprox(J_fd, 1e-6));
+
+  const auto inverse = make_id_feature(y0, 13, 0);
+  const CartesianMapFeature cartesian(*inverse);
+  ASSERT_EQ(cartesian.state().size(), 3);
+  ASSERT_TRUE(cartesian.state().isApprox(
+    CartesianMapFeature::position_from_inverse_depth(y0)
+  ));
 }
 
 TEST(MapManagement, LinearityIndexInfiniteWhenRhoVanishes) {

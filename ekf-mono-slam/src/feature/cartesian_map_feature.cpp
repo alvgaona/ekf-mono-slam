@@ -1,5 +1,6 @@
 #include "feature/cartesian_map_feature.h"
 
+#include <cmath>
 #include <eigen3/Eigen/Core>
 #include <memory>
 #include <opencv2/core.hpp>
@@ -18,11 +19,52 @@ CartesianMapFeature::CartesianMapFeature(
 )
   : MapFeature(state, position, descriptor_data, index) {}
 
-CartesianMapFeature::CartesianMapFeature(
-  const InverseDepthMapFeature& inverse, const Eigen::Vector3d& xyz
-)
+CartesianMapFeature::CartesianMapFeature(const InverseDepthMapFeature& inverse)
   : MapFeature(inverse) {
-  state_ = xyz;
+  state_ = position_from_inverse_depth(inverse.state());
+}
+
+Eigen::Vector3d CartesianMapFeature::position_from_inverse_depth(
+  const Eigen::VectorXd& inverse_depth
+) {
+  const Eigen::Vector3d x_c1 = inverse_depth.head<3>();
+  const double theta = inverse_depth(3);
+  const double phi = inverse_depth(4);
+  const double rho = inverse_depth(5);
+  const Eigen::Vector3d m{
+    std::cos(phi) * std::sin(theta),
+    -std::sin(phi),
+    std::cos(phi) * std::cos(theta)
+  };
+  return x_c1 + m / rho;
+}
+
+Eigen::Matrix<double, 3, 6> CartesianMapFeature::jacobian_from_inverse_depth(
+  const Eigen::VectorXd& inverse_depth
+) {
+  const double theta = inverse_depth(3);
+  const double phi = inverse_depth(4);
+  const double rho = inverse_depth(5);
+  const Eigen::Vector3d m{
+    std::cos(phi) * std::sin(theta),
+    -std::sin(phi),
+    std::cos(phi) * std::cos(theta)
+  };
+  const Eigen::Vector3d dm_dtheta{
+    std::cos(phi) * std::cos(theta), 0.0, -std::cos(phi) * std::sin(theta)
+  };
+  const Eigen::Vector3d dm_dphi{
+    -std::sin(phi) * std::sin(theta),
+    -std::cos(phi),
+    -std::sin(phi) * std::cos(theta)
+  };
+
+  Eigen::Matrix<double, 3, 6> jacobian = Eigen::Matrix<double, 3, 6>::Zero();
+  jacobian.leftCols<3>().setIdentity();
+  jacobian.col(3) = dm_dtheta / rho;
+  jacobian.col(4) = dm_dphi / rho;
+  jacobian.col(5) = -m / (rho * rho);
+  return jacobian;
 }
 
 Eigen::Vector3d CartesianMapFeature::directional_vector(

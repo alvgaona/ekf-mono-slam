@@ -103,8 +103,9 @@ class State final {
   );
   void add(const std::shared_ptr<MapFeature>& feature);
   void remove(const std::shared_ptr<MapFeature>& feature);
-  void convert_to_cartesian(
-    const std::shared_ptr<InverseDepthMapFeature>& feature
+  void replace(
+    const std::shared_ptr<InverseDepthMapFeature>& inverse,
+    const std::shared_ptr<CartesianMapFeature>& cartesian
   );
 
  private:

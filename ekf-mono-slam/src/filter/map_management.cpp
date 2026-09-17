@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "feature/cartesian_map_feature.h"
 #include "feature/image_feature_prediction.h"
 #include "feature/inverse_depth_map_feature.h"
 
@@ -62,10 +63,12 @@ void MapManager::convert_one(State& state, CovarianceMatrix& covariance) const {
   if (!to_convert) {
     return;
   }
+  auto cartesian = std::make_shared<CartesianMapFeature>(*to_convert);
   covariance.convert_inverse_depth(
-    *to_convert, to_convert->cartesian_jacobian()
+    *to_convert,
+    CartesianMapFeature::jacobian_from_inverse_depth(to_convert->state())
   );
-  state.convert_to_cartesian(to_convert);
+  state.replace(to_convert, cartesian);
 }
 
 void MapManager::add_needed(

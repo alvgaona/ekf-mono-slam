@@ -15,10 +15,15 @@ class CartesianMapFeature final : public MapFeature {
     const cv::Mat& descriptor_data,
     int index
   );
-  CartesianMapFeature(
-    const InverseDepthMapFeature& inverse, const Eigen::Vector3d& xyz
-  );
+  explicit CartesianMapFeature(const InverseDepthMapFeature& inverse);
   CartesianMapFeature(const CartesianMapFeature&) = default;
+
+  [[nodiscard]] static Eigen::Vector3d position_from_inverse_depth(
+    const Eigen::VectorXd& inverse_depth
+  );
+  [[nodiscard]] static Eigen::Matrix<double, 3, 6> jacobian_from_inverse_depth(
+    const Eigen::VectorXd& inverse_depth
+  );
 
   Eigen::Vector3d directional_vector(
     const Eigen::Matrix3d& rotation_matrix,

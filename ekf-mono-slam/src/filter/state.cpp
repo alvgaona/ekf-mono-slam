@@ -280,28 +280,33 @@ void State::add(const std::shared_ptr<MapFeature>& feature) {
   next_feature_id_ = std::max(next_feature_id_, feature->index() + 1);
 }
 
-void State::convert_to_cartesian(
-  const std::shared_ptr<InverseDepthMapFeature>& feature
+void State::replace(
+  const std::shared_ptr<InverseDepthMapFeature>& inverse,
+  const std::shared_ptr<CartesianMapFeature>& cartesian
 ) {
-  if (!feature) {
+  if (!inverse || !cartesian) {
     return;
   }
 
-  const int converted_position = feature->position();
-  auto cartesian = std::make_shared<CartesianMapFeature>(
-    *feature, feature->cartesian_position()
-  );
+  const int converted_position = inverse->position();
+  cartesian->set_position(converted_position);
 
+  bool found = false;
   for (auto& existing : features_) {
-    if (existing == feature) {
+    if (existing == inverse) {
       existing = cartesian;
+      found = true;
       break;
     }
   }
+  if (!found) {
+    return;
+  }
+
   std::erase_if(
     inverse_depth_features_,
-    [&feature](const std::shared_ptr<InverseDepthMapFeature>& f) {
-      return f == feature;
+    [&inverse](const std::shared_ptr<InverseDepthMapFeature>& f) {
+      return f == inverse;
     }
   );
   cartesian_features_.push_back(cartesian);

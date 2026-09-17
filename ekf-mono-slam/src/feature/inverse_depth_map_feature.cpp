@@ -6,6 +6,7 @@
 #include <limits>
 #include <memory>
 
+#include "feature/cartesian_map_feature.h"
 #include "math/ekf_math.h"
 
 InverseDepthMapFeature::InverseDepthMapFeature(
@@ -86,45 +87,6 @@ void InverseDepthMapFeature::measurement_jacobian(
   store_measurement_jacobian(H, covariance_matrix, camera);
 }
 
-Eigen::Vector3d InverseDepthMapFeature::cartesian_position() const {
-  const Eigen::Vector3d x_c1 = state_.head<3>();
-  const double theta = state_(3);
-  const double phi = state_(4);
-  const double rho = state_(5);
-  const Eigen::Vector3d m{
-    std::cos(phi) * std::sin(theta),
-    -std::sin(phi),
-    std::cos(phi) * std::cos(theta)
-  };
-  return x_c1 + m / rho;
-}
-
-Eigen::Matrix<double, 3, 6> InverseDepthMapFeature::cartesian_jacobian() const {
-  const double theta = state_(3);
-  const double phi = state_(4);
-  const double rho = state_(5);
-  const Eigen::Vector3d m{
-    std::cos(phi) * std::sin(theta),
-    -std::sin(phi),
-    std::cos(phi) * std::cos(theta)
-  };
-  const Eigen::Vector3d dm_dtheta{
-    std::cos(phi) * std::cos(theta), 0.0, -std::cos(phi) * std::sin(theta)
-  };
-  const Eigen::Vector3d dm_dphi{
-    -std::sin(phi) * std::sin(theta),
-    -std::cos(phi),
-    -std::sin(phi) * std::cos(theta)
-  };
-
-  Eigen::Matrix<double, 3, 6> jacobian = Eigen::Matrix<double, 3, 6>::Zero();
-  jacobian.leftCols<3>().setIdentity();
-  jacobian.col(3) = dm_dtheta / rho;
-  jacobian.col(4) = dm_dphi / rho;
-  jacobian.col(5) = -m / (rho * rho);
-  return jacobian;
-}
-
 double InverseDepthMapFeature::linearity_index(
   const Eigen::Vector3d& camera_position, const Eigen::MatrixXd& P
 ) const {
@@ -141,7 +103,8 @@ double InverseDepthMapFeature::linearity_index(
 
   const double std_d = std::sqrt(P_rho) / (rho * rho);
   const Eigen::Vector3d x_c1 = state_.head<3>();
-  const Eigen::Vector3d p = cartesian_position();
+  const Eigen::Vector3d p =
+    CartesianMapFeature::position_from_inverse_depth(state_);
   const Eigen::Vector3d to_anchor = p - x_c1;
   const Eigen::Vector3d to_camera = p - camera_position;
   const double d_anchor = to_anchor.norm();

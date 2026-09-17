@@ -51,7 +51,7 @@ class FeatureDetector final {
   void detect_features(
     const cv::Mat& image,
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-    int max_features
+    int features_needed
   );
 
   void detect_and_describe(
@@ -81,7 +81,7 @@ class FeatureDetector final {
     const std::vector<cv::KeyPoint>& keypoints,
     const cv::Mat& descriptors,
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-    int max_features
+    int features_needed
   );
 
   [[nodiscard]] std::vector<std::shared_ptr<Zone>> create_zones() const;
@@ -98,12 +98,12 @@ class FeatureDetector final {
     const cv::Mat& descriptors,
     const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
     const std::vector<cv::KeyPoint>& image_keypoints,
-    int max_features
+    int features_needed
   );
 
   void select_image_measurements_from_zones(
     std::list<std::shared_ptr<Zone>>& zones,
     const cv::Mat& image_mask,
-    int max_features
+    int features_needed
   );
 };
