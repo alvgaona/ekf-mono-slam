@@ -93,6 +93,10 @@ void EKFNode::declare_parameters() {
   declare_parameter("ransac.max_hypotheses", 1000);
   declare_parameter("ransac.rng_seed", 1);
 
+  declare_parameter("map_management.match_rate", 0.5);
+  declare_parameter("map_management.min_times_predicted", 5);
+  declare_parameter("map_management.linearity_index_threshold", 0.1);
+
   declare_parameter("delta_t", 0.04);
 }
 
@@ -151,9 +155,15 @@ SlamConfig EKFNode::load_slam_config() {
     get_parameter("ransac.innovation_threshold").as_double();
   config.ransac.max_hypotheses =
     get_parameter("ransac.max_hypotheses").as_int();
-  config.ransac.rng_seed = static_cast<unsigned>(
-    get_parameter("ransac.rng_seed").as_int()
-  );
+  config.ransac.rng_seed =
+    static_cast<unsigned>(get_parameter("ransac.rng_seed").as_int());
+
+  config.map_management.match_rate =
+    get_parameter("map_management.match_rate").as_double();
+  config.map_management.min_times_predicted =
+    get_parameter("map_management.min_times_predicted").as_int();
+  config.map_management.linearity_index_threshold =
+    get_parameter("map_management.linearity_index_threshold").as_double();
 
   config.delta_t = get_parameter("delta_t").as_double();
   return config;

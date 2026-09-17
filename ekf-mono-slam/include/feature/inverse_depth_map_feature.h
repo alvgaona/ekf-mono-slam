@@ -23,4 +23,10 @@ class InverseDepthMapFeature final : public MapFeature {
   void measurement_jacobian(
     const State& state, const CovarianceMatrix& covariance_matrix
   ) override;
+
+  [[nodiscard]] Eigen::Vector3d cartesian_position() const;
+  [[nodiscard]] Eigen::Matrix<double, 3, 6> cartesian_jacobian() const;
+  [[nodiscard]] double linearity_index(
+    const Eigen::Vector3d& camera_position, const Eigen::MatrixXd& P
+  ) const;
 };

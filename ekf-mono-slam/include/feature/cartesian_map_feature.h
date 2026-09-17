@@ -5,6 +5,8 @@
 
 #include "map_feature.h"
 
+class InverseDepthMapFeature;
+
 class CartesianMapFeature final : public MapFeature {
  public:
   CartesianMapFeature(
@@ -12,6 +14,9 @@ class CartesianMapFeature final : public MapFeature {
     int position,
     const cv::Mat& descriptor_data,
     int index
+  );
+  CartesianMapFeature(
+    const InverseDepthMapFeature& inverse, const Eigen::Vector3d& xyz
   );
   CartesianMapFeature(const CartesianMapFeature&) = default;
 

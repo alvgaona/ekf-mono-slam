@@ -72,7 +72,18 @@ void FeatureDetector::detect_features(
   const cv::Mat& image,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
 ) {
+  detect_features(image, predictions, image_feature_config_.features_per_image);
+}
+
+void FeatureDetector::detect_features(
+  const cv::Mat& image,
+  const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+  const int max_features
+) {
   image_features_.clear();
+  if (max_features <= 0) {
+    return;
+  }
 
   const cv::Mat image_mask(
     cv::Mat::ones(image.rows, image.cols, CV_8UC1) * 255
@@ -87,10 +98,9 @@ void FeatureDetector::detect_features(
   extractor_->compute(image, image_keypoints, descriptors);
 
   compute_image_feature_measurements(
-    image_mask, descriptors, predictions, image_keypoints
+    image_mask, descriptors, predictions, image_keypoints, max_features
   );
 
-  // Set the right indices on the image features
   for (auto i = 0u; i < image_features_.size(); i++) {
     image_features_[i]->index(i);
   }
@@ -179,7 +189,8 @@ void FeatureDetector::search_features_by_zone(
   const cv::Mat& image_mask,
   const std::vector<cv::KeyPoint>& keypoints,
   const cv::Mat& descriptors,
-  const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions
+  const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
+  const int max_features
 ) {
   std::vector<std::shared_ptr<Zone>> zones = create_zones();
   group_features_and_prediction_by_zone(
@@ -190,7 +201,7 @@ void FeatureDetector::search_features_by_zone(
     std::make_move_iterator(zones.begin()), std::make_move_iterator(zones.end())
   );
 
-  select_image_measurements_from_zones(zones_list, image_mask);
+  select_image_measurements_from_zones(zones_list, image_mask, max_features);
 }
 
 /**
@@ -362,11 +373,11 @@ void FeatureDetector::compute_image_feature_measurements(
   const cv::Mat& image_mask,
   const cv::Mat& descriptors,
   const std::vector<std::shared_ptr<ImageFeaturePrediction>>& predictions,
-  const std::vector<cv::KeyPoint>& image_keypoints
+  const std::vector<cv::KeyPoint>& image_keypoints,
+  const int max_features
 ) {
   if (const auto keypoints_size = image_keypoints.size();
-      keypoints_size <=
-      static_cast<size_t>(image_feature_config_.features_per_image)) {
+      keypoints_size <= static_cast<size_t>(max_features)) {
     for (auto i = 0u; i < keypoints_size; i++) {
       const cv::KeyPoint& keypoint = image_keypoints[i];
       image_features_.emplace_back(std::make_unique<ImageFeatureMeasurement>(
@@ -375,7 +386,7 @@ void FeatureDetector::compute_image_feature_measurements(
     }
   } else {
     search_features_by_zone(
-      image_mask, image_keypoints, descriptors, predictions
+      image_mask, image_keypoints, descriptors, predictions, max_features
     );
   }
 }
@@ -409,16 +420,18 @@ void FeatureDetector::compute_image_feature_measurements(
  * with appropriate dimensions and values.
  */
 void FeatureDetector::select_image_measurements_from_zones(
-  std::list<std::shared_ptr<Zone>>& zones, const cv::Mat& image_mask
+  std::list<std::shared_ptr<Zone>>& zones,
+  const cv::Mat& image_mask,
+  int features_needed
 ) {
   const cv::Mat1d measurementEllipseMatrix(2, 2);
   measurementEllipseMatrix << image_feature_config_.image_mask_ellipse_size,
     0.0, 0.0, image_feature_config_.image_mask_ellipse_size;
 
   auto zones_left = zones.size();
+  std::random_device rd;
+  std::mt19937 mt(rd());
 
-  // TODO: Change features_needed to be passed when calling DetectFeatures.
-  int features_needed = image_feature_config_.features_per_image;
   while (zones_left > 0 && features_needed > 0) {
     const std::shared_ptr<Zone> curr_zone = zones.front();
     int curr_zone_candidates_left = curr_zone->candidates_left();
@@ -428,20 +441,18 @@ void FeatureDetector::select_image_measurements_from_zones(
       zones.pop_front();
       zones_left--;
     } else {
-      std::random_device rd;
-      std::mt19937 mt(rd());
-      std::uniform_real_distribution<> dist(0, curr_zone_candidates_left - 1);
-      int candidate_idx = static_cast<int>(dist(mt));
+      std::uniform_int_distribution<int> dist(0, curr_zone_candidates_left - 1);
+      const int candidate_idx = dist(mt);
 
       auto& curr_candidates = curr_zone->candidates();
       std::shared_ptr<ImageFeatureMeasurement> candidate =
         curr_candidates.at(candidate_idx);
 
-      if (const cv::Point2f candidate_coordinates = candidate->coordinates();
-          image_mask.at<int>(
-            static_cast<int>(candidate_coordinates.y),
-            static_cast<int>(candidate_coordinates.x)
-          )) {
+      const cv::Point2f candidate_coordinates = candidate->coordinates();
+      const int x = static_cast<int>(candidate_coordinates.x);
+      const int y = static_cast<int>(candidate_coordinates.y);
+      if (x >= 0 && y >= 0 && x < image_mask.cols && y < image_mask.rows &&
+          image_mask.at<uchar>(y, x) != 0) {
         image_features_.emplace_back(candidate);
         curr_zone_predictions_count++;
         curr_zone->set_predictions_features_count(curr_zone_predictions_count);

@@ -1,8 +1,9 @@
 #include "feature/inverse_depth_map_feature.h"
 
-#include <eigen3/Eigen/src/Core/Matrix.h>
-
+#include <algorithm>
+#include <cmath>
 #include <eigen3/Eigen/Core>
+#include <limits>
 #include <memory>
 
 #include "math/ekf_math.h"
@@ -83,4 +84,77 @@ void InverseDepthMapFeature::measurement_jacobian(
   H.block(0, position_, 2, 6) = dhi_dyi;
 
   store_measurement_jacobian(H, covariance_matrix, camera);
+}
+
+Eigen::Vector3d InverseDepthMapFeature::cartesian_position() const {
+  const Eigen::Vector3d x_c1 = state_.head<3>();
+  const double theta = state_(3);
+  const double phi = state_(4);
+  const double rho = state_(5);
+  const Eigen::Vector3d m{
+    std::cos(phi) * std::sin(theta),
+    -std::sin(phi),
+    std::cos(phi) * std::cos(theta)
+  };
+  return x_c1 + m / rho;
+}
+
+Eigen::Matrix<double, 3, 6> InverseDepthMapFeature::cartesian_jacobian() const {
+  const double theta = state_(3);
+  const double phi = state_(4);
+  const double rho = state_(5);
+  const Eigen::Vector3d m{
+    std::cos(phi) * std::sin(theta),
+    -std::sin(phi),
+    std::cos(phi) * std::cos(theta)
+  };
+  const Eigen::Vector3d dm_dtheta{
+    std::cos(phi) * std::cos(theta), 0.0, -std::cos(phi) * std::sin(theta)
+  };
+  const Eigen::Vector3d dm_dphi{
+    -std::sin(phi) * std::sin(theta),
+    -std::cos(phi),
+    -std::sin(phi) * std::cos(theta)
+  };
+
+  Eigen::Matrix<double, 3, 6> jacobian = Eigen::Matrix<double, 3, 6>::Zero();
+  jacobian.leftCols<3>().setIdentity();
+  jacobian.col(3) = dm_dtheta / rho;
+  jacobian.col(4) = dm_dphi / rho;
+  jacobian.col(5) = -m / (rho * rho);
+  return jacobian;
+}
+
+double InverseDepthMapFeature::linearity_index(
+  const Eigen::Vector3d& camera_position, const Eigen::MatrixXd& P
+) const {
+  const int rho_index = position_ + 5;
+  if (rho_index >= P.rows() || rho_index >= P.cols()) {
+    return std::numeric_limits<double>::infinity();
+  }
+
+  const double rho = state_(5);
+  const double P_rho = P(rho_index, rho_index);
+  if (!(std::abs(rho) > 1e-12) || !(P_rho >= 0.0) || !std::isfinite(P_rho)) {
+    return std::numeric_limits<double>::infinity();
+  }
+
+  const double std_d = std::sqrt(P_rho) / (rho * rho);
+  const Eigen::Vector3d x_c1 = state_.head<3>();
+  const Eigen::Vector3d p = cartesian_position();
+  const Eigen::Vector3d to_anchor = p - x_c1;
+  const Eigen::Vector3d to_camera = p - camera_position;
+  const double d_anchor = to_anchor.norm();
+  const double d_camera = to_camera.norm();
+  if (!(d_anchor > 1e-12) || !(d_camera > 1e-12)) {
+    return std::numeric_limits<double>::infinity();
+  }
+
+  const double cos_alpha =
+    std::clamp(to_anchor.dot(to_camera) / (d_anchor * d_camera), -1.0, 1.0);
+  const double linearity = 4.0 * std_d * cos_alpha / d_camera;
+  if (!std::isfinite(linearity)) {
+    return std::numeric_limits<double>::infinity();
+  }
+  return linearity;
 }

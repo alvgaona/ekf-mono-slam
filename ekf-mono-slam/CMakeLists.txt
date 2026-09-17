@@ -55,6 +55,7 @@ set(core_sources
   src/feature/zone.cpp
   src/filter/covariance_matrix.cpp
   src/filter/ekf.cpp
+  src/filter/map_management.cpp
   src/filter/matching.cpp
   src/filter/ransac.cpp
   src/filter/state.cpp
@@ -123,6 +124,7 @@ set(test_sources
   test/utest_feature.cpp
   test/utest_filter.cpp
   test/utest_image.cpp
+  test/utest_map_management.cpp
   test/utest_math.cpp
   test/utest_ransac.cpp
   test/utest_update.cpp

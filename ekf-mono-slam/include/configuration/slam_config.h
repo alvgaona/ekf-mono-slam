@@ -47,6 +47,12 @@ struct RansacConfig {
   unsigned rng_seed = 1;
 };
 
+struct MapManagementConfig {
+  double match_rate = 0.5;
+  int min_times_predicted = 5;
+  double linearity_index_threshold = 0.1;
+};
+
 /** Full runtime SLAM configuration (loaded from config/ekf.yaml in the node).
  */
 struct SlamConfig {
@@ -54,5 +60,6 @@ struct SlamConfig {
   KinematicsConfig kinematics;
   ImageFeatureConfig image_feature;
   RansacConfig ransac;
+  MapManagementConfig map_management;
   double delta_t = 0.04;
 };

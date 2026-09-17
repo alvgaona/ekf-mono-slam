@@ -40,10 +40,17 @@ class CovarianceMatrix final {
 
   void add(
     const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
+    const State& state
+  );
+  void add(
+    const std::shared_ptr<ImageFeatureMeasurement>& image_feature_measurement,
     const std::shared_ptr<State>& state
   );
 
   void remove(const MapFeature& feature);
+  void convert_inverse_depth(
+    const MapFeature& feature, const Eigen::Matrix<double, 3, 6>& jacobian
+  );
 
   [[nodiscard]] const Eigen::MatrixXd& matrix() const { return matrix_; }
   Eigen::MatrixXd& matrix() { return matrix_; }

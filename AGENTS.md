@@ -53,6 +53,9 @@ pixi run test -- --gtest_filter=ExtendedKalmanFilter.PredictState
 | `test/utest_feature.cpp` | `FeatureDetectors`, `ImageFeatureMeasurement`, `Zones` |
 | `test/utest_math.cpp` | `JacobianDirectionalVector`, `QuaternionDerivatives`, `RotationMatrix`, `FeatureDistortion` |
 | `test/utest_image.cpp` | `FileSequenceImageProvider`, `FileSequenceProvider` |
+| `test/utest_update.cpp` | `KalmanUpdate` |
+| `test/utest_ransac.cpp` | `OnePointRansac` |
+| `test/utest_map_management.cpp` | `MapManagement` |
 | `test/itest_slam.cpp` | `SLAMIntegration` |
 
 ### Formatting / IDE
@@ -78,7 +81,7 @@ ros2 launch ekf_mono_slam vslam.launch.py \
 
 `file_sequence_image` params: `image_dir`, `start_image_index` (1), `end_image_index` (350), ~25 Hz.
 
-EKF runtime config: installed `config/ekf.yaml` (camera, kinematics, image_feature, `delta_t`). Loaded as ROS parameters on the `ekf` node and passed into `EKF(SlamConfig)`.
+EKF runtime config: installed `config/ekf.yaml` (camera, kinematics, image_feature, ransac, map_management, `delta_t`). Loaded as ROS parameters on the `ekf` node and passed into `EKF(SlamConfig)`.
 
 ## Repository layout
 
@@ -118,7 +121,7 @@ file_sequence_image                         ekf
 ```
 
 - **Init:** first frame runs AKAZE (configurable) detect/describe and `add_features`.
-- **Tracking (partial):** later frames `predict()` then `match_predicted_features` (match/update still TODO inside `filter/`).
+- **Tracking:** later frames `predict → match → RANSAC → update(LI) → rescue → update(HI) → map management` (delete / ID→XYZ / add deficit).
 - No feature-detect ROS service. No Rerun dependency.
 
 ### Packed state (Phase 0)
@@ -133,6 +136,7 @@ Camera block is `[r(3), q(4), v(3), ω(3)]` (quaternion `w,x,y,z`). Each map fea
 
 - Initial `P` matches MATLAB `initialize_x_and_p.m`: `eps` on pose/quat, `std_v0²` / `std_w0²` on `v`/`ω` (defaults 0.025). Accel SDs belong in `Q` only.
 - Inverse-depth `add()` builds a zeroed `(n+3)` augment (`R` and `inv_depth_sd²`), then `P ← J P_aug Jᵀ` of size `n+6`.
+- Inverse-depth → cartesian applies the 3×6 `J` with block copies into a new `(n-3)×(n-3)` `P`.
 - `feature_covariance_block` uses `feature.position()` and `feature.dimension()`.
 
 ### Measurement model
@@ -156,11 +160,11 @@ Core links Eigen + OpenCV only (no rclcpp).
 
 ### Domain modules
 
-- **`filter/`** — `EKF` owns `State`, `CovarianceMatrix`, and lazy `FeatureDetector`. Prefer extending `process_frame` here, not in the node.
+- **`filter/`** — `EKF` owns `State`, `CovarianceMatrix`, lazy `FeatureDetector`, `FeatureMatcher`, `OnePointRansac`, and `MapManager`. Prefer extending `process_frame` here, not in the node.
 - **`feature/`** — detectors, zones/ellipses, measurements/predictions, inverse-depth/cartesian map features.
 - **`math/`** — `EkfMath` Jacobians, distortion, quaternion derivatives.
 - **`image/`** — `ImageProvider` / `FileSequenceImageProvider`.
-- **`configuration/`** — `SlamConfig` POD (`CameraConfig`, `KinematicsConfig`, `ImageFeatureConfig`) with defaults matching `config/ekf.yaml`; core objects store and pass config (no process-wide parameter headers).
+- **`configuration/`** — `SlamConfig` POD (`CameraConfig`, `KinematicsConfig`, `ImageFeatureConfig`, `RansacConfig`, `MapManagementConfig`) with defaults matching `config/ekf.yaml`; core objects store and pass config (no process-wide parameter headers).
 - **`visual/`** — OpenCV drawing helpers used by the detector mask path.
 
 ### ROS interfaces
@@ -170,8 +174,10 @@ Msgs only (no srvs): `State`, `CovarianceMatrix`, `ImagePoint`, `ImageFeatureMea
 ### Implementation status
 
 - Phase 0 (predict/init packing, `P` layout, `H`/`S`, cartesian Jacobian) is done.
-- Post-init path: predict + stub match; 1-Point RANSAC update still TODO in `filter/` (Phase 1+).
+- Slice 1 (IC match, 1-Point RANSAC LI then HI update) is done.
+- Slice 2 (delete unstable, one ID→XYZ per frame, add if `|LI ∪ HI| < features_per_image`) is done.
 - Detector defaults to AKAZE; selectable via `image_feature.detector_type` / `descriptor_type` in YAML.
+- Debug image and long-sequence itest still TODO (slice 3).
 
 ## Dependencies
 

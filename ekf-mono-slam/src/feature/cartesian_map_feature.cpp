@@ -4,6 +4,7 @@
 #include <memory>
 #include <opencv2/core.hpp>
 
+#include "feature/inverse_depth_map_feature.h"
 #include "feature/map_feature.h"
 #include "filter/covariance_matrix.h"
 #include "filter/state.h"
@@ -16,6 +17,13 @@ CartesianMapFeature::CartesianMapFeature(
   int index
 )
   : MapFeature(state, position, descriptor_data, index) {}
+
+CartesianMapFeature::CartesianMapFeature(
+  const InverseDepthMapFeature& inverse, const Eigen::Vector3d& xyz
+)
+  : MapFeature(inverse) {
+  state_ = xyz;
+}
 
 Eigen::Vector3d CartesianMapFeature::directional_vector(
   const Eigen::Matrix3d& rotation_matrix, const Eigen::Vector3d& camera_position

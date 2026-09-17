@@ -8,6 +8,7 @@ EKF::EKF(const SlamConfig& config)
   : config_(config),
     matcher_(config.image_feature.match_ratio),
     ransac_(config.ransac),
+    map_manager_(config),
     step_(0),
     delta_t_(config.delta_t) {
   covariance_matrix_ = std::make_shared<CovarianceMatrix>(config_);
@@ -48,6 +49,11 @@ void EKF::process_frame(const cv::Mat& image) {
     *state_, *covariance_matrix_, split.outliers()
   );
   update(high_innovation);
+  const int inliers =
+    static_cast<int>(split.low_innovation().size() + high_innovation.size());
+  map_manager_.manage(
+    *state_, *covariance_matrix_, *feature_detector_, image, inliers
+  );
   ++step_;
 }
 
