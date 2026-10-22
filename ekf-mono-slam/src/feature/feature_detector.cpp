@@ -1,5 +1,6 @@
 #include "feature/feature_detector.h"
 
+#include <algorithm>
 #include <random>
 
 #include "feature/ellipse.h"
@@ -286,6 +287,25 @@ void FeatureDetector::group_features_and_prediction_by_zone(
     );
   }
 
+  // Detector order is not stable across runs. Sort so a fixed sample index
+  // always refers to the same point.
+  for (const auto& zone : zones) {
+    std::ranges::stable_sort(
+      zone->candidates(),
+      [](
+        const std::shared_ptr<ImageFeatureMeasurement>& a,
+        const std::shared_ptr<ImageFeatureMeasurement>& b
+      ) {
+        const cv::Point2f pa = a->coordinates();
+        const cv::Point2f pb = b->coordinates();
+        if (pa.y != pb.y) {
+          return pa.y < pb.y;
+        }
+        return pa.x < pb.x;
+      }
+    );
+  }
+
   std::ranges::sort(
     zones.begin(),
     zones.end(),
@@ -429,8 +449,9 @@ void FeatureDetector::select_image_measurements_from_zones(
     0.0, 0.0, image_feature_config_.image_mask_ellipse_size;
 
   auto zones_left = zones.size();
-  std::random_device rd;
-  std::mt19937 mt(rd());
+  // Same default as RansacConfig::rng_seed. A fresh random_device made the
+  // chosen map differ between runs of the same image.
+  std::mt19937 mt(1);
 
   while (zones_left > 0 && features_needed > 0) {
     const std::shared_ptr<Zone> curr_zone = zones.front();
