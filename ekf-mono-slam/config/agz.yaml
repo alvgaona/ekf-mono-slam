@@ -1,0 +1,45 @@
+# AGZ subset. Intrinsics come from calibration_data.npz.
+# dx and dy are 1/fx and 1/fy so the radial model uses OpenCV's normalized radius.
+# The sequence is 30 Hz.
+/**:
+  ros__parameters:
+    camera:
+      px: 1920
+      py: 1080
+      fx: 893.390108138
+      fy: 898.326486163
+      k1: -0.280525130254
+      k2: 0.115806413456
+      cx: 951.131004297
+      cy: 555.133500774
+      dx: 0.00111933184719
+      dy: 0.0011131810265
+      pixel_error_x: 1.0
+      pixel_error_y: 1.0
+      angular_vision_x: 94.1165901963
+      angular_vision_y: 62.0216469238
+    kinematics:
+      linear_accel_sd: 0.0005
+      angular_accel_sd: 0.00005
+      std_v0: 0.025
+      std_w0: 0.025
+      inv_depth_sd: 1.0
+      epsilon: 2.22e-16
+    image_feature:
+      image_area_divide_times: 2
+      image_mask_ellipse_size: 5.0
+      features_per_image: 20
+      init_inv_depth: 1.0
+      detector_type: "AKAZE"
+      descriptor_type: "AKAZE"
+      match_ratio: 0.8
+    ransac:
+      success_probability: 0.99
+      innovation_threshold: 1.0
+      max_hypotheses: 1000
+      rng_seed: 1
+    map_management:
+      match_rate: 0.5
+      min_times_predicted: 5
+      linearity_index_threshold: 0.1
+    delta_t: 0.0333333333333

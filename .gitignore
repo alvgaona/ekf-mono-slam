@@ -1,8 +1,12 @@
+# macOS
+.DS_Store
+
 # clang / tooling caches
 .cache/
 
 # Other
 datasets/
+data/
 
 # ROS
 install/
