@@ -353,8 +353,9 @@ cv::Ptr<cv::DescriptorExtractor> FeatureDetector::build_descriptor_extractor(
 ) {
   switch (type) {
     case DescriptorExtractorType::AKAZE:
+      // Same octave count as the detector. class_id indexes that pyramid.
       return cv::AKAZE::create(
-        cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2
+        cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 5, 5, cv::KAZE::DIFF_PM_G2
       );
     case DescriptorExtractorType::BRISK:
       return cv::BRISK::create(30, 3, 1.0f);
