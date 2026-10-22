@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <vector>
 
 #include "configuration/slam_config.h"
 #include "feature/ellipse.h"
@@ -49,6 +50,33 @@ TEST(FeatureDetectors, DetectFeatures) {
   ASSERT_THAT(detector.zone_size(), Eq(cv::Size(160, 120)));
   ASSERT_THAT(detector.image_size(), Eq(cv::Size(640, 480)));
   ASSERT_THAT(detector.zones_in_row(), Eq(4));
+}
+
+TEST(FeatureDetectors, DetectFeaturesIsRepeatable) {
+  FileSequenceImageProvider image_provider("./test/resources/desk_translation/"
+  );
+  const cv::Mat image = image_provider.next();
+
+  const auto points_from = [&image]() {
+    FeatureDetector detector(
+      FeatureDetector::build_detector(DetectorType::AKAZE),
+      FeatureDetector::build_descriptor_extractor(DescriptorExtractorType::AKAZE
+      ),
+      cv::Size(image.cols, image.rows)
+    );
+    detector.detect_features(image);
+    std::vector<cv::Point2f> points;
+    points.reserve(detector.image_features().size());
+    for (const auto& feature : detector.image_features()) {
+      points.push_back(feature->coordinates());
+    }
+    return points;
+  };
+
+  const std::vector<cv::Point2f> first = points_from();
+  const std::vector<cv::Point2f> second = points_from();
+  ASSERT_FALSE(first.empty());
+  ASSERT_EQ(first, second);
 }
 
 TEST(ImageFeatureMeasurement, UndistortImageFeatureMeasurement) {
