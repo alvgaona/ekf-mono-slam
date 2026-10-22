@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <set>
 #include <vector>
 
 #include "configuration/slam_config.h"
@@ -47,6 +48,11 @@ TEST(FeatureDetectors, DetectFeatures) {
   detector.detect_features(image);
 
   ASSERT_THAT(detector.image_features().size(), Eq(20u));
+  std::set<int> zones;
+  for (const auto& feature : detector.image_features()) {
+    zones.insert(feature->compute_zone(160, 120, 640));
+  }
+  ASSERT_GE(zones.size(), 8u);
   ASSERT_THAT(detector.zone_size(), Eq(cv::Size(160, 120)));
   ASSERT_THAT(detector.image_size(), Eq(cv::Size(640, 480)));
   ASSERT_THAT(detector.zones_in_row(), Eq(4));

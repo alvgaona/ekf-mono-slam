@@ -6,6 +6,19 @@
 #include "feature/ellipse.h"
 #include "visual/visual.h"
 
+namespace {
+
+  bool fewer_features_first(
+    const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b
+  ) {
+    if (a->predictions_features_count() != b->predictions_features_count()) {
+      return a->predictions_features_count() < b->predictions_features_count();
+    }
+    return a->id() < b->id();
+  }
+
+}  // namespace
+
 /**
  * @brief Construct a FeatureDetector object.
  *
@@ -245,8 +258,8 @@ std::vector<std::shared_ptr<Zone>> FeatureDetector::create_zones() const {
  * the zone and image sizes. Adds the prediction to the corresponding zone.
  * Increments the prediction feature count for the zone.
  * 3. **Sorts the zones based on their prediction feature count:**
- * This ensures that zones with more confirmed features are prioritized for
- * further processing.
+ * Zones with fewer features come first, so new points fill the emptier
+ * parts of the image. Ties keep the lower zone id.
  */
 void FeatureDetector::group_features_and_prediction_by_zone(
   std::vector<std::shared_ptr<Zone>>& zones,
@@ -306,13 +319,7 @@ void FeatureDetector::group_features_and_prediction_by_zone(
     );
   }
 
-  std::ranges::sort(
-    zones.begin(),
-    zones.end(),
-    [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
-      return a->predictions_features_count() > b->predictions_features_count();
-    }
-  );
+  std::ranges::sort(zones.begin(), zones.end(), fewer_features_first);
 }
 
 /**
@@ -429,9 +436,8 @@ void FeatureDetector::compute_image_feature_measurements(
  * the chosen candidate to visualize its spatial uncertainty.
  * 4. **Feature Selection:** The selected candidate is added to the
  * `image_features_` list, which stores the collected features.
- * 5. **Zone Reordering:** The zones are re-sorted based on their current
- * prediction feature count, ensuring that zones with more confirmed features
- * are prioritized.
+ * 5. **Zone Reordering:** After a point is kept, zones are re-sorted so the
+ * next point comes from a zone that still has fewer features.
  *
  * The function continues selecting features until either all zones have been
  * processed or the desired number of features (specified by
@@ -479,13 +485,7 @@ void FeatureDetector::select_image_measurements_from_zones(
         curr_zone_predictions_count++;
         curr_zone->set_predictions_features_count(curr_zone_predictions_count);
 
-        // Reorder zones based on predictions feature count
-        zones.sort(
-          [](const std::shared_ptr<Zone>& a, const std::shared_ptr<Zone>& b) {
-            return a->predictions_features_count() >=
-                   b->predictions_features_count();
-          }
-        );
+        zones.sort(fewer_features_first);
 
         Ellipse ellipse(candidate_coordinates, measurementEllipseMatrix);
         Visual::UncertaintyEllipse2D(
