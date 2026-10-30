@@ -82,6 +82,9 @@ target_link_libraries(ekf_mono_slam_core
     fmt::fmt
 )
 
+add_executable(agz_ate src/agz_ate.cpp)
+target_link_libraries(agz_ate PRIVATE ekf_mono_slam_core)
+
 add_executable(file_sequence_image src/file_sequence_image_node.cpp)
 target_link_libraries(file_sequence_image PRIVATE ekf_mono_slam_core)
 ament_target_dependencies(file_sequence_image PUBLIC
